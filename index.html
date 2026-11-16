@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Calendario de Adviento</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="escena">
+    <div id="marco">
+      <canvas id="lienzo" width="320" height="240"></canvas>
+      <div id="info"></div>
+      <div id="pista"></div>
+    </div>
+  </div>
+
+  <div id="tactil" aria-label="Controles táctiles">
+    <div class="grupo">
+      <button class="tecla" data-tecla="izquierda" aria-label="Izquierda">◀</button>
+      <button class="tecla" data-tecla="derecha" aria-label="Derecha">▶</button>
+    </div>
+    <div class="grupo">
+      <button class="tecla" data-tecla="arriba" aria-label="Subir">▲</button>
+      <button class="tecla" data-tecla="abajo" aria-label="Bajar">▼</button>
+    </div>
+    <div class="grupo">
+      <button class="tecla grande" data-tecla="accion">ABRIR</button>
+    </div>
+  </div>
+
+  <div id="modal" class="oculto" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="caja" tabindex="-1">
+      <div class="barra">
+        <span id="modal-dia"></span>
+        <button id="modal-cerrar" class="boton-pixel" aria-label="Cerrar">X</button>
+      </div>
+      <h2 id="modal-titulo"></h2>
+      <img id="modal-foto" class="oculto" alt="">
+      <p id="modal-texto"></p>
+      <div id="modal-juego"></div>
+    </div>
+  </div>
+
+  <noscript>Este calendario necesita JavaScript.</noscript>
+
+  <script src="js/sprites.js"></script>
+  <script src="js/edificio.js"></script>
+  <script src="js/dias.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

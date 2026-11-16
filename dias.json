@@ -1,0 +1,28 @@
+{
+  "dias": [
+    { "dia": 1, "tipo": "mensaje", "titulo": "¡Empieza diciembre!", "texto": "Hoy se abre la primera puerta.\nQue cada día de este mes traiga algo bonito." },
+    { "dia": 2, "tipo": "foto", "titulo": "Una casita nevada", "imagen": "fotos/ejemplo.svg", "texto": "Foto de ejemplo. Cambia la ruta por una foto tuya en la carpeta fotos/." },
+    { "dia": 3, "tipo": "mensaje", "titulo": "Chocolate caliente", "texto": "Vale por un chocolate caliente con nubes." },
+    { "dia": 4, "tipo": "mensaje", "titulo": "Playlist", "texto": "Hoy toca poner villancicos mientras decoramos." },
+    { "dia": 5, "tipo": "minijuego", "titulo": "Primer reto", "juego": "ejemplo", "texto": "Pulsa el botón para completar el reto de ejemplo.", "recompensa": "Premio: un abrazo." },
+    { "dia": 6, "tipo": "mensaje", "titulo": "Un recuerdo", "texto": "Acuérdate de aquel día de nieve. ¡Qué frío y qué risas!" },
+    { "dia": 7, "tipo": "foto", "titulo": "Paisaje de invierno", "imagen": "fotos/ejemplo.svg", "texto": "Otra foto de ejemplo." },
+    { "dia": 8, "tipo": "mensaje", "titulo": "Galletas", "texto": "Hoy, galletas de jengibre. Tú pones el horno, yo la masa." },
+    { "dia": 9, "tipo": "mensaje", "titulo": "Carta", "texto": "Escribe una carta corta a alguien que quieras." },
+    { "dia": 10, "tipo": "minijuego", "titulo": "Segundo reto", "juego": "ejemplo", "texto": "Otro minijuego de ejemplo.", "recompensa": "Premio: una peli bajo la manta." },
+    { "dia": 11, "tipo": "mensaje", "titulo": "Paseo", "texto": "Salimos a ver las luces de la ciudad." },
+    { "dia": 12, "tipo": "mensaje", "titulo": "Calcetines", "texto": "Hoy toca ponerse los calcetines más ridículos." },
+    { "dia": 13, "tipo": "foto", "titulo": "Luces", "imagen": "fotos/ejemplo.svg", "texto": "Aquí iría una foto de las luces de Navidad." },
+    { "dia": 14, "tipo": "mensaje", "titulo": "Adivinanza", "texto": "Blanca por fuera, fría por dentro, y si me abrazas, me deshago. ¿Qué soy?" },
+    { "dia": 15, "tipo": "minijuego", "titulo": "Tercer reto", "juego": "ejemplo", "texto": "Mitad de camino. Completa el reto.", "recompensa": "Premio: cena sorpresa." },
+    { "dia": 16, "tipo": "mensaje", "titulo": "Cuento", "texto": "Había una vez una chica que subía un edificio entero buscando puertas..." },
+    { "dia": 17, "tipo": "mensaje", "titulo": "Foto pendiente", "texto": "Mañana, foto juntos con gorro de Papá Noel." },
+    { "dia": 18, "tipo": "foto", "titulo": "Nieve", "imagen": "fotos/ejemplo.svg", "texto": "Foto de ejemplo número tres." },
+    { "dia": 19, "tipo": "mensaje", "titulo": "Té y manta", "texto": "Tarde de té, manta y libro." },
+    { "dia": 20, "tipo": "minijuego", "titulo": "Cuarto reto", "juego": "ejemplo", "texto": "Ya casi estamos. Un reto más.", "recompensa": "Premio: un masaje." },
+    { "dia": 21, "tipo": "mensaje", "titulo": "Solsticio", "texto": "La noche más larga del año. Aprovechémosla." },
+    { "dia": 22, "tipo": "mensaje", "titulo": "Envolver regalos", "texto": "Hoy se envuelven los regalos. Prohibido mirar." },
+    { "dia": 23, "tipo": "foto", "titulo": "Casi Nochebuena", "imagen": "fotos/ejemplo.svg", "texto": "Mañana es Nochebuena." },
+    { "dia": 24, "tipo": "mensaje", "titulo": "¡Feliz Nochebuena!", "texto": "Has llegado a la última puerta.\nGracias por subir hasta aquí. ¡Feliz Navidad!" }
+  ]
+}
