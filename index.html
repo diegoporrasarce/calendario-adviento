@@ -10,7 +10,18 @@
   <div id="escena">
     <div id="marco">
       <canvas id="lienzo" width="320" height="240"></canvas>
-      <div id="info"></div>
+      <div id="hud">
+        <div id="info"></div>
+        <dl id="leyenda" aria-label="Controles">
+          <div><dt>← →</dt><dd>Andar</dd></div>
+          <div><dt>↑ ↓</dt><dd>Subir y bajar (en la escalera)</dd></div>
+          <div><dt>Espacio / Enter</dt><dd>Abrir puerta</dd></div>
+          <div><dt>Esc</dt><dd>Cerrar / salir de pantalla completa</dd></div>
+        </dl>
+      </div>
+      <button id="pantalla-completa" type="button" title="Pantalla completa" aria-label="Pantalla completa">
+        <svg viewBox="0 0 10 10" fill="currentColor"><path d="M0 0h4v1H1v3H0zM6 0h4v4H9V1H6zM0 6h1v3h3v1H0zM9 6h1v4H6V9h3z"/></svg>
+      </button>
       <div id="pista"></div>
     </div>
   </div>

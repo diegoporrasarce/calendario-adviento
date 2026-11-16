@@ -1,34 +1,49 @@
 'use strict';
-/* Bucle principal: cielo, cámara, personaje, entrada de teclado/táctil e interacción con puertas. */
+/* Bucle principal: cielo, cámara, personaje, Papá Noel, entrada de teclado/táctil y puertas. */
 (() => {
-  const { ANCHO, ALTO, MUNDO_ALTO, PLANTAS, X_ESCALERA, X_MIN, X_MAX, sueloY } = Edificio;
+  const { ANCHO, ALTO, MUNDO_ALTO, PLANTAS, CIELO, X0, X1, X_ESCALERA, X_MIN, X_MAX, sueloY } = Edificio;
   const lienzo = document.getElementById('lienzo');
   const ctx = lienzo.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   const elInfo = document.getElementById('info');
   const elPista = document.getElementById('pista');
-  const esTactil = matchMedia('(pointer: coarse)').matches;
 
   /* ---------- Escalado ---------- */
   const escena = document.getElementById('escena');
-  const marco = document.getElementById('marco');
+  // El lienzo lógico crece (en píxeles del mismo tamaño) hasta cubrir toda la ventana;
+  // la escena de 320x240 queda centrada y el cielo/suelo se extiende a los lados.
+  let W = ANCHO, H = ALTO, ox = 0;
+  let cieloCv = null;                       // cielo prerenderizado; se regenera al cambiar de tamaño
   function ajustar() {
     const r = escena.getBoundingClientRect();
+    if (!r.width || !r.height) return;
     let s = Math.min(r.width / ANCHO, r.height / ALTO);
     if (s >= 2) s = Math.floor(s);          // píxeles enteros cuando cabe
-    marco.style.width = Math.floor(ANCHO * s) + 'px';
-    marco.style.height = Math.floor(ALTO * s) + 'px';
+    W = Math.max(ANCHO, Math.ceil(r.width / s));
+    H = Math.max(ALTO, Math.ceil(r.height / s));
+    ox = Math.floor((W - ANCHO) / 2);
+    cieloCv = null;
+    lienzo.width = W; lienzo.height = H;
+    ctx.imageSmoothingEnabled = false;
+    lienzo.style.width = W * s + 'px';
+    lienzo.style.height = H * s + 'px';
   }
   addEventListener('resize', ajustar);
   new ResizeObserver(ajustar).observe(escena);
   ajustar();
 
+  /* ---------- Pantalla completa (Esc la cierra de forma nativa) ---------- */
+  const botonPantalla = document.getElementById('pantalla-completa');
+  if (!document.fullscreenEnabled) botonPantalla.hidden = true;
+  botonPantalla.addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+    botonPantalla.blur();                  // para que Espacio/Enter no vuelvan a pulsarlo
+  });
+
   /* ---------- Entrada ---------- */
   const teclas = { izquierda: false, derecha: false, arriba: false, abajo: false };
-  const MAPA = {
-    ArrowLeft: 'izquierda', KeyA: 'izquierda', ArrowRight: 'derecha', KeyD: 'derecha',
-    ArrowUp: 'arriba', KeyW: 'arriba', ArrowDown: 'abajo', KeyS: 'abajo'
-  };
+  const MAPA = { ArrowLeft: 'izquierda', ArrowRight: 'derecha', ArrowUp: 'arriba', ArrowDown: 'abajo' };
   addEventListener('keydown', (e) => {
     if (Dias.hayModal()) return;
     const k = MAPA[e.code];
@@ -58,66 +73,116 @@
   const azar = () => { semilla = (semilla + 0x6D2B79F5) | 0; let t = Math.imul(semilla ^ (semilla >>> 15), 1 | semilla);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 
-  const estrellas = Array.from({ length: 90 }, () => ({
-    x: Math.floor(azar() * ANCHO), y: Math.floor(azar() * 330),
-    f: azar() * 6.28, v: 0.8 + azar() * 2.2, grande: azar() < 0.12
+  const TINTES = ['#ffffff', '#ffffff', '#cfe0ff', '#e6c8ff', '#ffc8f0'];
+  const estrellas = Array.from({ length: 150 }, () => ({
+    x: azar(), y: Math.floor(azar() * 560),     // x es una fracción del ancho visible
+    f: azar() * 6.28, v: 0.8 + azar() * 2.2, grande: azar() < 0.1, color: TINTES[Math.floor(azar() * TINTES.length)]
   }));
   const nubes = [
-    { x: 40, y: 26, v: 4, p: 0.8 }, { x: 200, y: 62, v: 2.5, p: 0.8 },
-    { x: 120, y: 92, v: 3.5, p: 0.8 }, { x: 260, y: 150, v: 5, p: 0.8 }
+    { x: 40, y: 26, v: 4 }, { x: 200, y: 62, v: 2.5 }, { x: 120, y: 96, v: 3.5 }, { x: 260, y: 155, v: 5 }, { x: 15, y: 215, v: 3 }
   ];
-  const copos = Array.from({ length: 80 }, () => {
+  const copos = Array.from({ length: 110 }, () => {
     const cerca = azar() < 0.3;
-    return { x: azar() * ANCHO, y: azar() * ALTO, f: azar() * 6.28, cerca,
-             vy: cerca ? 28 + azar() * 16 : 10 + azar() * 12 };
+    return { x: azar(), y: azar(), f: azar() * 6.28, cerca, vy: cerca ? 28 + azar() * 16 : 10 + azar() * 12 };
   });
 
-  const BANDAS = ['#070b24', '#0a1030', '#0d1538', '#111b44', '#16224f', '#1b2a5c', '#21336a', '#283c78'];
+  // Cielo casi negro con nebulosas magenta y azul tramadas (paleta limitada).
+  const EXTRA_CIELO = 60;                        // margen vertical para el paralaje
+  const h2 = (i, j) => { let h = (i * 374761393 + j * 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const ruido = (x, y) => {
+    const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j;
+    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    const a = h2(i, j), b = h2(i + 1, j), c = h2(i, j + 1), d = h2(i + 1, j + 1);
+    return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+  };
+  const fbm = (x, y) => ruido(x, y) * 0.55 + ruido(x * 2.1, y * 2.1) * 0.3 + ruido(x * 4.3, y * 4.3) * 0.15;
+
+  function crearCielo() {
+    const [cv, g] = Sprites.lienzoAux(W, H + EXTRA_CIELO);
+    const img = g.createImageData(cv.width, cv.height), px = img.data;
+    const FONDO = [[5, 4, 18], [9, 7, 30], [14, 12, 46], [22, 20, 68]];
+    const MAGENTA = [[60, 16, 88], [110, 28, 132], [160, 46, 158]];
+    const AZUL = [[14, 34, 96], [26, 66, 156], [52, 104, 200]];
+    for (let y = 0; y < cv.height; y++) {
+      for (let x = 0; x < cv.width; x++) {
+        const u = Sprites.umbral(x, y), v = y / cv.height;
+        let col = FONDO[Math.min(3, Math.floor(v * 3 + u))];
+        const kb = (fbm(x / 85 + 40, y / 85 + 11) - 0.58) / 0.18;
+        if (kb > u) col = AZUL[Math.min(2, Math.floor(kb * 1.6 + u * 0.8))];
+        const km = (fbm(x / 105, y / 105 + 3.7) + 0.12 * v - 0.5) / 0.2;
+        if (km > u) col = MAGENTA[Math.min(2, Math.floor(km * 1.6 + u * 0.8))];
+        const o = (y * cv.width + x) * 4;
+        px[o] = col[0]; px[o + 1] = col[1]; px[o + 2] = col[2]; px[o + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return cv;
+  }
+
   function dibujarCielo(cam, t) {
-    const alto = Math.ceil(ALTO / BANDAS.length);
-    BANDAS.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(0, i * alto, ANCHO, alto); });
+    if (!cieloCv) cieloCv = crearCielo();
+    ctx.drawImage(cieloCv, 0, -Math.max(0, Math.min(EXTRA_CIELO, Math.floor(cam * 0.25))));
 
     for (const e of estrellas) {
-      const sy = Math.floor(e.y - cam * 0.5);
-      if (sy < -2 || sy > ALTO) continue;
-      ctx.globalAlpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * e.v + e.f));
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(e.x, sy, 1, 1);
-      if (e.grande) { ctx.fillRect(e.x - 1, sy, 3, 1); ctx.fillRect(e.x, sy - 1, 1, 3); }
+      const sy = Math.floor(e.y - cam * 0.5), sx = Math.floor(e.x * W);
+      if (sy < -2 || sy > H) continue;
+      const brillo = 0.5 + 0.5 * Math.sin(t * e.v + e.f);
+      ctx.globalAlpha = 0.3 + 0.7 * brillo;
+      ctx.fillStyle = e.color;
+      ctx.fillRect(sx, sy, 1, 1);
+      if (e.grande && brillo > 0.4) { ctx.fillRect(sx - 1, sy, 3, 1); ctx.fillRect(sx, sy - 1, 1, 3); }
     }
     ctx.globalAlpha = 1;
 
-    Sprites.luna(ctx, 210, Math.floor(46 - cam * 0.6));
+    // Luna siempre visible, arriba a la derecha de la escena
+    const margen = W - ox - ANCHO;           // hueco libre a la derecha de la escena
+    const lunaX = margen >= 52 ? ox + ANCHO + Math.floor(margen / 2) : ox + 288;
+    Sprites.luna(ctx, lunaX, 34 - Math.floor(cam * 0.05));
 
     for (const n of nubes) {
-      const x = Math.floor(((n.x + t * n.v) % (ANCHO + 80)) - 40);
-      Sprites.nube(ctx, x, Math.floor(n.y - cam * n.p), '#2b3a6e', '#3c4d8c');
+      const x = Math.floor(((n.x + t * n.v) % (W + 80)) - 42);
+      Sprites.nube(ctx, x, Math.floor(n.y - cam * 0.8));
     }
   }
 
   function dibujarNieve(t) {
+    ctx.fillStyle = '#fff';
     for (const c of copos) {
-      const x = Math.floor(c.x + Math.sin(t * 1.5 + c.f) * 3);
-      const y = Math.floor((c.y + t * c.vy) % ALTO);
+      const x = Math.floor(c.x * W + Math.sin(t * 1.5 + c.f) * 3);
+      const y = Math.floor((c.y * H + t * c.vy) % H);
       ctx.globalAlpha = c.cerca ? 0.95 : 0.6;
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(x, y, c.cerca ? 2 : 1, c.cerca ? 2 : 1);
+      ctx.fillRect(x, y, 1, 1);
+      if (c.cerca) ctx.fillRect(x, y + 1, 1, 1);
     }
     ctx.globalAlpha = 1;
   }
 
   /* ---------- Personaje y cámara ---------- */
-  const jug = { x: 80, planta: 0, y: sueloY(0), dir: 1, modo: 'idle', t: 0, escalando: null };
-  let camY = Math.max(0, Math.min(MUNDO_ALTO - ALTO, jug.y - 170));
+  const jug = { x: 80, planta: 0, y: sueloY(0), dir: 1, modo: 'idle', t: 0, enEscalera: false, tEscalera: 0 };
+  // La cámara sigue al personaje; el pie queda al ~70% de la altura visible.
+  const objetivoCamara = () => Math.max(Math.min(0, MUNDO_ALTO - H), Math.min(MUNDO_ALTO - H, jug.y - H * 0.7));
+  let camY = objetivoCamara();
   const sacudidas = {};
   let puertaCercana = 0;
   let aviso = '', avisoHasta = 0;
-  const VEL = 58, VEL_ESCALA = 0.6;
+  const VEL = 58, VEL_ESCALERA = 64;       // px/s andando y por la escalera
+
+  /* ---------- Papá Noel: pasea por el tejado y se para a saludar ---------- */
+  const noel = { x: 170, dir: 1, pausa: 0, siguiente: 5 };
+  function actualizarNoel(dt) {
+    if (noel.pausa > 0) { noel.pausa -= dt; return; }
+    noel.x += noel.dir * 14 * dt;
+    noel.siguiente -= dt;
+    if (noel.x > X1 - 10) { noel.x = X1 - 10; noel.dir = -1; noel.pausa = 1.5; }
+    else if (noel.x < X0 + 10) { noel.x = X0 + 10; noel.dir = 1; noel.pausa = 1.5; }
+    else if (noel.siguiente <= 0) { noel.pausa = 2; noel.siguiente = 4 + Math.random() * 5; }
+  }
 
   function avisar(texto) { aviso = texto; avisoHasta = performance.now() + 2200; }
 
   function accion() {
-    if (Dias.hayModal() || jug.escalando || !puertaCercana) return;
+    if (Dias.hayModal() || jug.enEscalera || !puertaCercana) return;
     const n = puertaCercana;
     if (!Dias.abrirPuerta(n)) {
       sacudidas[n] = 0.45;
@@ -127,70 +192,84 @@
 
   function actualizar(dt) {
     jug.t += dt;
+    actualizarNoel(dt);
     for (const k in sacudidas) { sacudidas[k] -= dt; if (sacudidas[k] <= 0) delete sacudidas[k]; }
     const bloqueado = Dias.hayModal();
 
-    if (jug.escalando) {
-      const e = jug.escalando;
-      e.p = Math.min(1, e.p + dt / VEL_ESCALA);
-      jug.y = e.y0 + (e.y1 - e.y0) * e.p;
-      jug.x += (X_ESCALERA - jug.x) * Math.min(1, dt * 12);
+    const dx = bloqueado ? 0 : (teclas.derecha ? 1 : 0) - (teclas.izquierda ? 1 : 0);
+    const dy = bloqueado ? 0 : (teclas.abajo ? 1 : 0) - (teclas.arriba ? 1 : 0);
+    const yArriba = sueloY(PLANTAS - 1), yAbajo = sueloY(0);
+
+    // Escalera: se sube y baja mientras se mantiene la tecla; al soltar se queda donde esté.
+    if (dy && (jug.enEscalera || Math.abs(jug.x - X_ESCALERA) <= 8)) {
+      const ny = Math.max(yArriba, Math.min(yAbajo, jug.y + dy * VEL_ESCALERA * dt));
+      if (ny !== jug.y) {
+        jug.y = ny;
+        jug.x = X_ESCALERA;
+        jug.tEscalera += dt;
+        jug.enEscalera = true;
+      }
+    }
+    // planta más cercana y distancia a su suelo
+    const cercana = Math.max(0, Math.min(PLANTAS - 1, Math.round((yAbajo - jug.y) / (yAbajo - sueloY(1)))));
+    const resto = Math.abs(jug.y - sueloY(cercana));
+    // se pisa la planta al llegar justo a ella, o al querer andar estando casi a su altura
+    if (jug.enEscalera && (resto < 0.01 || (!dy && resto <= 3) || (dx && resto <= 5))) {
+      jug.y = sueloY(cercana);
+      jug.enEscalera = false;
+    }
+    if (!jug.enEscalera) jug.planta = cercana;
+
+    if (jug.enEscalera) {
       jug.modo = 'subir';
-      if (e.p >= 1) { jug.planta = e.hasta; jug.y = e.y1; jug.x = X_ESCALERA; jug.escalando = null; jug.modo = 'idle'; }
     } else {
-      const dx = bloqueado ? 0 : (teclas.derecha ? 1 : 0) - (teclas.izquierda ? 1 : 0);
       if (dx) jug.dir = dx;
       jug.x = Math.max(X_MIN, Math.min(X_MAX, jug.x + dx * VEL * dt));
       jug.modo = dx ? 'andar' : 'idle';
-
-      if (!bloqueado && Math.abs(jug.x - X_ESCALERA) <= 8) {
-        const delta = teclas.arriba ? 1 : teclas.abajo ? -1 : 0;
-        const destino = jug.planta + delta;
-        if (delta && destino >= 0 && destino < PLANTAS) {
-          jug.escalando = { desde: jug.planta, hasta: destino, y0: jug.y, y1: sueloY(destino), p: 0 };
-        }
-      }
     }
 
     // puerta que hay delante
     puertaCercana = 0;
-    if (!jug.escalando) {
+    if (!jug.enEscalera) {
       for (let n = 1; n <= Dias.TOTAL; n++) {
         const d = Edificio.puerta(n);
         if (d.planta === jug.planta && Math.abs(jug.x - d.cx) <= 12) { puertaCercana = n; break; }
       }
     }
 
-    const objetivo = Math.max(0, Math.min(MUNDO_ALTO - ALTO, jug.y - 170));
-    camY += (objetivo - camY) * Math.min(1, dt * 6);
+    camY += (objetivoCamara() - camY) * Math.min(1, dt * 6);
   }
 
   function textoPista() {
     if (performance.now() < avisoHasta) return aviso;
-    if (puertaCercana) {
-      const e = Dias.estado(puertaCercana), n = puertaCercana;
-      const boton = esTactil ? 'ABRIR' : 'Espacio / Enter';
-      if (e === 'disponible') return `Día ${n}: ${boton} para abrir`;
-      if (e === 'abierta') return `Día ${n} abierta · ${boton} para verla otra vez`;
-      return `Día ${n}: se abre el ${n} de diciembre`;
-    }
-    if (!jug.escalando && Math.abs(jug.x - X_ESCALERA) <= 8) return esTactil ? '▲ / ▼ para cambiar de planta' : '↑ / ↓ para cambiar de planta';
+    // Los controles están en la leyenda fija; aquí solo se avisa de las puertas aún cerradas.
+    if (puertaCercana && Dias.estado(puertaCercana) === 'bloqueada') return `Día ${puertaCercana}: se abre el ${puertaCercana} de diciembre`;
     return '';
   }
 
   /* ---------- Dibujo ---------- */
-  let textoHud = { info: null, pista: null };
+  const textoHud = { info: null, pista: null };
   function dibujar() {
     const cam = Math.round(camY);
     const t = jug.t;
     dibujarCielo(cam, t);
-    Edificio.dibujarEdificio(ctx, cam);
+    Edificio.dibujarEdificio(ctx, cam, W, H, ox);
+    ctx.save();
+    ctx.translate(ox, 0);                       // a partir de aquí, coordenadas de la escena 320x240
+    const techo = CIELO - cam;
+    if (techo > -40 && techo < H + 30) {
+      Sprites.humo(ctx, Edificio.CHIMENEA_X, techo - 18, t);
+      Sprites.papaNoel(ctx, Math.round(noel.x), techo + 3, noel.dir, noel.pausa <= 0, t);
+    }
+    for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarHalo(ctx, n, Dias.estado(n), cam, t);
     for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarPuerta(ctx, n, Dias.estado(n), cam, t, sacudidas[n]);
-    Sprites.personaje(ctx, Math.round(jug.x), Math.round(jug.y) - cam, jug.dir, jug.modo, t);
+    Sprites.personaje(ctx, Math.round(jug.x), Math.round(jug.y) - cam, jug.dir, jug.modo,
+      jug.enEscalera ? jug.tEscalera : t);    // en la escalera la animación solo avanza al moverse
     if (puertaCercana) {
       const d = Edificio.puerta(puertaCercana);
-      Edificio.dibujarFlecha(ctx, d.cx, d.y - cam - 56, t);
+      Edificio.dibujarFlecha(ctx, d.cx, d.y - cam - 51, t);
     }
+    ctx.restore();
     dibujarNieve(t);
 
     const info = Dias.info(), pista = textoPista();

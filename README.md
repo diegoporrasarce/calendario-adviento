@@ -3,7 +3,7 @@
 Juego web en HTML/CSS/JS puro (sin frameworks ni build). Un edificio de 6 plantas con 24 puertas: el día 1 está abajo a la izquierda y el 24 arriba a la derecha.
 
 ## Controles
-- **Flechas / WASD**: andar.
+- **← / →**: andar.
 - **↑ / ↓** junto a la escalera (lateral derecho): subir y bajar de planta.
 - **Espacio / Enter** delante de una puerta: abrirla.
 - En móvil aparecen botones táctiles.

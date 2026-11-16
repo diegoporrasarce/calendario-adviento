@@ -22,36 +22,79 @@ body {
 #escena {
   flex: 1;
   min-height: 0;
-  display: grid;
-  place-items: center;
+  position: relative;
   overflow: hidden;
-}
-
-#marco { position: relative; }
-
-#lienzo {
-  display: block;
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
   background: #0b1030;
 }
 
-#info, #pista {
+#marco { position: absolute; inset: 0; }
+
+#lienzo {
   position: absolute;
   left: 0;
-  right: 0;
-  padding: 3px 6px;
-  font-size: clamp(9px, 1.9vmin, 14px);
-  line-height: 1.2;
-  background: rgba(8, 10, 30, 0.72);
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+
+#pantalla-completa {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
   color: #f2d36b;
+  background: rgba(27, 31, 59, 0.9);
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 -2px 0 0 #f2d36b, 0 2px 0 0 #f2d36b, -2px 0 0 0 #f2d36b, 2px 0 0 0 #f2d36b;
+}
+#pantalla-completa:hover { background: #26305f; }
+#pantalla-completa svg { width: 20px; height: 20px; shape-rendering: crispEdges; }
+#pantalla-completa[hidden] { display: none; }
+
+/* HUD fijo arriba a la izquierda: fecha y leyenda de controles */
+#hud {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: clamp(10px, 1.9vmin, 14px);
+  line-height: 1.25;
   pointer-events: none;
 }
-#info { top: 0; }
-#pista { bottom: 0; color: #fff; }
+#info, #leyenda, #pista {
+  padding: 4px 8px;
+  background: rgba(8, 5, 26, 0.85);
+  box-shadow: 0 -2px 0 0 #6e1c84, 0 2px 0 0 #6e1c84, -2px 0 0 0 #6e1c84, 2px 0 0 0 #6e1c84;
+  text-shadow: 2px 2px 0 #3c1058;
+}
+#info { color: #e6c8ff; }
+#leyenda { margin: 0; color: #fff; }
+#leyenda > div { display: flex; gap: 10px; }
+#leyenda dt { min-width: 9.5em; color: #c8a0ff; }
+#leyenda dd { margin: 0; }
+@media (pointer: coarse) { #leyenda { display: none; } }   /* en táctil ya están los botones */
+
+/* Avisos (puerta aún cerrada, errores) */
+#pista {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 16px);
+  font-size: clamp(10px, 1.9vmin, 14px);
+  color: #fff;
+  pointer-events: none;
+}
 #pista:empty, #info:empty { display: none; }
 
 /* ---------- Controles táctiles ---------- */
