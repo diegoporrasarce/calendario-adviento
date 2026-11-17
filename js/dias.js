@@ -144,11 +144,32 @@ const Dias = (() => {
   }
 
   /* ---------- Minijuegos (tipo "minijuego"), a pantalla completa sobre la escena ---------- */
+  // Devuelve la capa del minijuego. Si el navegador sirve un index.html antiguo (de caché) que no la
+  // tiene, la crea aquí, para que una mezcla de versiones no deje el juego bloqueado.
+  function pantallaJuego() {
+    let capa = $('pantalla-juego');
+    if (!capa) {
+      capa = document.createElement('div');
+      capa.id = 'pantalla-juego';
+      capa.className = 'oculto';
+      capa.innerHTML = '<div id="juego-contenedor"></div>' +
+        '<button id="juego-cerrar" class="boton-pixel" type="button" aria-label="Cerrar el minijuego">X</button>';
+      ($('marco') || document.body).appendChild(capa);
+    }
+    const cerrar = $('juego-cerrar');
+    if (!cerrar.dataset.listo) {
+      cerrar.dataset.listo = '1';
+      cerrar.addEventListener('click', (e) => { e.currentTarget.blur(); cerrarModal(); });
+    }
+    return { capa, contenedor: $('juego-contenedor') };
+  }
+
   function quitarMinijuego() {
     if (typeof limpiarJuego === 'function') { try { limpiarJuego(); } catch (e) { console.error(e); } }
     limpiarJuego = null;
-    $('juego-contenedor').replaceChildren();
-    $('pantalla-juego').classList.add('oculto');
+    const { capa, contenedor } = pantallaJuego();
+    contenedor.replaceChildren();
+    capa.classList.add('oculto');
     document.body.classList.remove('jugando');
   }
 
@@ -163,9 +184,9 @@ const Dias = (() => {
   }
 
   function abrirMinijuego(n, entrada, miFicha) {
-    const contenedor = $('juego-contenedor');
+    const { capa, contenedor } = pantallaJuego();
     contenedor.replaceChildren();
-    $('pantalla-juego').classList.remove('oculto');
+    capa.classList.remove('oculto');
     document.body.classList.add('jugando');
     cargarJuego(entrada.juego).then((juego) => {
       if (miFicha !== ficha) return;
@@ -245,7 +266,7 @@ const Dias = (() => {
 
   document.addEventListener('DOMContentLoaded', () => {
     $('modal-cerrar').addEventListener('click', cerrarModal);
-    $('juego-cerrar').addEventListener('click', (e) => { e.currentTarget.blur(); cerrarModal(); });
+    pantallaJuego();                // prepara la capa del minijuego y su botón de cerrar
     $('modal').addEventListener('pointerdown', (e) => { if (e.target === $('modal')) cerrarModal(); });
     $('dialogo').addEventListener('click', avanzarDialogo);
   });
