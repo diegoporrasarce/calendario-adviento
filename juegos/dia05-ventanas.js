@@ -2,15 +2,20 @@
 /* Día 5 — Enciende las ventanas (Lights Out).
    Fachada con 4x4 ventanas: al tocar una cambian ella y sus vecinas de arriba, abajo, izquierda y derecha.
    Hay que encenderlas todas. El tablero se genera pulsando ventanas al azar desde "todo encendido",
-   así que siempre tiene solución. Botón para volver al tablero inicial. No se puede perder. */
+   así que siempre tiene solución. Botón para volver al tablero inicial y, a partir de 35 pulsaciones,
+   botón de pista que señala una ventana que hay que pulsar. No se puede perder. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia05-ventanas'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
     const N = 4, TOTAL = N * N;
     const PULSACIONES_AZAR = 5;          // cuántas pulsaciones al azar desordenan el tablero
+    const PISTA_DESDE = 35;              // pulsaciones (en total, aunque se reinicie) para que aparezca la pista
+    const REINICIAR = TOTAL, PISTA = TOTAL + 1;   // posiciones del cursor de teclado en los botones
 
-    let luces, inicial, solucion, pulsaciones, cursor, usaTeclado, destellos, ganada;
+    // pendientes: ventanas que faltan por pulsar para resolver desde el estado actual
+    // (pulsar una ventana dos veces la deja igual, así que cada pulsación la quita o la añade)
+    let luces, inicial, solucion, pendientes, pulsaciones, totales, pista, cursor, usaTeclado, destellos, ganada;
 
     const vecinas = (i) => {
       const f = Math.floor(i / N), c = i % N, v = [i];
@@ -36,13 +41,16 @@ window.JUEGOS['dia05-ventanas'] = {
       const g = generar();
       inicial = g.t; solucion = g.elegidas;
       luces = [...inicial];
-      pulsaciones = 0; cursor = 0; usaTeclado = false; ganada = 0;
+      pendientes = new Set(solucion);
+      pulsaciones = 0; totales = 0; pista = -1; cursor = 0; usaTeclado = false; ganada = 0;
       destellos = new Array(TOTAL).fill(0);
     }
 
     function pulsar(i) {
       conmutar(luces, i);
-      pulsaciones++;
+      pulsaciones++; totales++;
+      if (pendientes.has(i)) pendientes.delete(i); else pendientes.add(i);
+      if (i === pista) pista = -1;
       for (const j of vecinas(i)) destellos[j] = 0.25;
       Sonido.efecto('carta');
     }
@@ -60,12 +68,13 @@ window.JUEGOS['dia05-ventanas'] = {
       const anchoRejilla = N * w + (N - 1) * hueco, altoRejilla = N * h + (N - 1) * hueco;
       const x0 = Math.floor((api.ancho - anchoRejilla) / 2);
       const y0 = arriba + Math.floor((api.alto - arriba - abajo - altoRejilla) / 2);
-      const textoBoton = 'REINICIAR';
-      boton.w = Comun.medir(textoBoton, e) + 16;
-      boton.x = Math.floor((api.ancho - boton.w) / 2);
-      boton.y = y0 + altoRejilla + 12;
-      boton.texto = textoBoton;
-      return { w, h, hueco, x0, y0, boton, arriba, pos: (i) => ({ x: x0 + (i % N) * (w + hueco), y: y0 + Math.floor(i / N) * (h + hueco) }) };
+      // botones debajo de la rejilla: REINICIAR y, cuando toca, PISTA
+      const botones = [{ id: REINICIAR, texto: 'REINICIAR', color: C.lila }];
+      if (totales >= PISTA_DESDE) botones.push({ id: PISTA, texto: 'PISTA', color: C.oroClaro });
+      for (const b of botones) { b.w = Comun.medir(b.texto, e) + 16; b.h = boton.h; b.y = y0 + altoRejilla + 12; }
+      let bx = Math.floor((api.ancho - (botones.reduce((a, b) => a + b.w, 0) + 12 * (botones.length - 1))) / 2);
+      for (const b of botones) { b.x = bx; bx += b.w + 12; }
+      return { w, h, hueco, x0, y0, botones, arriba, pos: (i) => ({ x: x0 + (i % N) * (w + hueco), y: y0 + Math.floor(i / N) * (h + hueco) }) };
     }
 
     function actualizar(dt, api) {
@@ -73,28 +82,36 @@ window.JUEGOS['dia05-ventanas'] = {
       for (let i = 0; i < TOTAL; i++) destellos[i] = Math.max(0, destellos[i] - dt);
       if (ganada > 0) { ganada -= dt; if (ganada <= 0) api.ganar(); return; }
 
-      // teclado: flechas por la rejilla; desde la fila de abajo, ↓ lleva al botón de reiniciar (cursor = TOTAL)
-      if (e.pulsado('izquierda') && cursor < TOTAL && cursor % N > 0) { cursor--; usaTeclado = true; }
-      if (e.pulsado('derecha') && cursor < TOTAL && cursor % N < N - 1) { cursor++; usaTeclado = true; }
-      if (e.pulsado('arriba')) { cursor = cursor === TOTAL ? TOTAL - N : Math.max(cursor % N, cursor - N); usaTeclado = true; }
-      if (e.pulsado('abajo')) { cursor = cursor >= TOTAL - N ? TOTAL : cursor + N; usaTeclado = true; }
+      // teclado: flechas por la rejilla; desde la fila de abajo, ↓ lleva a los botones (← → entre ellos)
+      const hayPista = d.botones.length > 1;
+      if (cursor === PISTA && !hayPista) cursor = REINICIAR;
+      if (e.pulsado('izquierda')) { usaTeclado = true; if (cursor === PISTA) cursor = REINICIAR; else if (cursor < TOTAL && cursor % N > 0) cursor--; }
+      if (e.pulsado('derecha')) { usaTeclado = true; if (cursor === REINICIAR && hayPista) cursor = PISTA; else if (cursor < TOTAL && cursor % N < N - 1) cursor++; }
+      if (e.pulsado('arriba')) { cursor = cursor >= TOTAL ? TOTAL - N : Math.max(cursor % N, cursor - N); usaTeclado = true; }
+      if (e.pulsado('abajo')) { if (cursor < TOTAL) cursor = cursor >= TOTAL - N ? REINICIAR : cursor + N; usaTeclado = true; }
 
       let elegida = -1;
       if (e.pulsado('toque')) {
         e.pulsado('accion');
         usaTeclado = false;
-        const { x, y } = e.puntero, b = d.boton;
-        if (x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h) elegida = TOTAL;
+        const { x, y } = e.puntero;
+        const b = d.botones.find((k) => x >= k.x && x < k.x + k.w && y >= k.y && y < k.y + k.h);
+        if (b) elegida = b.id;
         else for (let i = 0; i < TOTAL; i++) {
           const q = d.pos(i);
           if (x >= q.x - 3 && x < q.x + d.w + 3 && y >= q.y - 3 && y < q.y + d.h + 3) { elegida = i; break; }
         }
       } else if (e.pulsado('accion')) { elegida = cursor; usaTeclado = true; }
 
-      if (elegida === TOTAL) {                                              // volver al tablero inicial
+      if (elegida === REINICIAR) {                                          // volver al tablero inicial
         luces = [...inicial]; pulsaciones = 0;
+        pendientes = new Set(solucion); pista = -1;
         destellos.fill(0.25);
         Sonido.efecto('cerrar');
+      } else if (elegida === PISTA) {                                       // señalar una ventana que falta pulsar
+        const faltan = [...pendientes];
+        pista = faltan[Math.floor(Math.random() * faltan.length)];
+        Sonido.efecto('abrir');
       } else if (elegida >= 0) {
         pulsar(elegida);
         if (luces.every(Boolean)) { ganada = 1.2; Sonido.efecto('pareja'); }
@@ -171,16 +188,29 @@ window.JUEGOS['dia05-ventanas'] = {
         ventana(ctx, q.x, q.y, d.w, d.h, on, fiesta ? (Math.floor(api.t * 8 + i) % 3 === 0 ? 1 : 0) : destellos[i], api.t, i);
       });
 
-      // botón de reiniciar
-      const b = d.boton, e = api.textoEscala;
-      Comun.caja(ctx, b.x, b.y, b.w, b.h);
-      texto(ctx, b.texto, b.x + 8, b.y + 3 + Math.floor((b.h - Comun.altoTexto(e)) / 2) - 3, C.lila, { escala: e });
+      // botones (REINICIAR y, si ya toca, PISTA)
+      const e = api.textoEscala;
+      for (const b of d.botones) {
+        Comun.caja(ctx, b.x, b.y, b.w, b.h);
+        texto(ctx, b.texto, b.x + 8, b.y + Math.floor((b.h - Comun.altoTexto(e)) / 2), b.color, { escala: e });
+      }
+
+      // ventana de la pista: marco dorado grueso que parpadea y una flecha encima
+      if (pista >= 0 && !fiesta) {
+        const q = d.pos(pista), o = Math.floor(api.t * 4) % 2;
+        ctx.fillStyle = o ? C.oroClaro : C.oro;
+        ctx.fillRect(q.x - 6, q.y - 6, d.w + 12, 3); ctx.fillRect(q.x - 6, q.y + d.h + 3, d.w + 12, 3);
+        ctx.fillRect(q.x - 6, q.y - 6, 3, d.h + 12); ctx.fillRect(q.x + d.w + 3, q.y - 6, 3, d.h + 12);
+        const fx = q.x + Math.floor(d.w / 2), fy = q.y - 14 - o * 2;
+        ctx.fillRect(fx - 4, fy, 9, 2); ctx.fillRect(fx - 3, fy + 2, 7, 2); ctx.fillRect(fx - 2, fy + 4, 5, 2); ctx.fillRect(fx - 1, fy + 6, 3, 2);
+      }
 
       // cursor del teclado
       if (usaTeclado && Math.floor(api.t * 3) % 3) {
-        const q = cursor === TOTAL ? { x: b.x, y: b.y } : d.pos(cursor);
-        const w = cursor === TOTAL ? b.w : d.w, h = cursor === TOTAL ? b.h : d.h;
-        ctx.fillStyle = C.oroClaro;
+        const b = d.botones.find((k) => k.id === cursor);
+        const q = b ? { x: b.x, y: b.y } : d.pos(cursor);
+        const w = b ? b.w : d.w, h = b ? b.h : d.h;
+        ctx.fillStyle = C.blanco;
         ctx.fillRect(q.x - 5, q.y - 5, w + 10, 2); ctx.fillRect(q.x - 5, q.y + h + 3, w + 10, 2);
         ctx.fillRect(q.x - 5, q.y - 5, 2, h + 10); ctx.fillRect(q.x + w + 3, q.y - 5, 2, h + 10);
       }
@@ -198,7 +228,7 @@ window.JUEGOS['dia05-ventanas'] = {
     }
 
     // Solo en modo debug: estado y solución (pulsar esas ventanas desde el tablero inicial lo resuelve)
-    if (Dias.debug) window.ventanasDebug = () => ({ luces, solucion: [...solucion], pulsaciones });
+    if (Dias.debug) window.ventanasDebug = () => ({ luces, solucion: [...solucion], pendientes: [...pendientes], pulsaciones, totales, pista });
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'ENCIENDE LAS VENTANAS',
