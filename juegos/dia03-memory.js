@@ -55,7 +55,9 @@ window.JUEGOS['dia03-memory'] = {
     function disposicion(api) {
       const vertical = api.alto > api.ancho * 1.1;
       const cols = vertical ? 3 : 4, filas = vertical ? 4 : 3;
-      const arriba = 34, hueco = 6;
+      const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
+      const dosFilas = api.ancho - api.margenDerecho < 250;               // los marcadores no caben en una fila
+      const arriba = 6 + altoCaja + 8 + (dosFilas ? altoCaja + 6 : 0), hueco = 6;
       const disponibleW = api.ancho - 24, disponibleH = api.alto - arriba - 10;
       let w = Math.floor((disponibleW - hueco * (cols - 1)) / cols);
       let h = Math.floor((disponibleH - hueco * (filas - 1)) / filas);
@@ -236,13 +238,16 @@ window.JUEGOS['dia03-memory'] = {
       for (const s of chispas) ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 1);
 
       // marcador
-      const e = api.textoEscala, alto = 5 * e + 8;
+      const e = api.textoEscala, alto = Comun.altoTexto(e) + 8;
       const t1 = `PAREJAS ${parejas}/${FIGURAS.length}`, t2 = `INTENTOS ${intentos}`;
       Comun.caja(ctx, 6, 6, Comun.medir(t1, e) + 8, alto);
       texto(ctx, t1, 10, 10, C.nieve, { escala: e });
-      const w2 = Comun.medir(t2, e) + 8, x2 = Math.max(Comun.medir(t1, e) + 22, Math.floor((api.ancho - w2) / 2));
-      Comun.caja(ctx, x2, 6, w2, alto);
-      texto(ctx, t2, x2 + 4, 10, C.lila, { escala: e });
+      // el segundo marcador va al centro; si choca con los botones de arriba a la derecha, debajo del primero
+      const w2 = Comun.medir(t2, e) + 8;
+      let x2 = Math.max(Comun.medir(t1, e) + 22, Math.floor((api.ancho - w2) / 2)), y2 = 6;
+      if (x2 + w2 > api.ancho - api.margenDerecho) { x2 = 6; y2 = 6 + alto + 6; }
+      Comun.caja(ctx, x2, y2, w2, alto);
+      texto(ctx, t2, x2 + 4, y2 + 4, C.lila, { escala: e });
     }
 
     return Comun.crearJuego(contenedor, alTerminar, {

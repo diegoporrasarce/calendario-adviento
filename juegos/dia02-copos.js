@@ -182,7 +182,7 @@ window.JUEGOS['dia02-copos'] = {
       for (const s of chispas) ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 1);
 
       // marcador: copos a la izquierda y tiempo en el centro (la esquina derecha es del botón X)
-      const e = api.textoEscala, altoCaja = 5 * e + 8;
+      const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
       Comun.caja(ctx, 6, 6, 22 + Comun.medir('20/20', e), altoCaja);
       dibujarCopo(ctx, 14, 6 + Math.floor(altoCaja / 2), false);
       texto(ctx, `${cuenta}/${META}`, 23, 10, C.nieve, { escala: e });

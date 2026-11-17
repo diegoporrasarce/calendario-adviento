@@ -32,10 +32,10 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   y devuelve lo que esta devuelve (su `destruir`). La base pone el lienzo de 320×240 escalado, la entrada unificada
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`,
-  `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 3×5), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
+  `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
-  - La esquina superior derecha queda libre para los botones de sonido, pantalla completa y cerrar.
+  - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
   - En modo debug, `juegoDebug.ganar()` desde la consola gana la partida (para probar).
 - **Estilo:** el del juego principal: píxel gordo, paleta limitada, sombreado con trama, sin degradados lisos. Sprites dibujados en código. La protagonista es siempre la chica de `js/sprites.js`.
 - **Pantalla:** el minijuego ocupa toda la escena (no una ventanita), para que se vea bien en el móvil.

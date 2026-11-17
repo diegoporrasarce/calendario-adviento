@@ -99,15 +99,29 @@ const Comun = (() => {
     return e;
   }
 
-  /* ---------- Texto pixel (fuente propia de 3x5, mayúsculas) ---------- */
-  // Cada glifo: 5 filas de 3 bits (en octal: 7 = ###, 5 = #.#, 2 = .#.).
+  /* ---------- Texto pixel (fuente propia de 5x7, mayúsculas) ---------- */
+  // Cada glifo: 7 filas de 5 bits (16 = píxel de la izquierda ... 1 = el de la derecha).
+  const LETRA_W = 5, LETRA_H = 7, AVANCE = 6;
   const FUENTE = {
-    A: '25755', B: '65656', C: '34443', D: '65556', E: '74647', F: '74644', G: '34553', H: '55755', I: '72227',
-    J: '11152', K: '55655', L: '44447', M: '57755', N: '65555', 'Ñ': '70655', O: '25552', P: '65644', Q: '25563',
-    R: '65655', S: '34216', T: '72222', U: '55557', V: '55552', W: '55775', X: '55255', Y: '55222', Z: '71247',
-    0: '75557', 1: '26227', 2: '71747', 3: '71717', 4: '55711', 5: '74717', 6: '74757', 7: '71122', 8: '75757', 9: '75717',
-    ' ': '00000', '!': '22202', '¡': '20222', '?': '71302', '¿': '20647', '.': '00002', ',': '00024', ':': '02020',
-    '-': '00700', '+': '02720', '/': '11244', '%': '51245', '(': '24442', ')': '21112', '·': '00200', "'": '22000', '"': '55000'
+    A: [14, 17, 17, 31, 17, 17, 17], B: [30, 17, 17, 30, 17, 17, 30], C: [14, 17, 16, 16, 16, 17, 14],
+    D: [30, 17, 17, 17, 17, 17, 30], E: [31, 16, 16, 30, 16, 16, 31], F: [31, 16, 16, 30, 16, 16, 16],
+    G: [14, 17, 16, 23, 17, 17, 15], H: [17, 17, 17, 31, 17, 17, 17], I: [14, 4, 4, 4, 4, 4, 14],
+    J: [7, 2, 2, 2, 2, 18, 12], K: [17, 18, 20, 24, 20, 18, 17], L: [16, 16, 16, 16, 16, 16, 31],
+    M: [17, 27, 21, 21, 17, 17, 17], N: [17, 17, 25, 21, 19, 17, 17], 'Ñ': [14, 0, 17, 25, 21, 19, 17],
+    O: [14, 17, 17, 17, 17, 17, 14], P: [30, 17, 17, 30, 16, 16, 16], Q: [14, 17, 17, 17, 21, 18, 13],
+    R: [30, 17, 17, 30, 20, 18, 17], S: [15, 16, 16, 14, 1, 1, 30], T: [31, 4, 4, 4, 4, 4, 4],
+    U: [17, 17, 17, 17, 17, 17, 14], V: [17, 17, 17, 17, 17, 10, 4], W: [17, 17, 17, 21, 21, 21, 10],
+    X: [17, 17, 10, 4, 10, 17, 17], Y: [17, 17, 10, 4, 4, 4, 4], Z: [31, 1, 2, 4, 8, 16, 31],
+    0: [14, 17, 19, 21, 25, 17, 14], 1: [4, 12, 4, 4, 4, 4, 14], 2: [14, 17, 1, 2, 4, 8, 31],
+    3: [30, 1, 1, 14, 1, 1, 30], 4: [2, 6, 10, 18, 31, 2, 2], 5: [31, 16, 30, 1, 1, 17, 14],
+    6: [6, 8, 16, 30, 17, 17, 14], 7: [31, 1, 2, 4, 8, 8, 8], 8: [14, 17, 17, 14, 17, 17, 14],
+    9: [14, 17, 17, 15, 1, 2, 12],
+    ' ': [0, 0, 0, 0, 0, 0, 0], '!': [4, 4, 4, 4, 4, 0, 4], '¡': [4, 0, 4, 4, 4, 4, 4],
+    '?': [14, 17, 1, 2, 4, 0, 4], '¿': [4, 0, 4, 8, 16, 17, 14], '.': [0, 0, 0, 0, 0, 12, 12],
+    ',': [0, 0, 0, 0, 12, 4, 8], ':': [0, 12, 12, 0, 12, 12, 0], '-': [0, 0, 0, 14, 0, 0, 0],
+    '+': [0, 4, 4, 31, 4, 4, 0], '/': [1, 1, 2, 4, 8, 16, 16], '%': [24, 25, 2, 4, 8, 19, 3],
+    '(': [2, 4, 8, 8, 8, 4, 2], ')': [8, 4, 2, 2, 2, 4, 8], '·': [0, 0, 0, 12, 12, 0, 0],
+    "'": [4, 4, 8, 0, 0, 0, 0], '"': [10, 10, 0, 0, 0, 0, 0]
   };
   // Mayúsculas y sin tildes (la Ñ se conserva). Lo que no está en la fuente sale como '?'.
   function normalizar(texto) {
@@ -117,9 +131,10 @@ const Comun = (() => {
       return FUENTE[base] ? base : '?';
     }).join('');
   }
-  const medir = (texto, escala = 1) => Math.max(0, normalizar(texto).length * 4 - 1) * escala;
+  const medir = (texto, escala = 1) => Math.max(0, normalizar(texto).length * AVANCE - 1) * escala;
+  const altoTexto = (escala = 1) => LETRA_H * escala;
 
-  // opciones: { escala, centro (x es el centro), sombra (color) }
+  // opciones: { escala, centro (x es el centro), sombra (color, 1 px abajo a la derecha por cada nivel de escala) }
   function texto(ctx, cadena, x, y, color, opciones = {}) {
     const escala = opciones.escala || 1;
     const t = normalizar(cadena);
@@ -128,12 +143,10 @@ const Comun = (() => {
     ctx.fillStyle = color;
     for (const c of t) {
       const g = FUENTE[c];
-      for (let fila = 0; fila < 5; fila++) {
-        const bits = Number(g[fila]);
-        for (let col = 0; col < 3; col++)
-          if (bits & (4 >> col)) ctx.fillRect(cx + col * escala, y + fila * escala, escala, escala);
-      }
-      cx += 4 * escala;
+      for (let fila = 0; fila < LETRA_H; fila++)
+        for (let col = 0; col < LETRA_W; col++)
+          if (g[fila] & (16 >> col)) ctx.fillRect(cx + col * escala, y + fila * escala, escala, escala);
+      cx += AVANCE * escala;
     }
   }
 
@@ -159,17 +172,19 @@ const Comun = (() => {
 
   // Panel centrado: título grande y líneas de texto. `e` = escala del texto (2 en pantallas pequeñas).
   function panel(ctx, titulo, lineas, pie, t, alto = ALTO, e = 1, ancho = ANCHO) {
-    const w = e > 1 ? 300 : 240;
+    const w = Math.min(ancho - 12, e > 1 ? 308 : 280);
     const cuerpo = lineas.flatMap((l) => envolver(l, w - 16, e));
     const pies = pie ? envolver(pie, w - 16, e) : [];
-    const salto = 7 * e + 1;
-    const h = 24 + cuerpo.length * salto + (pies.length ? 6 + pies.length * salto : 2);
-    const cx = Math.floor(ancho / 2), x = cx - w / 2, y = Math.floor((alto - h) / 2);
+    const salto = altoTexto(e) + 3 * e;                                   // alto de línea con interlineado
+    const et = medir(titulo, e + 1) <= w - 16 ? e + 1 : e;               // el título, un tamaño más grande si cabe
+    const arriba = 8 + altoTexto(et) + 8;                                 // margen + título + separación
+    const h = arriba + cuerpo.length * salto + (pies.length ? 4 + pies.length * salto : 0) + 4;
+    const cx = Math.floor(ancho / 2), x = cx - Math.floor(w / 2), y = Math.floor((alto - h) / 2);
     caja(ctx, x, y, w, h);
-    texto(ctx, titulo, cx, y + 6, PALETA.oroClaro, { escala: 2, centro: true, sombra: PALETA.rojoOsc });
-    cuerpo.forEach((l, i) => texto(ctx, l, cx, y + 22 + i * salto, PALETA.nieve, { centro: true, escala: e }));
+    texto(ctx, titulo, cx, y + 8, PALETA.oroClaro, { escala: et, centro: true, sombra: PALETA.tinta });
+    cuerpo.forEach((l, i) => texto(ctx, l, cx, y + arriba + i * salto, PALETA.nieve, { centro: true, escala: e }));
     if (Math.floor(t * 2.5) % 2 === 0)
-      pies.forEach((l, i) => texto(ctx, l, cx, y + 28 + (cuerpo.length + i) * salto, PALETA.lila, { centro: true, escala: e }));
+      pies.forEach((l, i) => texto(ctx, l, cx, y + arriba + 4 + (cuerpo.length + i) * salto, PALETA.lila, { centro: true, escala: e }));
   }
 
   /* ---------- Fondo de noche reutilizable (cielo tramado y estrellas) ---------- */
@@ -201,7 +216,7 @@ const Comun = (() => {
 
   /* ---------- Marco del juego: fases, reintentos, "Saltar" y victoria ---------- */
   // cfg: { titulo, instruccion, sinDerrota, pantallaCompleta, reiniciar(api), actualizar(dt, api), dibujar(ctx, api) }
-  // api: { entrada, t, ancho, alto, textoEscala, ganar(), perder(motivo), sacudir(segundos), aviso(texto, x, y, color) }
+  // api: { entrada, t, ancho, alto, textoEscala, margenDerecho, ganar(), perder(motivo), sacudir(segundos), aviso(texto, x, y, color) }
   //   ancho/alto: tamaño lógico del lienzo (320x240, o más si pantallaCompleta: llena toda la pantalla)
   //   textoEscala: 2 cuando el lienzo se ve pequeño (móvil), para que el texto se lea
   function crearJuego(contenedor, alTerminar, cfg) {
@@ -224,6 +239,8 @@ const Comun = (() => {
       get ancho() { return pantalla.ancho; },
       get alto() { return pantalla.alto; },
       get textoEscala() { return pantalla.escala < 2 ? 2 : 1; },
+      // ancho lógico de la esquina superior derecha ocupada por los botones de sonido, pantalla completa y cerrar
+      get margenDerecho() { return Math.ceil(132 / pantalla.escala); },
       ganar() {
         if (fase !== 'jugando') return;
         fase = 'victoria'; tFase = 0;
@@ -305,7 +322,7 @@ const Comun = (() => {
           ctx.fillRect(Math.round(c.x + Math.sin(api.t * 4 + c.f) * 3), Math.round(c.y), 2, Math.floor(api.t * 8 + c.f) % 2 ? 2 : 1);
         }
         const rebote = Math.round(Math.abs(Math.sin(api.t * 5)) * -4);
-        texto(ctx, '¡CONSEGUIDO!', Math.floor(api.ancho / 2), Math.floor(api.alto / 2) - 20 + rebote, PALETA.oroClaro, { escala: 3, centro: true, sombra: PALETA.rojoOsc });
+        texto(ctx, '¡CONSEGUIDO!', Math.floor(api.ancho / 2), Math.floor(api.alto / 2) - 20 + rebote, PALETA.oroClaro, { escala: 3, centro: true, sombra: PALETA.tinta });
       }
       reloj = requestAnimationFrame(bucle);
     }
@@ -321,5 +338,5 @@ const Comun = (() => {
     };
   }
 
-  return { ANCHO, ALTO, PALETA, crearLienzo, crearEntrada, texto, medir, envolver, caja, panel, fondoNoche, crearJuego };
+  return { ANCHO, ALTO, PALETA, crearLienzo, crearEntrada, texto, medir, altoTexto, envolver, caja, panel, fondoNoche, crearJuego };
 })();
