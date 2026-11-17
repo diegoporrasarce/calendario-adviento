@@ -96,7 +96,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 ### Hechos
 - **2 — Atrapa copos:** 20 copos en 60 s, carámbanos que quitan 3, copos grandes. Mensaje escrito.
 - **3 — Memory:** 12 cartas con giro animado, 4×3 en horizontal y 3×4 en vertical; toque o flechas + Espacio. Sin derrota ("Saltar" a los 2 min).
-- **4 — Riega la planta:** barra con zona verde que se estrecha y se acelera; 3 aciertos seguidos y florece la flor de Pascua. Un fallo vuelve a empezar la racha (cuenta para "Saltar").
+- **4 — Riega la planta:** barra con zona verde que se estrecha y se acelera; 4 aciertos seguidos (con capullo antes de abrirse) y florece la flor de Pascua. Un fallo vuelve a empezar la racha (cuenta para "Saltar").
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
