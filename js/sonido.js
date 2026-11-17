@@ -30,10 +30,13 @@ const Sonido = (() => {
     src.start(cuando);
   }
 
-  /* ---------- Música: «Jingle Bells» (dominio público), estrofa + estribillo en bucle ---------- */
-  const N = { G3: 55, A3: 57, B3: 59, C4: 60, D4: 62, E4: 64, F4: 65, G4: 67, A4: 69 };
-  const { G3, A3, B3, C4, D4, E4, F4, G4, A4 } = N;
-  // [nota, duración en tiempos]
+  /* ---------- Música: villancicos de dominio público, una pista por escena ---------- */
+  // Cada pista: tempo (segundos por tiempo), compas (tiempos por compás), melodia [[nota, tiempos]]
+  // (null = silencio; suena una octava por encima), bajo (fundamental de cada compás), tipo de onda y cascabel.
+  const N = { C3: 48, D3: 50, E3: 52, F3: 53, G3: 55, A3: 57, B3: 59, C4: 60, D4: 62, E4: 64, F4: 65, Fs4: 66, G4: 67, A4: 69, B4: 71, C5: 72 };
+  const { D3, E3, F3, G3, A3, B3, C4, D4, E4, F4, Fs4, G4, A4, B4, C5 } = N;
+
+  // «Jingle Bells»: estrofa + estribillo (el edificio)
   const ESTROFA = [
     [G3, 1], [E4, 1], [D4, 1], [C4, 1], [G3, 3], [G3, .5], [G3, .5],
     [G3, 1], [E4, 1], [D4, 1], [C4, 1], [A3, 4],
@@ -49,38 +52,103 @@ const Sonido = (() => {
     [E4, 1], [G4, 1], [C4, 1.5], [D4, .5], [E4, 4],
     [F4, 1], [F4, 1], [F4, 1.5], [F4, .5], [F4, 1], [E4, 1], [E4, 1], [E4, .5], [E4, .5]
   ];
-  const MELODIA = [
-    ...ESTROFA,
-    ...ESTRIBILLO_A, [E4, 1], [D4, 1], [D4, 1], [E4, 1], [D4, 2], [G4, 2],
-    ...ESTRIBILLO_A, [G4, 1], [G4, 1], [F4, 1], [D4, 1], [C4, 4]
-  ];
-  // Fundamental del acorde de cada compás (bajo)
-  const BAJO = [48, 48, 48, 53, 53, 55, 55, 48, 48, 48, 48, 53, 53, 55, 55, 48,
-                48, 48, 48, 48, 53, 48, 50, 55, 48, 48, 48, 48, 53, 48, 55, 48];
-  const TEMPO = 0.36;                                  // segundos por tiempo
-  const eventos = [];
-  let tiempos = 0;
-  for (const [m, d] of MELODIA) { eventos.push({ t: tiempos, m: m + 12, d: d * 0.9, tipo: 'square', v: 0.5 }); tiempos += d; }
-  BAJO.forEach((m, compas) => {
-    eventos.push({ t: compas * 4, m, d: 1.6, tipo: 'triangle', v: 1 });
-    eventos.push({ t: compas * 4 + 2, m: m + 7, d: 1.6, tipo: 'triangle', v: 0.8 });
-    for (let i = 0; i < 4; i++) eventos.push({ t: compas * 4 + i, m: 96, d: 0.12, tipo: 'sine', v: i % 2 ? 0.35 : 0.2 });   // cascabel
-  });
-  eventos.sort((a, b) => a.t - b.t);
-  const TOTAL = BAJO.length * 4;
 
+  // «Deck the Halls»
+  const DECK_A = [[G4, 1.5], [F4, .5], [E4, 1], [D4, 1], [C4, 1], [D4, 1], [E4, 1], [C4, 1],
+                  [D4, .5], [E4, .5], [F4, .5], [D4, .5], [E4, 1.5], [D4, .5], [C4, 1], [B3, 1], [C4, 2]];
+
+  const PISTAS = {
+    edificio: {
+      tempo: 0.36, compas: 4, tipo: 'square', cascabel: true,
+      melodia: [...ESTROFA,
+        ...ESTRIBILLO_A, [E4, 1], [D4, 1], [D4, 1], [E4, 1], [D4, 2], [G4, 2],
+        ...ESTRIBILLO_A, [G4, 1], [G4, 1], [F4, 1], [D4, 1], [C4, 4]],
+      bajo: [48, 48, 48, 53, 53, 55, 55, 48, 48, 48, 48, 53, 53, 55, 55, 48,
+             48, 48, 48, 48, 53, 48, 50, 55, 48, 48, 48, 48, 53, 48, 55, 48]
+    },
+    deck: {
+      tempo: 0.27, compas: 4, tipo: 'square',
+      melodia: [...DECK_A, ...DECK_A,
+        [D4, 1.5], [E4, .5], [F4, 1], [D4, 1], [E4, 1.5], [F4, .5], [G4, 1], [D4, 1],
+        [E4, .5], [Fs4, .5], [G4, 1], [A4, .5], [B4, .5], [C5, 1], [B4, 1], [A4, 1], [G4, 2],
+        [G4, 1.5], [F4, .5], [E4, 1], [D4, 1], [C4, 1], [D4, 1], [E4, 1], [C4, 1],
+        [A4, .5], [A4, .5], [A4, .5], [A4, .5], [G4, 1.5], [F4, .5], [E4, 1], [D4, 1], [C4, 2]],
+      bajo: [48, 48, 55, 48, 48, 48, 55, 48, 55, 48, 50, 55, 48, 48, 53, 48]
+    },
+    wewish: {
+      tempo: 0.3, compas: 3, tipo: 'square',
+      melodia: [[C4, 1], [C4, .5], [D4, .5], [C4, .5], [B3, .5], [A3, 1], [A3, 1], [A3, 1],
+        [D4, 1], [D4, .5], [E4, .5], [D4, .5], [C4, .5], [B3, 1], [G3, 1], [G3, 1],
+        [E4, 1], [E4, .5], [F4, .5], [E4, .5], [D4, .5], [C4, 1], [A3, 1], [G3, .5], [G3, .5],
+        [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
+      bajo: [48, 53, 55, 52, 57, 53, 55, 48]
+    },
+    nochedepaz: {
+      tempo: 0.33, compas: 3, tipo: 'triangle',
+      melodia: [[G3, 1.5], [A3, .5], [G3, 1], [E3, 3], [G3, 1.5], [A3, .5], [G3, 1], [E3, 3],
+        [D4, 2], [D4, 1], [B3, 3], [C4, 2], [C4, 1], [G3, 3],
+        [A3, 2], [A3, 1], [C4, 1.5], [B3, .5], [A3, 1], [G3, 1.5], [A3, .5], [G3, 1], [E3, 3],
+        [A3, 2], [A3, 1], [C4, 1.5], [B3, .5], [A3, 1], [G3, 1.5], [A3, .5], [G3, 1], [E3, 3],
+        [D4, 2], [D4, 1], [F4, 1.5], [D4, .5], [B3, 1], [C4, 3], [E4, 3],
+        [C4, 1], [G3, 1], [E3, 1], [G3, 1.5], [F3, .5], [D3, 1], [C4 - 12, 3], [null, 3]],
+      bajo: [48, 48, 48, 48, 55, 55, 48, 48, 53, 53, 48, 48, 53, 53, 48, 48, 55, 55, 48, 48, 48, 55, 48, 48]
+    }
+  };
+
+  // Convierte una pista en una lista de notas ordenada por tiempo.
+  function compilar(p) {
+    const ev = [];
+    let t = 0;
+    for (const [m, d] of p.melodia) {
+      if (m !== null) ev.push({ t, m: m + 12, d: d * 0.9, tipo: p.tipo, v: p.tipo === 'square' ? 0.5 : 1.1 });
+      t += d;
+    }
+    const c = p.compas;
+    p.bajo.forEach((m, k) => {
+      const t0 = k * c;
+      ev.push({ t: t0, m, d: c === 3 ? 1.2 : 1.6, tipo: 'triangle', v: 1 });
+      if (c === 3) { ev.push({ t: t0 + 1, m: m + 7, d: 0.8, tipo: 'triangle', v: 0.6 }); ev.push({ t: t0 + 2, m: m + 12, d: 0.8, tipo: 'triangle', v: 0.6 }); }
+      else ev.push({ t: t0 + 2, m: m + 7, d: 1.6, tipo: 'triangle', v: 0.8 });
+      if (p.cascabel) for (let i = 0; i < c; i++) ev.push({ t: t0 + i, m: 96, d: 0.12, tipo: 'sine', v: i % 2 ? 0.35 : 0.2 });
+    });
+    ev.sort((a, b) => a.t - b.t);
+    return { eventos: ev, total: Math.max(t, p.bajo.length * c), tempo: p.tempo };
+  }
+
+  let pista = compilar(PISTAS.edificio), nombrePista = 'edificio';
   let inicioBucle = 0, indice = 0;
   function programarMusica() {
     if (!ctx || ctx.state !== 'running') return;
     const limite = ctx.currentTime + 0.4;
     for (;;) {
-      if (indice >= eventos.length) { indice = 0; inicioBucle += TOTAL * TEMPO; }
-      const e = eventos[indice];
-      const cuando = inicioBucle + e.t * TEMPO;
+      if (indice >= pista.eventos.length) { indice = 0; inicioBucle += pista.total * pista.tempo; }
+      const e = pista.eventos[indice];
+      const cuando = inicioBucle + e.t * pista.tempo;
       if (cuando > limite) break;
-      if (cuando >= ctx.currentTime - 0.05) nota(e.m, Math.max(cuando, ctx.currentTime), e.d * TEMPO, e.tipo, e.v, canalMusica);
+      if (cuando >= ctx.currentTime - 0.05) nota(e.m, Math.max(cuando, ctx.currentTime), e.d * pista.tempo, e.tipo, e.v, canalMusica);
       indice++;
     }
+  }
+
+  function nuevoCanal() {
+    canalMusica = ctx.createGain();
+    canalMusica.gain.value = 0.045;
+    canalMusica.connect(salida);
+  }
+
+  // Cambia la música: 'edificio' o el nombre de una pista de PISTAS. La anterior se apaga con un fundido.
+  function musica(nombre) {
+    if (!PISTAS[nombre] || nombre === nombrePista) return;
+    nombrePista = nombre;
+    pista = compilar(PISTAS[nombre]);
+    indice = 0;
+    if (!ctx) return;
+    const viejo = canalMusica, t = ctx.currentTime;
+    viejo.gain.setValueAtTime(viejo.gain.value, t);
+    viejo.gain.linearRampToValueAtTime(0, t + 0.3);
+    setTimeout(() => viejo.disconnect(), 600);
+    nuevoCanal();
+    inicioBucle = t + 0.35;
   }
 
   // Debe llamarse desde un gesto del usuario (los navegadores bloquean el audio hasta entonces).
@@ -92,9 +160,7 @@ const Sonido = (() => {
     salida = ctx.createGain();
     salida.gain.value = silencio ? 0 : 1;
     salida.connect(ctx.destination);
-    canalMusica = ctx.createGain();
-    canalMusica.gain.value = 0.045;
-    canalMusica.connect(salida);
+    nuevoCanal();
     inicioBucle = ctx.currentTime + 0.3;
     setInterval(programarMusica, 100);
   }
@@ -115,6 +181,7 @@ const Sonido = (() => {
     else if (nombre === 'golpe') { ruido(t, 0.18, 0.18, 500); nota(40, t, 0.16, 'square', 0.08); }
     else if (nombre === 'carta') { ruido(t, 0.04, 0.06, 2500); nota(81, t, 0.04, 'triangle', 0.06); }
     else if (nombre === 'pareja') [79, 84, 88].forEach((m, i) => nota(m, t + i * 0.06, 0.12, 'square', 0.07));
+    else if (nombre === 'agua') { ruido(t, 0.6, 0.07, 1400); ruido(t + 0.15, 0.4, 0.05, 900); }
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 
@@ -145,5 +212,5 @@ const Sonido = (() => {
     return silencio;
   }
 
-  return { iniciar, efecto, voz, alternarSilencio, enSilencio: () => silencio };
+  return { iniciar, musica, efecto, voz, alternarSilencio, enSilencio: () => silencio };
 })();

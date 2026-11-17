@@ -255,6 +255,7 @@ window.JUEGOS['dia03-memory'] = {
       instruccion: 'DA LA VUELTA A LAS CARTAS DE DOS EN DOS Y ENCUENTRA LAS 6 PAREJAS. TOCA LAS CARTAS, O USA LAS FLECHAS Y ESPACIO.',
       sinDerrota: true,
       pantallaCompleta: true,
+      musica: 'wewish',
       reiniciar, actualizar, dibujar
     });
   }

@@ -199,6 +199,7 @@ window.JUEGOS['dia02-copos'] = {
       titulo: 'ATRAPA COPOS',
       instruccion: `COGE ${META} COPOS CON EL GORRO MOVIENDOTE CON LAS FLECHAS O CON EL DEDO. ¡OJO CON LOS CARAMBANOS, QUITAN ${CASTIGO}!`,
       pantallaCompleta: true,
+      musica: 'deck',
       reiniciar, actualizar, dibujar
     });
   }

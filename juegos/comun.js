@@ -215,7 +215,7 @@ const Comun = (() => {
   }
 
   /* ---------- Marco del juego: fases, reintentos, "Saltar" y victoria ---------- */
-  // cfg: { titulo, instruccion, sinDerrota, pantallaCompleta, reiniciar(api), actualizar(dt, api), dibujar(ctx, api) }
+  // cfg: { titulo, instruccion, sinDerrota, pantallaCompleta, musica (pista de js/sonido.js), reiniciar(api), actualizar(dt, api), dibujar(ctx, api) }
   // api: { entrada, t, ancho, alto, textoEscala, margenDerecho, ganar(), perder(motivo), sacudir(segundos), aviso(texto, x, y, color) }
   //   ancho/alto: tamaño lógico del lienzo (320x240, o más si pantallaCompleta: llena toda la pantalla)
   //   textoEscala: 2 cuando el lienzo se ve pequeño (móvil), para que el texto se lea
@@ -257,6 +257,8 @@ const Comun = (() => {
         Sonido.efecto('perder');
         if (intentos >= 3) mostrarSaltar();
       },
+      // fallo sin pantalla de derrota (el juego sigue): cuenta para que "Saltar" aparezca al tercero
+      fallo() { intentos++; if (intentos >= 3) mostrarSaltar(); },
       sacudir(seg) { temblor = Math.max(temblor, seg); },
       // texto flotante que sube y desaparece (por ejemplo "+1")
       aviso(texto, x, y, color) { avisos.push({ texto, x, y, color: color || PALETA.nieve, vida: 0.8 }); }
@@ -277,6 +279,7 @@ const Comun = (() => {
       alTerminar();
     }
 
+    Sonido.musica(cfg.musica || 'deck');   // cada minijuego tiene su villancico (al cerrar vuelve el del edificio)
     cfg.reiniciar(api);              // la pantalla de título enseña el escenario de fondo
     if (Dias.debug) window.juegoDebug = api;   // solo en modo debug, para probar (p. ej. juegoDebug.ganar())
 
@@ -332,6 +335,7 @@ const Comun = (() => {
     return () => {
       terminado = true;
       cancelAnimationFrame(reloj);
+      Sonido.musica('edificio');
       entrada.destruir();
       saltar.remove();
       quitarLienzo();

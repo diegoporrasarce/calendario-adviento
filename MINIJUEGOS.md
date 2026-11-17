@@ -28,11 +28,12 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   ```
   `alTerminar()` se llama al ganar o al pulsar "Saltar". `iniciarJuego` recibe un tercer argumento con la entrada del día en `dias.json`, para leer palabras, preguntas o fotos.
 - **Base compartida `juegos/comun.js`** (se carga desde `index.html`): cada juego llama a
-  `Comun.crearJuego(contenedor, alTerminar, { titulo, instruccion, sinDerrota, pantallaCompleta, reiniciar, actualizar, dibujar })`
+  `Comun.crearJuego(contenedor, alTerminar, { titulo, instruccion, sinDerrota, pantallaCompleta, musica, reiniciar, actualizar, dibujar })`
   y devuelve lo que esta devuelve (su `destruir`). La base pone el lienzo de 320×240 escalado, la entrada unificada
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
-  y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`,
+  y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`, `api.fallo()` (cuenta un fallo para "Saltar" sin pantalla de derrota),
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
+  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4).
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
   - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
@@ -95,6 +96,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 ### Hechos
 - **2 — Atrapa copos:** 20 copos en 60 s, carámbanos que quitan 3, copos grandes. Mensaje escrito.
 - **3 — Memory:** 12 cartas con giro animado, 4×3 en horizontal y 3×4 en vertical; toque o flechas + Espacio. Sin derrota ("Saltar" a los 2 min).
+- **4 — Riega la planta:** barra con zona verde que se estrecha y se acelera; 3 aciertos seguidos y florece la flor de Pascua. Un fallo vuelve a empezar la racha (cuenta para "Saltar").
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
