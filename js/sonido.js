@@ -109,6 +109,11 @@ const Sonido = (() => {
     else if (nombre === 'cerrar') { nota(76, t, 0.07, 'triangle', 0.1); nota(69, t + 0.06, 0.1, 'triangle', 0.1); }
     else if (nombre === 'paso') ruido(t, 0.06, 0.05, 900);
     else if (nombre === 'escalera') nota(60 + Math.floor(Math.random() * 3), t, 0.05, 'triangle', 0.06);
+    // efectos de los minijuegos
+    else if (nombre === 'empezar') [67, 72, 79].forEach((m, i) => nota(m, t + i * 0.08, 0.14, 'square', 0.08));
+    else if (nombre === 'coger') { nota(84 + Math.floor(Math.random() * 3), t, 0.06, 'square', 0.06); nota(91, t + 0.05, 0.08, 'triangle', 0.08); }
+    else if (nombre === 'golpe') { ruido(t, 0.18, 0.18, 500); nota(40, t, 0.16, 'square', 0.08); }
+    else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 
   /* ---------- Voz de los diálogos: un pitido corto por letra, con tono según la letra ---------- */

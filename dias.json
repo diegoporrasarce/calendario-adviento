@@ -10,7 +10,7 @@
       "Muévete con las flechas, sube por la escalera de la derecha y pulsa Espacio delante de una puerta.",
       "¡Nos vemos mañana en la puerta 2!"
     ] },
-    { "dia": 2, "tipo": "foto", "titulo": "Una casita nevada", "imagen": "fotos/ejemplo.svg", "texto": "Foto de ejemplo. Cambia la ruta por una foto tuya en la carpeta fotos/." },
+    { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "TODO: escribe aquí el mensaje que aparece al ganar el día 2." },
     { "dia": 3, "tipo": "mensaje", "titulo": "Chocolate caliente", "texto": "Vale por un chocolate caliente con nubes." },
     { "dia": 4, "tipo": "mensaje", "titulo": "Playlist", "texto": "Hoy toca poner villancicos mientras decoramos." },
     { "dia": 5, "tipo": "minijuego", "titulo": "Primer reto", "juego": "ejemplo", "texto": "Pulsa el botón para completar el reto de ejemplo.", "recompensa": "Premio: un abrazo." },

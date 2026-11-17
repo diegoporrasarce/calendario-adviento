@@ -172,6 +172,29 @@ body {
 #dialogo-sigue.oculto { display: none; }
 @keyframes sigue { 50% { transform: translateY(4px); } }
 
+/* ---------- Minijuegos: ocupan toda la escena ---------- */
+#pantalla-juego {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: #05060f;
+}
+#juego-contenedor {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.lienzo-juego {
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+#juego-cerrar { position: absolute; top: 6px; right: 6px; z-index: 2; }
+#juego-contenedor .saltar { position: absolute; right: 10px; bottom: 10px; z-index: 2; }
+.juego-error { max-width: 420px; padding: 16px; text-align: center; }
+
 /* ---------- Controles táctiles ---------- */
 #tactil {
   display: none;

@@ -135,6 +135,46 @@ const Dias = (() => {
     empezarLinea();
   }
 
+  /* ---------- Minijuegos (tipo "minijuego"), a pantalla completa sobre la escena ---------- */
+  function quitarMinijuego() {
+    if (typeof limpiarJuego === 'function') { try { limpiarJuego(); } catch (e) { console.error(e); } }
+    limpiarJuego = null;
+    $('juego-contenedor').replaceChildren();
+    $('pantalla-juego').classList.add('oculto');
+  }
+
+  // Mensaje del modal al terminar (o saltar) el minijuego.
+  function mostrarRecompensa(n, entrada) {
+    $('modal-dia').textContent = `Día ${n}`;
+    $('modal-titulo').textContent = entrada.titulo || `Día ${n}`;
+    $('modal-foto').classList.add('oculto');
+    $('modal-texto').textContent = '¡Completado!' + (entrada.recompensa ? '\n' + entrada.recompensa : '');
+    $('modal').classList.remove('oculto');
+    document.querySelector('#modal .caja').focus();
+  }
+
+  function abrirMinijuego(n, entrada, miFicha) {
+    const contenedor = $('juego-contenedor');
+    contenedor.replaceChildren();
+    $('pantalla-juego').classList.remove('oculto');
+    cargarJuego(entrada.juego).then((juego) => {
+      if (miFicha !== ficha) return;
+      // el tercer argumento son los datos del día en dias.json (palabras, preguntas, fotos…)
+      limpiarJuego = juego.iniciarJuego(contenedor, () => {
+        if (miFicha !== ficha) return;
+        marcarAbierta(n);
+        quitarMinijuego();
+        mostrarRecompensa(n, entrada);
+      }, entrada);
+    }).catch((err) => {
+      if (miFicha !== ficha) return;
+      const p = document.createElement('p');
+      p.className = 'juego-error';
+      p.textContent = 'No se pudo cargar el minijuego: ' + err.message;
+      contenedor.appendChild(p);
+    });
+  }
+
   function cerrarModal() {
     if (!modalAbierto) return;
     modalAbierto = false;
@@ -142,8 +182,7 @@ const Dias = (() => {
     Sonido.efecto('cerrar');
     if (dialogo) { clearInterval(dialogo.reloj); dialogo = null; }
     $('dialogo').classList.add('oculto');
-    if (typeof limpiarJuego === 'function') { try { limpiarJuego(); } catch (e) { /* ignorar */ } }
-    limpiarJuego = null;
+    quitarMinijuego();
     $('modal-juego').replaceChildren();
     $('modal').classList.add('oculto');
   }
@@ -156,6 +195,11 @@ const Dias = (() => {
 
     if (entrada && entrada.tipo === 'dialogo') {       // no usa la caja del modal, sino el diálogo sobre la escena
       abrirDialogo(n, entrada);
+      modalAbierto = true;
+      return true;
+    }
+    if (entrada && entrada.tipo === 'minijuego') {     // ocupa toda la escena; al ganar se enseña el mensaje en el modal
+      abrirMinijuego(n, entrada, miFicha);
       modalAbierto = true;
       return true;
     }
@@ -179,20 +223,6 @@ const Dias = (() => {
       foto.src = entrada.imagen;
       foto.classList.remove('oculto');
       marcarAbierta(n);
-    } else if (entrada.tipo === 'minijuego') {
-      $('modal-texto').textContent = entrada.texto || '';
-      const contenedor = $('modal-juego');
-      cargarJuego(entrada.juego).then((juego) => {
-        if (miFicha !== ficha) return;
-        limpiarJuego = juego.iniciarJuego(contenedor, () => {
-          if (miFicha !== ficha) return;
-          marcarAbierta(n);
-          Sonido.efecto('completar');
-          $('modal-texto').textContent = '¡Completado!' + (entrada.recompensa ? '\n' + entrada.recompensa : '');
-        });
-      }).catch((err) => {
-        if (miFicha === ficha) $('modal-texto').textContent = 'No se pudo cargar el minijuego: ' + err.message;
-      });
     } else {
       $('modal-texto').textContent = `Tipo de contenido desconocido: ${entrada.tipo}`;
     }
@@ -205,6 +235,7 @@ const Dias = (() => {
 
   document.addEventListener('DOMContentLoaded', () => {
     $('modal-cerrar').addEventListener('click', cerrarModal);
+    $('juego-cerrar').addEventListener('click', (e) => { e.currentTarget.blur(); cerrarModal(); });
     $('modal').addEventListener('pointerdown', (e) => { if (e.target === $('modal')) cerrarModal(); });
     $('dialogo').addEventListener('click', avanzarDialogo);
   });

@@ -9,9 +9,10 @@ Juego web en HTML/CSS/JS puro, sin frameworks ni build. Se publica en GitHub Pag
   El lienzo crece en píxeles lógicos para cubrir toda la ventana; la escena queda centrada.
 - Los sprites se dibujan en código (arrays de píxeles o funciones de dibujo), no PNG, salvo las fotos de los días.
 - El contenido de cada día vive en dias.json, nunca en el código.
+- Los minijuegos (días 2 a 24) siguen MINIJUEGOS.md: léelo antes de crear o tocar cualquiera.
 - Cada minijuego es un archivo en juegos/<nombre>.js que exporta
   iniciarJuego(contenedor, alTerminar). Se carga solo cuando se entra en esa puerta.
 - Los comentarios y nombres de variables, en español.
 
 ## Estructura
-index.html, style.css, js/main.js, js/sprites.js, js/edificio.js, js/sonido.js (audio generado en código, sin archivos), js/dias.js, dias.json, fotos/, juegos/
+index.html, style.css, js/main.js, js/sprites.js, js/edificio.js, js/sonido.js (audio generado en código, sin archivos), js/dias.js, dias.json, fotos/, juegos/ (comun.js = base compartida de los minijuegos)
