@@ -182,7 +182,7 @@ const Edificio = (() => {
     R('#dbe5f5', 0, yBase + 1, ANCHO, SUELO - 1);
     tramaSuelo(g, 0, ANCHO, yBase, SUELO);
     for (let x = 0; x < ANCHO; x += 4) if (azar(x, 1) > 0.5) R('#f4f8ff', x, yBase - 1, 4, 1);
-    Sprites.abeto(g, 11, yBase + 7, 46);
+    Sprites.abeto(g, 12, yBase + 7, 54);
     Sprites.muneco(g, 27, yBase + 8);
     return cv;
   }
@@ -200,12 +200,12 @@ const Edificio = (() => {
       tramaSuelo(ctx, ox + ANCHO, W, yG, H - yG);
       if (H - yG > SUELO) Sprites.tramar(ctx, ox, yG + SUELO, ANCHO, Math.min(16, H - yG - SUELO), '#8e9ecb', (xx, yy) => ((yy - yG - 6) / 24) * 0.9);
       for (let i = 0, x = ox - 14; x > -20; i++) {                    // abetos a la izquierda
-        Sprites.abeto(ctx, x, yG + 7, 26 + Math.floor(azar(i, 1) * 24));
-        x -= 22 + Math.floor(azar(i, 2) * 16);
+        Sprites.abeto(ctx, x, yG + 7, 34 + Math.floor(azar(i, 1) * 30));
+        x -= 26 + Math.floor(azar(i, 2) * 18);
       }
       for (let i = 0, x = ox + ANCHO + 14; x < W + 20; i++) {         // y a la derecha
-        Sprites.abeto(ctx, x, yG + 7, 26 + Math.floor(azar(i, 3) * 24));
-        x += 22 + Math.floor(azar(i, 4) * 16);
+        Sprites.abeto(ctx, x, yG + 7, 34 + Math.floor(azar(i, 3) * 30));
+        x += 26 + Math.floor(azar(i, 4) * 18);
       }
     }
     const sy = Math.max(0, camY), dy = sy - camY;

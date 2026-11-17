@@ -8,7 +8,7 @@ Juego web en HTML/CSS/JS puro (sin frameworks ni build). Un edificio de 6 planta
 - **Espacio / Enter** delante de una puerta: abrirla.
 - En móvil aparecen botones táctiles.
 
-Una puerta solo se abre si su número ≤ el día actual de diciembre. El progreso se guarda en `localStorage`.
+Una puerta solo se abre si su número ≤ el día actual de diciembre (en noviembre, ninguna). Desde el 25 de diciembre y hasta octubre quedan todas accesibles. El progreso se guarda en `localStorage`.
 
 ## Probarlo en local
 `dias.json` se carga con `fetch`, y los navegadores lo bloquean con `file://`. Sirve la carpeta con cualquier servidor estático:
@@ -19,7 +19,7 @@ py -m http.server 8000
 y abre <http://localhost:8000/>.
 
 ### Simular la fecha
-Añade `?debug=1&dia=N` a la URL, por ejemplo `http://localhost:8000/?debug=1&dia=12` (con `dia=0` simulas antes de diciembre). En modo debug el progreso se guarda aparte.
+Añade `?debug=1&dia=N` a la URL, por ejemplo `http://localhost:8000/?debug=1&dia=12` (con `dia=0` simulas antes de diciembre). En modo debug el progreso se guarda aparte. Con `&abrir=N` se abre esa puerta nada más cargar, para probar su contenido.
 
 ## Contenido (`dias.json`)
 Cada día tiene `dia`, `tipo`, `titulo` y según el tipo:
@@ -27,6 +27,7 @@ Cada día tiene `dia`, `tipo`, `titulo` y según el tipo:
 | tipo | campos |
 |------|--------|
 | `mensaje` | `texto` |
+| `dialogo` | `personaje` (nombre), `retrato` (clave en `RETRATOS` de `js/sprites.js`), `lineas` (lista de frases que se pasan con Espacio) |
 | `foto` | `imagen` (ruta en `fotos/`), `texto`, `alt` opcional |
 | `minijuego` | `juego` (nombre del archivo en `juegos/`), `texto`, `recompensa` opcional |
 

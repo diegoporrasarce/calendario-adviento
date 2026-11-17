@@ -41,6 +41,15 @@
     botonPantalla.blur();                  // para que Espacio/Enter no vuelvan a pulsarlo
   });
 
+  /* ---------- Sonido: arranca con el primer gesto; botón para silenciar ---------- */
+  for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => Sonido.iniciar(), { capture: true });
+  const botonSilencio = document.getElementById('silencio');
+  botonSilencio.classList.toggle('apagado', Sonido.enSilencio());
+  botonSilencio.addEventListener('click', () => {
+    botonSilencio.classList.toggle('apagado', Sonido.alternarSilencio());
+    botonSilencio.blur();
+  });
+
   /* ---------- Entrada ---------- */
   const teclas = { izquierda: false, derecha: false, arriba: false, abajo: false };
   const MAPA = { ArrowLeft: 'izquierda', ArrowRight: 'derecha', ArrowUp: 'arriba', ArrowDown: 'abajo' };
@@ -62,7 +71,9 @@
     b.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       b.classList.add('activa');
-      if (k === 'accion') accion(); else teclas[k] = true;
+      if (k !== 'accion') teclas[k] = true;
+      else if (Dias.hayDialogo()) Dias.avanzarDialogo();   // el botón ABRIR también pasa el texto
+      else accion();
     });
     for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(ev, soltar);
     b.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -120,6 +131,8 @@
     return cv;
   }
 
+  const CICLO_TRINEO = 20, VUELO_TRINEO = 16;    // segundos: pasa cada 20 s y tarda 16 en cruzar
+
   function dibujarCielo(cam, t) {
     if (!cieloCv) cieloCv = crearCielo();
     ctx.drawImage(cieloCv, 0, -Math.max(0, Math.min(EXTRA_CIELO, Math.floor(cam * 0.25))));
@@ -139,6 +152,15 @@
     const margen = W - ox - ANCHO;           // hueco libre a la derecha de la escena
     const lunaX = margen >= 52 ? ox + ANCHO + Math.floor(margen / 2) : ox + 288;
     Sprites.luna(ctx, lunaX, 34 - Math.floor(cam * 0.05));
+
+    // Trineo con renos: cruza el cielo cada medio minuto, alternando el sentido
+    const fase = t % CICLO_TRINEO;
+    if (fase < VUELO_TRINEO) {
+      const p = fase / VUELO_TRINEO, dir = Math.floor(t / CICLO_TRINEO) % 2 ? -1 : 1;
+      const tx = dir > 0 ? -90 + p * (W + 180) : W + 90 - p * (W + 180);
+      const ty = (dir > 0 ? 34 : 58) + Math.sin(p * Math.PI * 2) * 12 - cam * 0.1;
+      Sprites.trineo(ctx, Math.floor(tx), Math.floor(ty), dir, t);
+    }
 
     for (const n of nubes) {
       const x = Math.floor(((n.x + t * n.v) % (W + 80)) - 42);
@@ -184,7 +206,9 @@
   function accion() {
     if (Dias.hayModal() || jug.enEscalera || !puertaCercana) return;
     const n = puertaCercana;
-    if (!Dias.abrirPuerta(n)) {
+    if (Dias.abrirPuerta(n)) Sonido.efecto('abrir');
+    else {
+      Sonido.efecto('bloqueada');
       sacudidas[n] = 0.45;
       avisar(Dias.diaActual === 0 ? `La puerta ${n} sigue cerrada: aún no es diciembre` : `La puerta ${n} se abre el ${n} de diciembre`);
     }
@@ -206,6 +230,7 @@
       if (ny !== jug.y) {
         jug.y = ny;
         jug.x = X_ESCALERA;
+        if (Math.floor((jug.tEscalera + dt) * 6) !== Math.floor(jug.tEscalera * 6)) Sonido.efecto('escalera');
         jug.tEscalera += dt;
         jug.enEscalera = true;
       }
@@ -226,6 +251,7 @@
       if (dx) jug.dir = dx;
       jug.x = Math.max(X_MIN, Math.min(X_MAX, jug.x + dx * VEL * dt));
       jug.modo = dx ? 'andar' : 'idle';
+      if (dx && Math.floor(jug.t * 4) !== Math.floor((jug.t - dt) * 4)) Sonido.efecto('paso');   // pisadas en la nieve
     }
 
     // puerta que hay delante
@@ -287,7 +313,11 @@
   }
   requestAnimationFrame(bucle);
 
-  Dias.cargar().catch((err) => {
+  Dias.cargar().then(() => {
+    // En modo debug, ?abrir=N abre esa puerta al cargar (para probar contenido).
+    const abrir = parseInt(new URLSearchParams(location.search).get('abrir'), 10);
+    if (Dias.debug && abrir) Dias.abrirPuerta(abrir);
+  }).catch((err) => {
     console.error(err);
     avisar('No se pudo cargar dias.json. Abre el juego desde un servidor local o GitHub Pages.');
     avisoHasta = Infinity;

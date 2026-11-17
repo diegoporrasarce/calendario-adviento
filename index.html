@@ -22,7 +22,16 @@
       <button id="pantalla-completa" type="button" title="Pantalla completa" aria-label="Pantalla completa">
         <svg viewBox="0 0 10 10" fill="currentColor"><path d="M0 0h4v1H1v3H0zM6 0h4v4H9V1H6zM0 6h1v3h3v1H0zM9 6h1v4H6V9h3z"/></svg>
       </button>
+      <button id="silencio" type="button" title="Sonido" aria-label="Activar o silenciar el sonido">♪</button>
       <div id="pista"></div>
+      <div id="dialogo" class="oculto" role="dialog" aria-live="polite">
+        <canvas id="dialogo-retrato" width="32" height="40"></canvas>
+        <div class="bocadillo">
+          <div id="dialogo-nombre"></div>
+          <p id="dialogo-texto"></p>
+          <span id="dialogo-sigue">▼</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -57,6 +66,7 @@
 
   <script src="js/sprites.js"></script>
   <script src="js/edificio.js"></script>
+  <script src="js/sonido.js"></script>
   <script src="js/dias.js"></script>
   <script src="js/main.js"></script>
 </body>

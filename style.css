@@ -53,7 +53,24 @@ body {
   cursor: pointer;
   box-shadow: 0 -2px 0 0 #f2d36b, 0 2px 0 0 #f2d36b, -2px 0 0 0 #f2d36b, 2px 0 0 0 #f2d36b;
 }
-#pantalla-completa:hover { background: #26305f; }
+#pantalla-completa:hover, #silencio:hover { background: #26305f; }
+#silencio {
+  position: absolute;
+  top: 4px;
+  right: 46px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font: inherit;
+  font-size: 20px;
+  color: #f2d36b;
+  background: rgba(27, 31, 59, 0.9);
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 -2px 0 0 #f2d36b, 0 2px 0 0 #f2d36b, -2px 0 0 0 #f2d36b, 2px 0 0 0 #f2d36b;
+}
+#silencio.apagado { color: #6a6f8c; text-decoration: line-through; box-shadow: 0 -2px 0 0 #6a6f8c, 0 2px 0 0 #6a6f8c, -2px 0 0 0 #6a6f8c, 2px 0 0 0 #6a6f8c; }
 #pantalla-completa svg { width: 20px; height: 20px; shape-rendering: crispEdges; }
 #pantalla-completa[hidden] { display: none; }
 
@@ -96,6 +113,64 @@ body {
   pointer-events: none;
 }
 #pista:empty, #info:empty { display: none; }
+
+/* ---------- Diálogo estilo RPG: retrato + caja de texto abajo ---------- */
+#dialogo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+}
+#dialogo-retrato {
+  flex: none;
+  height: clamp(120px, 34vh, 320px);
+  width: auto;
+  aspect-ratio: 4 / 5;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 4px 0 rgba(5, 4, 18, 0.6));
+}
+#dialogo-retrato.oculto + .bocadillo { margin-left: 0; }
+.bocadillo {
+  position: relative;
+  flex: 1;
+  min-height: 5.6em;
+  padding: 16px 20px 22px;
+  font-size: clamp(14px, 2.6vmin, 22px);
+  line-height: 1.4;
+  color: #1d1a2e;
+  background: #f8f8f0;
+  box-shadow:
+    0 -4px 0 0 #f8f8f0, 0 4px 0 0 #f8f8f0, -4px 0 0 0 #f8f8f0, 4px 0 0 0 #f8f8f0,
+    0 -8px 0 0 #3a4478, 0 8px 0 0 #3a4478, -8px 0 0 0 #3a4478, 8px 0 0 0 #3a4478,
+    0 0 0 4px #3a4478, inset 0 0 0 3px #8a94c8;
+  margin: 8px;
+}
+#dialogo-nombre {
+  position: absolute;
+  top: -1.9em;
+  left: 4px;
+  padding: 2px 12px;
+  color: #fff;
+  background: #c8383f;
+  box-shadow: 0 -3px 0 0 #3a4478, -3px 0 0 0 #3a4478, 3px 0 0 0 #3a4478;
+}
+#dialogo-nombre:empty { display: none; }
+#dialogo-texto { margin: 0; white-space: pre-wrap; }
+#dialogo-sigue {
+  position: absolute;
+  right: 14px;
+  bottom: 6px;
+  color: #c8383f;
+  animation: sigue 0.7s steps(2) infinite;
+}
+#dialogo-sigue.oculto { display: none; }
+@keyframes sigue { 50% { transform: translateY(4px); } }
 
 /* ---------- Controles táctiles ---------- */
 #tactil {

@@ -14,4 +14,4 @@ Juego web en HTML/CSS/JS puro, sin frameworks ni build. Se publica en GitHub Pag
 - Los comentarios y nombres de variables, en español.
 
 ## Estructura
-index.html, style.css, js/main.js, js/sprites.js, js/edificio.js, js/dias.js, dias.json, fotos/, juegos/
+index.html, style.css, js/main.js, js/sprites.js, js/edificio.js, js/sonido.js (audio generado en código, sin archivos), js/dias.js, dias.json, fotos/, juegos/

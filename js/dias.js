@@ -13,14 +13,16 @@ const Dias = (() => {
   let limpiarJuego = null;
 
   /* ---------- Fecha ---------- */
-  // Día de diciembre actual. Antes del 1 de diciembre devuelve 0 (ninguna puerta).
+  // Día de diciembre actual: en noviembre devuelve 0 (ninguna puerta, cuenta atrás);
+  // en diciembre, el día del mes; de enero a octubre, 25 (pasada la Navidad, todas accesibles).
   function calcularDiaActual() {
     if (debug) {
       const n = parseInt(params.get('dia'), 10);
       return Number.isNaN(n) ? 1 : Math.max(0, Math.min(31, n));
     }
     const hoy = new Date();
-    return hoy.getMonth() === 11 ? hoy.getDate() : 0;
+    if (hoy.getMonth() === 11) return hoy.getDate();
+    return hoy.getMonth() === 10 ? 0 : 25;
   }
   const diaActual = calcularDiaActual();
 
@@ -55,6 +57,7 @@ const Dias = (() => {
       const d = diasHastaDiciembre();
       return `Faltan ${d} ${d === 1 ? 'día' : 'días'} para el 1 de diciembre`;
     }
+    if (diaActual > TOTAL) return `¡Feliz Navidad! Todas las puertas están abiertas · ${abiertas.size}/${TOTAL} vistas`;
     return `Hoy: ${diaActual} de diciembre · ${abiertas.size}/${TOTAL} abiertas`;
   }
 
@@ -82,10 +85,63 @@ const Dias = (() => {
     });
   }
 
+  /* ---------- Diálogo estilo RPG (tipo "dialogo") ---------- */
+  let dialogo = null;             // { n, lineas, i, letras, reloj }
+
+  function pintarLinea() {
+    const linea = dialogo.lineas[dialogo.i];
+    $('dialogo-texto').textContent = linea.slice(0, dialogo.letras);
+    $('dialogo-sigue').classList.toggle('oculto', dialogo.letras < linea.length);
+  }
+
+  function empezarLinea() {
+    dialogo.letras = 0;
+    clearInterval(dialogo.reloj);
+    dialogo.reloj = setInterval(() => {            // el texto aparece letra a letra
+      if (!dialogo) return;
+      Sonido.voz(dialogo.lineas[dialogo.i][dialogo.letras] || '');
+      dialogo.letras++;
+      pintarLinea();
+      if (dialogo.letras >= dialogo.lineas[dialogo.i].length) clearInterval(dialogo.reloj);
+    }, 28);
+    pintarLinea();
+  }
+
+  // Completa la línea si aún se está escribiendo; si no, pasa a la siguiente o termina.
+  function avanzarDialogo() {
+    if (!dialogo) return;
+    const linea = dialogo.lineas[dialogo.i];
+    if (dialogo.letras < linea.length) {
+      clearInterval(dialogo.reloj);
+      dialogo.letras = linea.length;
+      pintarLinea();
+    } else if (dialogo.i < dialogo.lineas.length - 1) {
+      dialogo.i++;
+      empezarLinea();
+    } else {
+      marcarAbierta(dialogo.n);
+      cerrarModal();
+    }
+  }
+
+  function abrirDialogo(n, entrada) {
+    const lineas = (Array.isArray(entrada.lineas) ? entrada.lineas : [entrada.texto || '']).map(String).filter(Boolean);
+    if (!lineas.length) lineas.push('...');
+    const retrato = $('dialogo-retrato');
+    retrato.classList.toggle('oculto', !Sprites.pintarRetrato(retrato, entrada.retrato));
+    $('dialogo-nombre').textContent = entrada.personaje || '';
+    dialogo = { n, lineas, i: 0, letras: 0, reloj: 0 };
+    $('dialogo').classList.remove('oculto');
+    empezarLinea();
+  }
+
   function cerrarModal() {
     if (!modalAbierto) return;
     modalAbierto = false;
     ficha++;
+    Sonido.efecto('cerrar');
+    if (dialogo) { clearInterval(dialogo.reloj); dialogo = null; }
+    $('dialogo').classList.add('oculto');
     if (typeof limpiarJuego === 'function') { try { limpiarJuego(); } catch (e) { /* ignorar */ } }
     limpiarJuego = null;
     $('modal-juego').replaceChildren();
@@ -97,6 +153,12 @@ const Dias = (() => {
     if (n < 1 || n > TOTAL || n > diaActual) return false;
     const entrada = datos.find((d) => d.dia === n);
     const miFicha = ++ficha;
+
+    if (entrada && entrada.tipo === 'dialogo') {       // no usa la caja del modal, sino el diálogo sobre la escena
+      abrirDialogo(n, entrada);
+      modalAbierto = true;
+      return true;
+    }
 
     $('modal-dia').textContent = `Día ${n}`;
     $('modal-titulo').textContent = entrada ? (entrada.titulo || `Día ${n}`) : `Día ${n}`;
@@ -125,6 +187,7 @@ const Dias = (() => {
         limpiarJuego = juego.iniciarJuego(contenedor, () => {
           if (miFicha !== ficha) return;
           marcarAbierta(n);
+          Sonido.efecto('completar');
           $('modal-texto').textContent = '¡Completado!' + (entrada.recompensa ? '\n' + entrada.recompensa : '');
         });
       }).catch((err) => {
@@ -143,13 +206,22 @@ const Dias = (() => {
   document.addEventListener('DOMContentLoaded', () => {
     $('modal-cerrar').addEventListener('click', cerrarModal);
     $('modal').addEventListener('pointerdown', (e) => { if (e.target === $('modal')) cerrarModal(); });
+    $('dialogo').addEventListener('click', avanzarDialogo);
   });
+  // Este listener (document) se ejecuta antes que el de main.js (window), así que la misma
+  // pulsación que abre el diálogo no lo avanza.
   document.addEventListener('keydown', (e) => {
-    if (modalAbierto && e.key === 'Escape') cerrarModal();
+    if (!modalAbierto) return;
+    if (e.key === 'Escape') cerrarModal();
+    else if (dialogo && (e.code === 'Space' || e.code === 'Enter')) {
+      e.preventDefault();
+      e.stopPropagation();        // si esta pulsación cierra el diálogo, que main.js no vuelva a abrir la puerta
+      if (!e.repeat) avanzarDialogo();
+    }
   });
 
   return {
     TOTAL, debug, diaActual, cargar, estado, info, abrirPuerta, cerrarModal,
-    hayModal: () => modalAbierto
+    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo
   };
 })();

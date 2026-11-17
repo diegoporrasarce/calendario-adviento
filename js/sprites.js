@@ -229,22 +229,94 @@ const Sprites = (() => {
   }
 
   // Abeto nevado. (x, yBase) = centro de la base.
-  function abeto(ctx, x, yBase, alto) {
-    const tronco = 3;
-    rect(ctx, '#4a2f1c', x - 1, yBase - tronco, 3, tronco);
+  // Se genera píxel a píxel una vez por altura: pisos de ramas que caen, borde irregular,
+  // volumen tramado (luz a la izquierda) y nieve acumulada en las puntas de las ramas.
+  const abetos = {};
+  const ruidoAbeto = (a, b) => {
+    let h = (a * 374761393 + b * 668265263) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  };
+  function crearAbeto(alto) {
+    const maxMedio = Math.max(4, Math.round(alto * 0.3));
+    const cx = maxMedio + 1, [cv, g] = lienzoAux(2 * maxMedio + 3, alto);
+    const tronco = Math.max(3, Math.round(alto * 0.1));
     const cuerpo = alto - tronco;
-    const tramo = Math.max(1, Math.floor(cuerpo / 3));
+    const pisos = Math.max(3, Math.round(alto / 8));
+    const th = cuerpo / pisos;
+    const verdes = ['#3f8a5c', '#2c6e48', '#1b4d33', '#0f3324'];
+    rect(g, '#5a3a22', cx - 1, cuerpo - 2, 3, tronco + 2);
+    rect(g, '#33200f', cx + 1, cuerpo - 2, 1, tronco + 2);
     for (let i = 0; i < cuerpo; i++) {
-      const k = Math.min(2, Math.floor(i / tramo));
-      const j = i - k * tramo;
-      const medio = 1 + j + k * 2;
-      const y = yBase - tronco - cuerpo + i;
-      rect(ctx, '#1b4d33', x - medio, y, 2 * medio + 1, 1);
-      rect(ctx, '#27694a', x - medio, y, medio, 1);
-      for (let px = x + 1; px <= x + medio; px++) if ((px + y) % 2 === 0) rect(ctx, '#12382a', px, y, 1, 1);   // trama de sombra
-      if (j === 0) rect(ctx, '#f4f8ff', x - medio, y, 2 * medio + 1, 1);
-      if (j === 1) rect(ctx, '#f4f8ff', x - medio + 1, y, medio, 1);
+      const u = (i + 1) / cuerpo;
+      const k = Math.min(pisos - 1, Math.floor(i / th));
+      const f = (i - k * th) / th;                                   // 0 = arriba del piso, 1 = punta de las ramas
+      let medio = Math.round(u * maxMedio * 0.45 + f * maxMedio * 0.55 * (0.35 + 0.65 * u));
+      if (ruidoAbeto(i, alto) > 0.7) medio++;
+      medio = Math.min(medio, maxMedio);
+      for (let x = -medio; x <= medio; x++) {
+        const borde = Math.abs(x) === medio;
+        if (borde && medio > 1 && ruidoAbeto(x + 50, i + alto) > 0.55) continue;   // silueta irregular
+        const v = (x / (medio + 1)) * 0.5 + 0.5;                       // 0 izquierda (luz) .. 1 derecha (sombra)
+        const sombra = k > 0 && f < 0.25 ? 0.3 : 0;                    // sombra del piso de encima
+        let color = verdes[Math.max(0, Math.min(3, Math.floor((v * 0.75 + sombra) * 3 + umbral(x + cx, i))))];
+        const nevado = i < 2 || (f > 0.6 && Math.abs(x) > medio * 0.3 && ruidoAbeto(((x + cx) >> 1) + k * 31, alto + k) > 0.38);
+        if (nevado) color = v > 0.62 ? '#c5d3ea' : '#f4f8ff';
+        rect(g, color, cx + x, i, 1, 1);
+      }
     }
+    return cv;
+  }
+  function abeto(ctx, x, yBase, alto) {
+    const cv = abetos[alto] || (abetos[alto] = crearAbeto(alto));
+    ctx.drawImage(cv, x - (cv.width >> 1), yBase - alto);
+  }
+
+  /* ---------- Trineo con tres renos volando. (x, y) = esquina del trineo; dir 1 = hacia la derecha ---------- */
+  function trineo(ctx, x, y, dir, t) {
+    ctx.save();
+    ctx.translate(x, y);
+    if (dir < 0) ctx.scale(-1, 1);
+    const r = (c, a, d, w, h) => rect(ctx, c, a, d, w, h);
+    // estela de chispas
+    for (let i = 0; i < 7; i++) {
+      if (Math.sin(t * 9 + i * 2.3) < 0) continue;
+      r(i % 2 ? '#ffe27a' : '#ffffff', -4 - i * 5, 6 + Math.round(Math.sin(t * 4 + i) * 3), 1, 1);
+    }
+    // riendas
+    r('#c9a227', 14, 3, 56, 1);
+    // trineo
+    r('#c8383f', 2, 3, 14, 5); r('#9c2630', 2, 7, 14, 1);
+    r('#c8383f', 0, 0, 3, 7); r('#c8383f', 15, 1, 3, 3); r('#c8383f', 17, 0, 2, 1);
+    r('#f2c94c', 2, 3, 14, 1); r('#f2c94c', 0, 0, 3, 1);
+    r('#c6cbd8', 1, 10, 17, 1); r('#c6cbd8', 18, 9, 1, 1); r('#c6cbd8', 19, 7, 1, 2);
+    r('#8a92b0', 4, 8, 1, 2); r('#8a92b0', 13, 8, 1, 2);
+    // saco de regalos
+    r('#6b4a2a', 3, -3, 6, 6); r('#8a6238', 3, -3, 6, 1); r('#e03a44', 5, -5, 2, 2); r('#3c8a5a', 7, -4, 2, 1);
+    // elfo conductor
+    r('#3c8a5a', 10, 0, 3, 3); r('#f6cfae', 10, -3, 3, 3); r('#2a1a14', 12, -2, 1, 1);
+    r('#2a6843', 10, -5, 3, 2); r('#e03a44', 9, -6, 1, 2); r('#3c8a5a', 13, 1, 2, 1);
+    // renos
+    for (let i = 0; i < 3; i++) {
+      const rx = 26 + i * 17, ry = Math.round(Math.sin(t * 5 + i * 1.4) * 1.5) - 2;
+      const galope = Math.floor(t * 7 + i) % 2;
+      const q = (c, a, d, w, h) => r(c, rx + a, ry + d, w, h);
+      q('#8a5a34', 2, 4, 9, 4); q('#b07a48', 3, 7, 7, 1); q('#6e4526', 2, 4, 9, 1);
+      q('#f3ecd8', 1, 3, 1, 2);                                        // cola
+      q('#8a5a34', 9, 2, 2, 4); q('#8a5a34', 10, 0, 4, 3);              // cuello y cabeza
+      q('#2a1a14', 12, 1, 1, 1);
+      q(i === 2 ? '#ff4040' : '#2a1a14', 14, 1, 1, 1);                  // el primero, nariz roja
+      q('#d9c9a0', 10, -3, 1, 3); q('#d9c9a0', 11, -3, 2, 1); q('#d9c9a0', 9, -2, 1, 1); q('#d9c9a0', 12, -4, 1, 1);
+      q('#c8383f', 9, 4, 2, 1);                                         // collar
+      if (galope) {                                                      // patas estiradas
+        q('#6e4526', 10, 8, 2, 1); q('#6e4526', 12, 9, 2, 1); q('#2a1a14', 14, 9, 1, 1);
+        q('#6e4526', 1, 8, 2, 1); q('#6e4526', -1, 9, 2, 1); q('#2a1a14', -2, 9, 1, 1);
+      } else {                                                           // patas recogidas
+        q('#6e4526', 9, 8, 1, 2); q('#6e4526', 7, 9, 2, 1); q('#2a1a14', 6, 9, 1, 1);
+        q('#6e4526', 3, 8, 1, 2); q('#6e4526', 4, 9, 2, 1); q('#2a1a14', 6, 10, 1, 1);
+      }
+    }
+    ctx.restore();
   }
 
   // Muñeco de nieve. (x, y) = centro de la base.
@@ -279,6 +351,43 @@ const Sprites = (() => {
     rect(ctx, lazo, x + Math.floor(w / 2) - 1, y - 1, 1, 1); rect(ctx, lazo, x + Math.floor(w / 2) + 1, y - 1, 1, 1);
   }
 
-  return { umbral, tramar, lienzoAux, P, rect, disco, numero, anchoNumero, personaje, papaNoel, humo,
-           luna, nube, candado, abeto, muneco, corona, regalo };
+  /* ---------- Retratos para los diálogos (32x40), como arrays de píxeles ---------- */
+  const RETRATOS = {
+    henar: {
+      paleta: {
+        a: '#f2f2f2', b: '#c8c8d2', c: '#c83c3c', d: '#8e2a2a', e: '#e05454', f: '#e8dcc0', g: '#c4b690',
+        h: '#6b4a2e', i: '#4a3220', j: '#8c6540', k: '#f0c8a8', l: '#4a2e1a', m: '#ffffff', n: '#e8a096',
+        o: '#b86a6a', p: '#d9a888', q: '#3f8f5a', r: '#2c6640', s: '#ececf2', t: '#c8c8d6'
+      },
+      filas: [
+        '..............aaaa..............', '.............aaaaab.............', '.............aaaabb.............',
+        '..............bbbb..............', '............cccccccc............', '..........cccccccccccd..........',
+        '.........ccccccccccccdd.........', '........cccccccccccccddd........', '.......eccccccccccccccddd.......',
+        '.......eccccccccccccccddd.......', '......eeccccccccccccccdddd......', '......ecccccccccccccccdddd......',
+        '......ffffffffffffffffffgg......', '......fffffffffffffffffggg......', '......hhhhhhhhhhhhhhhhhhii......',
+        '.....hhhhhhhhhhhhhhhhhhhiii.....', '.....hhhhhhhhhhhhhhhhhhhiii.....', '.....hhhhhjhhhhhhhhjhhhhiii.....',
+        '.....hhhhhhhhhhhhhhhhhhhiii.....', '.....hhhkhhkkhhhkkhhkhhhiii.....', '.....hhkkkkkkkkkkkkkkkkkiii.....',
+        '.....hhkkkkkkkkkkkkkkkkkiii.....', '.....hhkkklmkkkkkkklmkkkiii.....', '.....hhkkkllkkkkkkkllkkkiii.....',
+        '.....hhknkkkkkkkkkkkkknkiii.....', '.....hhkkkkkkkkookkkkkkkiii.....', '.....hhpkkkkkkkkkkkkkkkpiii.....',
+        '.....hhiippkkkkkkkkkppiiiii.....', '.....hiqqqqqqqqqqqqqqqqqqii.....', '.....hiqffqqqqqqqqqqqqffqii.....',
+        '.....hiqqqqqqqqqqqqqqqqqrii.....', '.....hirrqqqqqqqqqqqqrrrrii.....', '.....iqqqssssssssssssssstti.....',
+        '.....iqfqssssssssssssssstti.....', '....ssqqqsssssssssssssssttss....', '...sssqqrsssssssssssssstttsst...',
+        '..ssssrrrsssssssssssssttttsstt..', '..ssssssssssssssssssssttttsstt..', '..ssssssssssssssssssssttttsstt..',
+        '..ssssssssssssssssssssttttsstt..'
+      ]
+    }
+  };
+
+  // Pinta el retrato `nombre` en un <canvas> (ajusta su tamaño). Devuelve false si no existe.
+  function pintarRetrato(lienzo, nombre) {
+    const r = RETRATOS[nombre];
+    if (!r) return false;
+    lienzo.width = r.filas[0].length; lienzo.height = r.filas.length;
+    const g = lienzo.getContext('2d');
+    r.filas.forEach((f, y) => [...f].forEach((ch, x) => { if (ch !== '.') rect(g, r.paleta[ch], x, y, 1, 1); }));
+    return true;
+  }
+
+  return { pintarRetrato, umbral, tramar, lienzoAux, P, rect, disco, numero, anchoNumero, personaje, papaNoel, humo,
+           luna, nube, candado, abeto, trineo, muneco, corona, regalo };
 })();
