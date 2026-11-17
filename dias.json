@@ -11,7 +11,7 @@
       "¡Nos vemos mañana en la puerta 2!"
     ] },
     { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "¡Feliz segundo día de diciembre! Has atrapado todos los copos, pero esto no ha hecho más que empezar: todavía quedan muchas pruebas por superar." },
-    { "dia": 3, "tipo": "mensaje", "titulo": "Chocolate caliente", "texto": "Vale por un chocolate caliente con nubes." },
+    { "dia": 3, "tipo": "minijuego", "titulo": "Memory navideño", "juego": "dia03-memory", "recompensa": "¡Feliz tercer día de diciembre! Qué buena memoria tienes… La vas a necesitar, porque las pruebas no han hecho más que empezar." },
     { "dia": 4, "tipo": "mensaje", "titulo": "Playlist", "texto": "Hoy toca poner villancicos mientras decoramos." },
     { "dia": 5, "tipo": "minijuego", "titulo": "Primer reto", "juego": "ejemplo", "texto": "Pulsa el botón para completar el reto de ejemplo.", "recompensa": "Premio: un abrazo." },
     { "dia": 6, "tipo": "mensaje", "titulo": "Un recuerdo", "texto": "Acuérdate de aquel día de nieve. ¡Qué frío y qué risas!" },

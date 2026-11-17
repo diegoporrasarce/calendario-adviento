@@ -92,6 +92,10 @@ El minijuego es un runner lateral: la chica corre sola por los tejados de la ciu
 Al ganar, escena final: el ladrón devuelve el saco (o resulta que los robaba por un motivo tierno; pendiente de elegir), nieva sobre el edificio iluminado y aparece el mensaje principal con una foto.
 Necesita: una imagen del autor para su sprite y retrato, el texto del final y la foto.
 
+### Hechos
+- **2 — Atrapa copos:** 20 copos en 60 s, carámbanos que quitan 3, copos grandes. Mensaje escrito.
+- **3 — Memory:** 12 cartas con giro animado, 4×3 en horizontal y 3×4 en vertical; toque o flechas + Espacio. Sin derrota ("Saltar" a los 2 min).
+
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
 - **4:** la zona verde se estrecha en cada acierto y la planta crece.

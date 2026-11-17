@@ -113,6 +113,8 @@ const Sonido = (() => {
     else if (nombre === 'empezar') [67, 72, 79].forEach((m, i) => nota(m, t + i * 0.08, 0.14, 'square', 0.08));
     else if (nombre === 'coger') { nota(84 + Math.floor(Math.random() * 3), t, 0.06, 'square', 0.06); nota(91, t + 0.05, 0.08, 'triangle', 0.08); }
     else if (nombre === 'golpe') { ruido(t, 0.18, 0.18, 500); nota(40, t, 0.16, 'square', 0.08); }
+    else if (nombre === 'carta') { ruido(t, 0.04, 0.06, 2500); nota(81, t, 0.04, 'triangle', 0.06); }
+    else if (nombre === 'pareja') [79, 84, 88].forEach((m, i) => nota(m, t + i * 0.06, 0.12, 'square', 0.07));
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 
