@@ -14,7 +14,7 @@
     { "dia": 3, "tipo": "minijuego", "titulo": "Memory navideño", "juego": "dia03-memory", "recompensa": "¡Feliz tercer día de diciembre! Qué buena memoria tienes… La vas a necesitar, porque las pruebas no han hecho más que empezar." },
     { "dia": 4, "tipo": "minijuego", "titulo": "Riega la planta", "juego": "dia04-planta", "recompensa": "¡Feliz cuarto día de diciembre! La flor de Pascua ya luce en tu piso nuevo. Poco a poco, esto empieza a parecer un hogar." },
     { "dia": 5, "tipo": "minijuego", "titulo": "Enciende las ventanas", "juego": "dia05-ventanas", "recompensa": "¡Feliz quinto día de diciembre! Todo el edificio brilla gracias a ti. Se nota que ya hay alguien nuevo en el barrio." },
-    { "dia": 6, "tipo": "mensaje", "titulo": "Un recuerdo", "texto": "Acuérdate de aquel día de nieve. ¡Qué frío y qué risas!" },
+    { "dia": 6, "tipo": "minijuego", "titulo": "Sube la escalera", "juego": "dia06-escalera", "recompensa": "¡Feliz sexto día de diciembre! Seis pisos al ritmo de las campanas… Ya conoces el edificio de arriba abajo." },
     { "dia": 7, "tipo": "foto", "titulo": "Paisaje de invierno", "imagen": "fotos/ejemplo.svg", "texto": "Otra foto de ejemplo." },
     { "dia": 8, "tipo": "mensaje", "titulo": "Galletas", "texto": "Hoy, galletas de jengibre. Tú pones el horno, yo la masa." },
     { "dia": 9, "tipo": "mensaje", "titulo": "Carta", "texto": "Escribe una carta corta a alguien que quieras." },

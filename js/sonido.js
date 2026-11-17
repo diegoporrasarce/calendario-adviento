@@ -83,6 +83,14 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «Carol of the Bells» (Shchedryk, M. Leontóvich, 1916): el motivo de cuatro notas sobre un bajo que baja
+    campanas: {
+      tempo: 0.28, compas: 3, tipo: 'square',
+      melodia: [
+        ...Array.from({ length: 8 }, () => [[58, 1], [A3, .5], [58, .5], [G3, 1]]).flat(),
+        ...Array.from({ length: 8 }, () => [[D4, 1], [C4, .5], [D4, .5], [58, 1]]).flat()],
+      bajo: [55, 53, 51, 50, 55, 53, 51, 50, 55, 53, 51, 50, 55, 53, 51, 50]
+    },
     // «Good King Wenceslas» (en sol mayor)
     wenceslao: {
       tempo: 0.28, compas: 4, tipo: 'square',
@@ -129,6 +137,7 @@ const Sonido = (() => {
 
   let pista = compilar(PISTAS.edificio), nombrePista = 'edificio';
   let inicioBucle = 0, indice = 0;
+  let origenPista = 0;                                 // momento (reloj de audio) en que empezó la pista actual
   function programarMusica() {
     if (!ctx || ctx.state !== 'running') return;
     const limite = ctx.currentTime + 0.4;
@@ -160,7 +169,15 @@ const Sonido = (() => {
     viejo.gain.linearRampToValueAtTime(0, t + 0.3);
     setTimeout(() => viejo.disconnect(), 600);
     nuevoCanal();
-    inicioBucle = t + 0.35;
+    inicioBucle = origenPista = t + 0.35;
+  }
+
+  // Pulso de la música tal y como se oye ahora (descontando la latencia de salida), para los juegos de ritmo.
+  // Devuelve null si el audio aún no está en marcha.
+  function pulsoMusica() {
+    if (!ctx || ctx.state !== 'running') return null;
+    const latencia = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
+    return { pulso: (ctx.currentTime - latencia - origenPista) / pista.tempo, tempo: pista.tempo, compas: PISTAS[nombrePista].compas };
   }
 
   // Debe llamarse desde un gesto del usuario (los navegadores bloquean el audio hasta entonces).
@@ -173,7 +190,7 @@ const Sonido = (() => {
     salida.gain.value = silencio ? 0 : 1;
     salida.connect(ctx.destination);
     nuevoCanal();
-    inicioBucle = ctx.currentTime + 0.3;
+    inicioBucle = origenPista = ctx.currentTime + 0.3;
     setInterval(programarMusica, 100);
   }
 
@@ -224,5 +241,5 @@ const Sonido = (() => {
     return silencio;
   }
 
-  return { iniciar, musica, efecto, voz, alternarSilencio, enSilencio: () => silencio };
+  return { iniciar, musica, pulsoMusica, efecto, voz, alternarSilencio, enSilencio: () => silencio };
 })();
