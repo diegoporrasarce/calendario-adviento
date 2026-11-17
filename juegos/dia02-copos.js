@@ -34,7 +34,7 @@ window.JUEGOS['dia02-copos'] = {
     function medir(api) {
       ancho = api.ancho; alto = api.alto; suelo = alto - 26;
     }
-    const velocidad = () => 130 + (ancho - 320) * 0.45;                    // en pantallas anchas corre más
+    const velocidad = () => 85 + (ancho - 320) * 0.25;                     // px/s; en pantallas anchas algo más
     const caida = () => alto / 240;                                        // los copos tardan lo mismo en caer en cualquier alto
 
     function nuevoCopo(y) {
