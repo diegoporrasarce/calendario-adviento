@@ -72,17 +72,25 @@ const Dias = (() => {
   /* ---------- Modal ---------- */
   const $ = (id) => document.getElementById(id);
 
-  function cargarJuego(nombre) {
+  // Inserta un <script>; en modo debug evita la caché para ver siempre la última versión.
+  function cargarScript(ruta) {
     return new Promise((ok, fallo) => {
-      if (!/^[\w-]+$/.test(nombre)) return fallo(new Error('Nombre de juego no válido'));
-      window.JUEGOS = window.JUEGOS || {};
-      if (window.JUEGOS[nombre]) return ok(window.JUEGOS[nombre]);
       const s = document.createElement('script');
-      s.src = `juegos/${nombre}.js`;
-      s.onload = () => (window.JUEGOS[nombre] ? ok(window.JUEGOS[nombre]) : fallo(new Error('El archivo no registra el juego')));
-      s.onerror = () => fallo(new Error('No se pudo cargar juegos/' + nombre + '.js'));
+      s.src = ruta + (debug ? '?t=' + Date.now() : '');
+      s.onload = ok;
+      s.onerror = () => fallo(new Error('No se pudo cargar ' + ruta));
       document.head.appendChild(s);
     });
+  }
+
+  async function cargarJuego(nombre) {
+    if (!/^[\w-]+$/.test(nombre)) throw new Error('Nombre de juego no válido');
+    window.JUEGOS = window.JUEGOS || {};
+    if (window.JUEGOS[nombre]) return window.JUEGOS[nombre];
+    if (typeof Comun === 'undefined' && nombre !== 'ejemplo') await cargarScript('juegos/comun.js');   // base compartida
+    await cargarScript(`juegos/${nombre}.js`);
+    if (!window.JUEGOS[nombre]) throw new Error('El archivo no registra el juego');
+    return window.JUEGOS[nombre];
   }
 
   /* ---------- Diálogo estilo RPG (tipo "dialogo") ---------- */
