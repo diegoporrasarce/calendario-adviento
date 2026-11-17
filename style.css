@@ -191,7 +191,10 @@ body {
   image-rendering: pixelated;
   touch-action: none;
 }
-#juego-cerrar { position: absolute; top: 6px; right: 6px; z-index: 2; }
+#juego-cerrar { position: absolute; top: 4px; right: 4px; z-index: 2; width: 34px; height: 34px; min-height: 0; padding: 0; }
+/* Durante un minijuego, pantalla completa y sonido siguen a mano, a la izquierda de la X */
+body.jugando #pantalla-completa { z-index: 7; right: 46px; }
+body.jugando #silencio { z-index: 7; right: 88px; }
 #juego-contenedor .saltar { position: absolute; right: 10px; bottom: 10px; z-index: 2; }
 .juego-error { max-width: 420px; padding: 16px; text-align: center; }
 

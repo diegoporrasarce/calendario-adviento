@@ -149,6 +149,7 @@ const Dias = (() => {
     limpiarJuego = null;
     $('juego-contenedor').replaceChildren();
     $('pantalla-juego').classList.add('oculto');
+    document.body.classList.remove('jugando');
   }
 
   // Mensaje del modal al terminar (o saltar) el minijuego.
@@ -165,6 +166,7 @@ const Dias = (() => {
     const contenedor = $('juego-contenedor');
     contenedor.replaceChildren();
     $('pantalla-juego').classList.remove('oculto');
+    document.body.classList.add('jugando');
     cargarJuego(entrada.juego).then((juego) => {
       if (miFicha !== ficha) return;
       // el tercer argumento son los datos del día en dias.json (palabras, preguntas, fotos…)

@@ -19,25 +19,28 @@ const Comun = (() => {
   };
 
   /* ---------- Lienzo escalado y centrado en el contenedor ---------- */
-  // Siempre mide 320 de ancho. Con altoFlexible, en pantallas verticales (móvil) gana altura
-  // en vez de dejar franjas negras: el juego debe leer `info.alto` en cada fotograma.
-  function crearLienzo(contenedor, altoFlexible) {
+  // Mide al menos 320x240 lógicos. Con pantallaCompleta, el lienzo crece (en píxeles del mismo tamaño)
+  // hasta llenar toda la pantalla, sin franjas negras: el juego lee `info.ancho` e `info.alto` en cada fotograma.
+  function crearLienzo(contenedor, pantallaCompleta) {
     const lienzo = document.createElement('canvas');
     lienzo.width = ANCHO; lienzo.height = ALTO;
     lienzo.className = 'lienzo-juego';
     contenedor.appendChild(lienzo);
     const ctx = lienzo.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    const info = { lienzo, ctx, alto: ALTO, escala: 1 };
+    const info = { lienzo, ctx, ancho: ANCHO, alto: ALTO, escala: 1 };
     function ajustar() {
       const r = contenedor.getBoundingClientRect();
       if (!r.width || !r.height) return;
       let s = Math.min(r.width / ANCHO, r.height / ALTO);
       if (s >= 2) s = Math.floor(s);          // píxeles enteros cuando cabe, como en la escena
-      const alto = altoFlexible ? Math.max(ALTO, Math.min(560, Math.floor(r.height / s))) : ALTO;
-      if (alto !== lienzo.height) { lienzo.height = alto; ctx.imageSmoothingEnabled = false; }
-      info.alto = alto; info.escala = s;
-      lienzo.style.width = Math.floor(ANCHO * s) + 'px';
+      const ancho = pantallaCompleta ? Math.max(ANCHO, Math.min(960, Math.ceil(r.width / s))) : ANCHO;
+      const alto = pantallaCompleta ? Math.max(ALTO, Math.min(640, Math.ceil(r.height / s))) : ALTO;
+      if (ancho !== lienzo.width || alto !== lienzo.height) {
+        lienzo.width = ancho; lienzo.height = alto; ctx.imageSmoothingEnabled = false;
+      }
+      info.ancho = ancho; info.alto = alto; info.escala = s;
+      lienzo.style.width = Math.floor(ancho * s) + 'px';
       lienzo.style.height = Math.floor(alto * s) + 'px';
     }
     const observador = new ResizeObserver(ajustar);
@@ -68,8 +71,8 @@ const Comun = (() => {
     // Toques y ratón sobre el lienzo, en coordenadas lógicas (0..320, 0..240)
     const posicion = (ev) => {
       const r = lienzo.getBoundingClientRect();
-      e.puntero.x = Math.floor(((ev.clientX - r.left) / r.width) * ANCHO);
-      e.puntero.y = Math.floor(((ev.clientY - r.top) / r.height) * ALTO);
+      e.puntero.x = Math.floor(((ev.clientX - r.left) / r.width) * lienzo.width);
+      e.puntero.y = Math.floor(((ev.clientY - r.top) / r.height) * lienzo.height);
     };
     escuchar(lienzo, 'pointerdown', (ev) => {
       ev.preventDefault();
@@ -155,36 +158,41 @@ const Comun = (() => {
   }
 
   // Panel centrado: título grande y líneas de texto. `e` = escala del texto (2 en pantallas pequeñas).
-  function panel(ctx, titulo, lineas, pie, t, alto = ALTO, e = 1) {
+  function panel(ctx, titulo, lineas, pie, t, alto = ALTO, e = 1, ancho = ANCHO) {
     const w = e > 1 ? 300 : 240;
     const cuerpo = lineas.flatMap((l) => envolver(l, w - 16, e));
     const pies = pie ? envolver(pie, w - 16, e) : [];
     const salto = 7 * e + 1;
     const h = 24 + cuerpo.length * salto + (pies.length ? 6 + pies.length * salto : 2);
-    const x = (ANCHO - w) / 2, y = Math.floor((alto - h) / 2);
+    const cx = Math.floor(ancho / 2), x = cx - w / 2, y = Math.floor((alto - h) / 2);
     caja(ctx, x, y, w, h);
-    texto(ctx, titulo, ANCHO / 2, y + 6, PALETA.oroClaro, { escala: 2, centro: true, sombra: PALETA.rojoOsc });
-    cuerpo.forEach((l, i) => texto(ctx, l, ANCHO / 2, y + 22 + i * salto, PALETA.nieve, { centro: true, escala: e }));
+    texto(ctx, titulo, cx, y + 6, PALETA.oroClaro, { escala: 2, centro: true, sombra: PALETA.rojoOsc });
+    cuerpo.forEach((l, i) => texto(ctx, l, cx, y + 22 + i * salto, PALETA.nieve, { centro: true, escala: e }));
     if (Math.floor(t * 2.5) % 2 === 0)
-      pies.forEach((l, i) => texto(ctx, l, ANCHO / 2, y + 28 + (cuerpo.length + i) * salto, PALETA.lila, { centro: true, escala: e }));
+      pies.forEach((l, i) => texto(ctx, l, cx, y + 28 + (cuerpo.length + i) * salto, PALETA.lila, { centro: true, escala: e }));
   }
 
   /* ---------- Fondo de noche reutilizable (cielo tramado y estrellas) ---------- */
   const cielos = {};
-  function fondoNoche(ctx, t, alto = ALTO) {
-    if (!cielos[alto]) {
-      const [cv, g] = Sprites.lienzoAux(ANCHO, alto);
-      const tonos = ['#05060f', '#0b1030', '#14183c', '#1f1a4a', '#2c1a58'];
+  function fondoNoche(ctx, t, alto = ALTO, ancho = ANCHO) {
+    const clave = ancho + 'x' + alto;
+    if (!cielos[clave]) {
+      // se pinta de una vez con ImageData (rápido incluso a pantalla completa)
+      const [cv, g] = Sprites.lienzoAux(ancho, alto);
+      const tonos = [[5, 6, 15], [11, 16, 48], [20, 24, 60], [31, 26, 74], [44, 26, 88]];
+      const img = g.createImageData(ancho, alto), px = img.data;
       for (let y = 0; y < alto; y++)
-        for (let x = 0; x < ANCHO; x++) {
-          g.fillStyle = tonos[Math.min(4, Math.floor((y / alto) * 4 + Sprites.umbral(x, y)))];
-          g.fillRect(x, y, 1, 1);
+        for (let x = 0; x < ancho; x++) {
+          const c = tonos[Math.min(4, Math.floor((y / alto) * 4 + Sprites.umbral(x, y)))], o = (y * ancho + x) * 4;
+          px[o] = c[0]; px[o + 1] = c[1]; px[o + 2] = c[2]; px[o + 3] = 255;
         }
-      cielos[alto] = cv;
+      g.putImageData(img, 0, 0);
+      cielos[clave] = cv;
     }
-    ctx.drawImage(cielos[alto], 0, 0);
-    for (let i = 0; i < 40 + Math.floor((alto - ALTO) / 8); i++) {
-      const x = (i * 97) % ANCHO, y = (i * 53) % (alto - 90);
+    ctx.drawImage(cielos[clave], 0, 0);
+    const n = Math.floor((40 * ancho * alto) / (ANCHO * ALTO));
+    for (let i = 0; i < n; i++) {
+      const x = (i * 97 + Math.floor(i / 7) * 13) % ancho, y = (i * 53) % (alto - 90);
       if ((Math.floor(t * 2) + i) % 7 === 0) continue;       // algunas titilan
       ctx.fillStyle = i % 3 ? PALETA.nieve : PALETA.lilaClaro;
       ctx.fillRect(x, y, 1, 1);
@@ -192,12 +200,12 @@ const Comun = (() => {
   }
 
   /* ---------- Marco del juego: fases, reintentos, "Saltar" y victoria ---------- */
-  // cfg: { titulo, instruccion, sinDerrota, altoFlexible, reiniciar(api), actualizar(dt, api), dibujar(ctx, api) }
-  // api: { entrada, t, alto, textoEscala, ganar(), perder(motivo), sacudir(segundos), aviso(texto, x, y, color) }
-  //   alto: altura lógica del lienzo (240, o más en móvil vertical si altoFlexible)
+  // cfg: { titulo, instruccion, sinDerrota, pantallaCompleta, reiniciar(api), actualizar(dt, api), dibujar(ctx, api) }
+  // api: { entrada, t, ancho, alto, textoEscala, ganar(), perder(motivo), sacudir(segundos), aviso(texto, x, y, color) }
+  //   ancho/alto: tamaño lógico del lienzo (320x240, o más si pantallaCompleta: llena toda la pantalla)
   //   textoEscala: 2 cuando el lienzo se ve pequeño (móvil), para que el texto se lea
   function crearJuego(contenedor, alTerminar, cfg) {
-    const pantalla = crearLienzo(contenedor, cfg.altoFlexible);
+    const pantalla = crearLienzo(contenedor, cfg.pantallaCompleta);
     const { ctx, lienzo, destruir: quitarLienzo } = pantalla;
     const entrada = crearEntrada(lienzo);
     let fase = 'titulo', tFase = 0, intentos = 0, tJugando = 0, temblor = 0, motivo = '', terminado = false;
@@ -213,6 +221,7 @@ const Comun = (() => {
 
     const api = {
       entrada, t: 0,
+      get ancho() { return pantalla.ancho; },
       get alto() { return pantalla.alto; },
       get textoEscala() { return pantalla.escala < 2 ? 2 : 1; },
       ganar() {
@@ -220,8 +229,8 @@ const Comun = (() => {
         fase = 'victoria'; tFase = 0;
         Sonido.efecto('completar');
         const colores = [PALETA.rojo, PALETA.oro, PALETA.verde, PALETA.nieve, PALETA.lila];
-        for (let i = 0; i < 90; i++)
-          confeti.push({ x: Math.random() * ANCHO, y: -Math.random() * 120, vy: 30 + Math.random() * 50,
+        for (let i = 0; i < Math.floor(90 * pantalla.ancho / ANCHO); i++)
+          confeti.push({ x: Math.random() * pantalla.ancho, y: -Math.random() * 120, vy: 30 + Math.random() * 50,
                          f: Math.random() * 6, c: colores[i % colores.length] });
       },
       perder(texto) {
@@ -285,10 +294,10 @@ const Comun = (() => {
 
       const e = api.textoEscala;
       if (fase === 'titulo') {
-        panel(ctx, cfg.titulo, [cfg.instruccion], 'PULSA ESPACIO O TOCA PARA EMPEZAR', api.t, api.alto, e);
+        panel(ctx, cfg.titulo, [cfg.instruccion], 'PULSA ESPACIO O TOCA PARA EMPEZAR', api.t, api.alto, e, api.ancho);
       } else if (fase === 'perdido') {
         panel(ctx, '¡OH, NO!', [motivo, intentos >= 3 ? 'SI TE ATASCAS, PUEDES SALTARLO' : ''].filter(Boolean),
-              'PULSA PARA REINTENTAR', api.t, api.alto, e);
+              'PULSA PARA REINTENTAR', api.t, api.alto, e, api.ancho);
       } else if (fase === 'victoria') {
         for (const c of confeti) {
           c.y += c.vy * dt * (api.alto / ALTO);
@@ -296,7 +305,7 @@ const Comun = (() => {
           ctx.fillRect(Math.round(c.x + Math.sin(api.t * 4 + c.f) * 3), Math.round(c.y), 2, Math.floor(api.t * 8 + c.f) % 2 ? 2 : 1);
         }
         const rebote = Math.round(Math.abs(Math.sin(api.t * 5)) * -4);
-        texto(ctx, '¡CONSEGUIDO!', ANCHO / 2, Math.floor(api.alto / 2) - 20 + rebote, PALETA.oroClaro, { escala: 3, centro: true, sombra: PALETA.rojoOsc });
+        texto(ctx, '¡CONSEGUIDO!', Math.floor(api.ancho / 2), Math.floor(api.alto / 2) - 20 + rebote, PALETA.oroClaro, { escala: 3, centro: true, sombra: PALETA.rojoOsc });
       }
       reloj = requestAnimationFrame(bucle);
     }

@@ -28,14 +28,14 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   ```
   `alTerminar()` se llama al ganar o al pulsar "Saltar". `iniciarJuego` recibe un tercer argumento con la entrada del día en `dias.json`, para leer palabras, preguntas o fotos.
 - **Base compartida `juegos/comun.js`** (se carga desde `index.html`): cada juego llama a
-  `Comun.crearJuego(contenedor, alTerminar, { titulo, instruccion, sinDerrota, altoFlexible, reiniciar, actualizar, dibujar })`
+  `Comun.crearJuego(contenedor, alTerminar, { titulo, instruccion, sinDerrota, pantallaCompleta, reiniciar, actualizar, dibujar })`
   y devuelve lo que esta devuelve (su `destruir`). La base pone el lienzo de 320×240 escalado, la entrada unificada
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`,
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 3×5), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
-  - `altoFlexible: true`: en móvil vertical el lienzo gana altura (`api.alto`) en vez de dejar franjas negras.
+  - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
-  - La esquina superior derecha queda libre para el botón X de cerrar.
+  - La esquina superior derecha queda libre para los botones de sonido, pantalla completa y cerrar.
   - En modo debug, `juegoDebug.ganar()` desde la consola gana la partida (para probar).
 - **Estilo:** el del juego principal: píxel gordo, paleta limitada, sombreado con trama, sin degradados lisos. Sprites dibujados en código. La protagonista es siempre la chica de `js/sprites.js`.
 - **Pantalla:** el minijuego ocupa toda la escena (no una ventanita), para que se vea bien en el móvil.
