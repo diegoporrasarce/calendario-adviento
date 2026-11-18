@@ -83,6 +83,13 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «God Rest Ye Merry Gentlemen» (tradicional inglés, en mi menor), primera frase dos veces
+    caballeros: {
+      tempo: 0.25, compas: 4, tipo: 'square',
+      melodia: [0, 1].flatMap(() => [[52, 1], [52, 1], [59, 1], [59, 1], [57, 1], [55, 1], [54, 1], [52, 1],
+                                     [50, 1], [52, 1], [54, 1], [55, 1], [57, 1], [59, 3]]),
+      bajo: [52, 52, 50, 47, 52, 52, 50, 52]
+    },
     // «The First Noel» (tradicional inglés), estrofa dos veces
     noel: {
       tempo: 0.3, compas: 3, tipo: 'square',

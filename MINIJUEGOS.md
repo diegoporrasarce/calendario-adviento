@@ -33,7 +33,7 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`, `api.fallo()` (cuenta un fallo para "Saltar" sin pantalla de derrota),
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
-  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8).
+  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8), `caballeros` (día 9).
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
   - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
@@ -66,7 +66,7 @@ Cada día tiene la descripción del usuario. Las **propuestas** son recomendacio
 | 6 | Sube la escalera | Juego de ritmo: pulsar ↑ al compás para subir 6 pisos antes de que acabe el tiempo. |
 | 7 | Muñeco de nieve | Hacer rodar bolas de nieve y apilarlas sin que se caigan. |
 | 8 | El gato del vecino | Un gato se ha escondido en el edificio y hay que encontrarlo detrás de las macetas o ventanas. |
-| 9 | Chocolate caliente | Llenar la taza parando la barra en el punto exacto, sin desbordarla. |
+| 9 | Chocolate caliente | Prepararse una taza mezclando y preparando los ingredientes, con nata por encima, estilo Overcooked. |
 | 10 | Adivina la palabra | Wordle de 5 letras con una palabra vuestra. |
 | 11 | Decorar el árbol | Colocar adornos en el árbol del portal. Al terminar todo está precioso… y empieza a temblar. |
 | 12 | Salva la Navidad | Ver detalle abajo. |
@@ -101,6 +101,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **6 — Sube la escalera:** ritmo sincronizado con la música (`Sonido.pulsoMusica()`, descontando la latencia); flechas al principio de cada compás y algunas dobles; acierto = peldaño, fallo = resbala (nunca por debajo del último piso). 6 pisos (24 peldaños) en 40 s.
 - **7 — Muñeco de nieve:** la pieza se balancea y se suelta al pulsar: base, cuerpo, cabeza y sombrero, cada vez más rápido. Centrada = ¡PERFECTO!; algo torcida aguanta; muy descentrada rueda y se rompe (derrota y reintento). Al final se añaden solos ojos, nariz, bufanda, botones y brazos.
 - **8 — El gato del vecino:** 10 escondites en la fachada (4 cortinas, 3 macetas, 3 cajas de la mudanza). Pistas: la cola asoma cada pocos segundos y al fallar sale FRÍO / TEMPLADO / ¡CALIENTE!. Tras 3 fallos el gato cambia de sitio. Encontrarlo 3 veces. Sin derrota.
+- **9 — Chocolate caliente (estilo Overcooked):** cocina vista desde arriba con nevera, tazas, fogón, cacao, nata, nubes, entrega y papelera. Leche al cazo → se calienta (4 s) → cacao → remover 6 veces → servir (2 tazas por cazo) → nata (y nubes si la comanda lo pide) → entregar. La leche caliente sin cacao se quema a los 9 s. 3 pedidos en 150 s. Flechas + Espacio, o tocar el puesto (la chica va sola).
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
@@ -109,7 +110,6 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **6:** al compás de la música del juego, con margen generoso (en el móvil el sonido llega con retraso).
 - **7:** solo apilar: la bola se balancea y se suelta al tocar; 3 bolas.
 - **8:** pistas (cola asomando, maullido más fuerte cuanto más cerca).
-- **9:** para que no se parezca al día 4: mantener pulsado para echar chocolate y soltar a tiempo; el líquido sigue cayendo un instante.
 - **10:** teclado en pantalla con Ñ; se acepta cualquier palabra de 5 letras; sin tildes.
 - **13:** meta de 12 bloques.
 - **14:** se genera un camino con solución y se giran las piezas al azar.
