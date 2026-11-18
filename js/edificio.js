@@ -329,6 +329,8 @@ const Edificio = (() => {
 
   return {
     ANCHO, ALTO, MUNDO_ALTO, PLANTAS, CIELO, X0, X1, X_ESCALERA, X_MIN, X_MAX, PUERTA_W, CHIMENEA_X,
-    sueloY, puerta, dibujarEdificio, dibujarHalo, dibujarPuerta, dibujarFlecha
+    sueloY, puerta, dibujarEdificio, dibujarHalo, dibujarPuerta, dibujarFlecha,
+    // dibujo estático del edificio (320 x MUNDO_ALTO, fondo transparente), para reutilizarlo en los minijuegos
+    imagenFondo: () => fondo || (fondo = crearFondo())
   };
 })();

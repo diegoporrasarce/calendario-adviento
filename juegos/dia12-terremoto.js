@@ -1,306 +1,312 @@
 'use strict';
 /* Día 12 — ¡Salva la Navidad! (el terremoto).
-   1. El edificio tiembla, se agrieta y se viene abajo planta a planta entre polvo y cascotes.
-   2. La chica queda en la calle entre los escombros: hay que recoger 10 regalos en 60 segundos,
-      corriendo (← →) y saltando (↑, Espacio o tocar) sobre los montones. Caen piedras: antes se ve su
-      sombra en el suelo; cada golpe quita 5 segundos.
-   3. Al recoger el último regalo el edificio se reconstruye y vuelve a verse bien. */
+   1. Derrumbe: el mismo edificio de la pantalla principal (con sus puertas) tiembla, se agrieta y se viene
+      abajo trozo a trozo, del tejado a la planta baja, entre cascotes y polvo.
+   2. Saltos (tipo Doodle Jump): la chica rebota sola sobre trozos del edificio que flotan entre el polvo;
+      se dirige con ← → (o tocando a un lado). Hay que subir recogiendo 10 regalos. Con la altura aparecen
+      escombros que se desmoronan tras un salto y otros que se mueven. Caer por abajo = reintentar
+      (sin volver a ver el derrumbe).
+   3. Al coger el último regalo, el edificio se vuelve a levantar y se ve como siempre. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia12-terremoto'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
-    const META = 10, TIEMPO = 60, CASTIGO = 5;
-    const VEL = 95, SALTO = 250, GRAVEDAD = 640;
-    const T_DERRUMBE = 5.2, T_RECONSTRUIR = 2.4;
-    const PLANTAS = 6, ALTO_PLANTA = 22, ANCHO_EDIF = 150;
+    const META = 10;
+    const VEL = 130, REBOTE = 345, GRAVEDAD = 620;
+    const B_ANCHO = Edificio.ANCHO, B_ALTO = Edificio.MUNDO_ALTO;
+    const SUELO_B = Edificio.sueloY(0);                                   // suelo de la calle en la imagen del edificio
+    const ALTO_PLANTA = Edificio.sueloY(0) - Edificio.sueloY(1);
+    const TECHO_B = Edificio.CIELO - 22;                                  // lo más alto (chimenea con nieve)
+    const T_TEMBLOR = 1.6, T_ENTRE_TROZOS = 0.42, T_RECONSTRUIR = 2.6;
 
-    let fase, t, mundo, jug, montones, regalos, piedras, polvo, cascotes, recogidos, quedan, aviso, golpeado, proxPiedra;
-
-    // Mundo en unidades de escena (se amplía K veces): ancho W, suelo en y = 0, hacia arriba negativo
-    function medir(api) {
-      const K = api.alto >= 420 ? 2 : 1;
-      return { K, W: Math.floor(api.ancho / K), H: Math.floor(api.alto / K) };
+    /* ---------- Foto del edificio tal y como está en la pantalla principal (con sus puertas) ---------- */
+    let foto = null;
+    function fotoEdificio() {
+      if (foto) return foto;
+      const [cv, g] = Sprites.lienzoAux(B_ANCHO, B_ALTO);
+      g.drawImage(Edificio.imagenFondo(), 0, 0);
+      for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarHalo(g, n, Dias.estado(n), 0, 0);
+      for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarPuerta(g, n, Dias.estado(n), 0, 0);
+      return (foto = cv);
     }
+
+    // Trozos en que se rompe: el tejado y cada planta, de arriba abajo, partidos en columnas de 40 px
+    const FRANJAS = [];
+    {
+      const yTop = Edificio.sueloY(Edificio.PLANTAS - 1) - ALTO_PLANTA;
+      FRANJAS.push({ y0: TECHO_B, y1: yTop });
+      for (let p = Edificio.PLANTAS - 1; p >= 0; p--) FRANJAS.push({ y0: Edificio.sueloY(p) - ALTO_PLANTA, y1: Edificio.sueloY(p) });
+    }
+    const T_DERRUMBE = T_TEMBLOR + FRANJAS.length * T_ENTRE_TROZOS + 1.4;
+
+    let derrumbeVisto = false;           // al reintentar ya no se repite la animación
+    let fase, t, trozos, cascotes, polvo, montonB, jug, plataformas, regalos, recogidos, camara, aviso, alturaMax, ultimaFranja;
 
     function reiniciar(api) {
-      mundo = medir(api);
-      const W = mundo.W;
-      fase = 'derrumbe'; t = 0;
-      jug = { x: 34, y: 0, vy: 0, dir: 1, enSuelo: true, andando: false };
-      // montones de escombros (plataformas a las que se puede subir), repartidos por la calle
-      montones = [];
-      const n = Math.max(3, Math.floor(W / 110));
-      for (let i = 0; i < n; i++) {
-        const w = 44 + ((i * 37) % 30), x = Math.floor((i + 0.5) * W / n - w / 2) + ((i % 2) ? 12 : -12);
-        montones.push({ x, w, h: 16 + ((i * 23) % 22) });
-      }
-      regalos = []; piedras = []; polvo = []; cascotes = [];
-      recogidos = 0; quedan = TIEMPO; aviso = null; golpeado = 0; proxPiedra = 1.2;
+      t = 0; trozos = []; cascotes = []; polvo = []; aviso = null; ultimaFranja = -1;
+      montonB = new Array(B_ANCHO).fill(0);                               // altura del montón de escombros (vista del derrumbe)
+      fase = derrumbeVisto ? 'saltar' : 'derrumbe';
+      if (fase === 'saltar') empezarSaltos(api);
     }
 
-    const alturaSuelo = (x) => {                                           // altura del suelo (o del montón) en x
-      let h = 0;
-      for (const m of montones) if (x >= m.x && x <= m.x + m.w) h = Math.max(h, m.h);
-      return -h;
-    };
-
-    function ponerRegalo() {
-      const W = mundo.W;
-      for (let intento = 0; intento < 20; intento++) {
-        const x = 16 + Math.random() * (W - 32);
-        if (Math.abs(x - jug.x) < 40) continue;
-        if (regalos.some((r) => Math.abs(r.x - x) < 30)) continue;
-        regalos.push({ x, y: alturaSuelo(x), color: [C.rojo, C.verde, '#4a7ad8', C.lila][Math.floor(Math.random() * 4)], t: Math.random() * 6 });
-        return;
+    /* ---------- Saltos ---------- */
+    function empezarSaltos(api) {
+      const W = Math.floor(api.ancho / escala(api));
+      jug = { x: W / 2, y: -1, vy: -REBOTE, dir: 1 };
+      plataformas = []; regalos = []; recogidos = 0; camara = null; alturaMax = 0;
+      // plataformas cada vez más separadas y con más trampas; un regalo cada ~170 px de subida
+      let y = -40;
+      const objetivo = 160 + META * 170 + 120;
+      while (y > -objetivo) {
+        const altura = -y, w = 34 + Math.floor(Math.random() * 14);
+        const hueco = Math.min(78, 30 + altura * 0.02 + Math.random() * 18);
+        y -= hueco;
+        const tipo = altura > 500 && Math.random() < 0.22 ? 'fragil' : altura > 900 && Math.random() < 0.25 ? 'movil' : 'normal';
+        plataformas.push({
+          x: Math.random() * (W - w), y, w, tipo, vx: tipo === 'movil' ? (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 30) : 0,
+          sx: 40 + Math.floor(Math.random() * (B_ANCHO - 120)), sy: 130 + Math.floor(Math.random() * 230), roto: false, vy: 0
+        });
       }
+      for (let k = 0; k < META; k++) {
+        const ya = -(160 + k * 170);
+        let mejor = plataformas[0], d = Infinity;
+        for (const p of plataformas) if (p.tipo === 'normal' && Math.abs(p.y - ya) < d) { d = Math.abs(p.y - ya); mejor = p; }
+        regalos.push({ p: mejor, dx: mejor.w / 2, color: [C.rojo, C.verde, '#4a7ad8', C.lila][k % 4], t: Math.random() * 6 });
+      }
+      decir('¡SALTA POR LOS ESCOMBROS Y RECOGE LOS REGALOS!', C.oroClaro, 2.4);
     }
 
+    const escala = (api) => (api.alto >= 440 ? 2 : 1);
     function decir(txt, color, vida = 1.4) { aviso = { texto: txt, color: color || C.oroClaro, vida }; }
 
     function actualizar(dt, api) {
       t += dt;
-      mundo = medir(api);
       if (aviso) { aviso.vida -= dt; if (aviso.vida <= 0) aviso = null; }
-      for (let i = polvo.length - 1; i >= 0; i--) { const p = polvo[i]; p.vida -= dt; p.r += 10 * dt; p.y -= 6 * dt; if (p.vida <= 0) polvo.splice(i, 1); }
+      for (let i = polvo.length - 1; i >= 0; i--) { const p = polvo[i]; p.vida -= dt; p.r += 12 * dt; p.y -= 8 * dt; if (p.vida <= 0) polvo.splice(i, 1); }
       for (let i = cascotes.length - 1; i >= 0; i--) {
         const c = cascotes[i];
         c.vy += GRAVEDAD * dt; c.x += c.vx * dt; c.y += c.vy * dt;
-        if (c.y > 0) { c.y = 0; c.vy *= -0.25; c.vx *= 0.5; }
+        if (c.suelo !== undefined && c.y > c.suelo) { c.y = c.suelo; c.vy *= -0.2; c.vx *= 0.5; }
         c.vida -= dt; if (c.vida <= 0) cascotes.splice(i, 1);
       }
+      if (fase === 'derrumbe') return actualizarDerrumbe(dt, api);
+      if (fase === 'reconstruir') { if (t >= T_RECONSTRUIR + 0.8) api.ganar(); return; }
+      actualizarSaltos(dt, api);
+    }
 
-      if (fase === 'derrumbe') {
-        if (t < 1.6) { api.sacudir(0.12 + t * 0.06); if (Math.floor(t * 3) !== Math.floor((t - dt) * 3)) Sonido.efecto('golpe'); }
-        // cada planta cae (de arriba abajo) y se rompe en cascotes con polvo
-        const cx = Math.floor(mundo.W / 2);
-        for (let p = PLANTAS - 1; p >= 0; p--) {
-          const tp = 1.6 + (PLANTAS - 1 - p) * 0.5;
-          if (t >= tp && t - dt < tp) {
-            Sonido.efecto('derrumbe'); api.sacudir(0.35);
-            const y = -(p + 0.5) * ALTO_PLANTA;
-            for (let k = 0; k < 14; k++)
-              cascotes.push({ x: cx - ANCHO_EDIF / 2 + Math.random() * ANCHO_EDIF, y, vx: (Math.random() - 0.5) * 160, vy: -Math.random() * 80, vida: 2 + Math.random(), w: 3 + Math.floor(Math.random() * 5), c: Math.random() < 0.6 ? '#a2432f' : '#8c857b' });
-            for (let k = 0; k < 6; k++) polvo.push({ x: cx - ANCHO_EDIF / 2 + Math.random() * ANCHO_EDIF, y: -4, r: 6 + Math.random() * 8, vida: 1.6 });
-          }
-        }
-        if (t >= T_DERRUMBE) {
-          fase = 'jugar'; t = 0;
-          decir('¡LOS REGALOS ESTAN ENTRE LAS RUINAS!', C.oroClaro, 2.4);
-          for (let i = 0; i < 3; i++) ponerRegalo();
-        }
-        api.entrada.pulsado('accion'); api.entrada.pulsado('toque'); api.entrada.pulsado('arriba');
+    function actualizarDerrumbe(dt, api) {
+      api.entrada.pulsado('accion'); api.entrada.pulsado('toque'); api.entrada.pulsado('arriba');
+      if (t < T_TEMBLOR) {
+        api.sacudir(0.12 + t * 0.08);
+        if (Math.floor(t * 3) !== Math.floor((t - dt) * 3)) Sonido.efecto('golpe');
         return;
       }
-
-      if (fase === 'reconstruir') {
-        // los montones desaparecen: la chica cae a la calle
-        jug.vy += GRAVEDAD * dt; jug.y = Math.min(0, jug.y + jug.vy * dt); if (jug.y === 0) jug.vy = 0;
-        jug.andando = false; jug.enSuelo = jug.y === 0;
-        if (t >= T_RECONSTRUIR) api.ganar();
-        return;
+      // cada franja se suelta a su tiempo, partida en trozos que caen
+      const k = Math.floor((t - T_TEMBLOR) / T_ENTRE_TROZOS);
+      if (k < FRANJAS.length && k > ultimaFranja) {
+        ultimaFranja = k;
+        const f = FRANJAS[k];
+        Sonido.efecto('derrumbe'); api.sacudir(0.4);
+        for (let x = 0; x < B_ANCHO; x += 40)
+          trozos.push({ sx: x, sy: f.y0, w: 40, h: f.y1 - f.y0, x, y: f.y0, vx: (Math.random() - 0.5) * 60, vy: -Math.random() * 30, retraso: Math.random() * 0.15 });
       }
+      for (let i = trozos.length - 1; i >= 0; i--) {
+        const tr = trozos[i];
+        if (tr.retraso > 0) { tr.retraso -= dt; continue; }
+        tr.vy += GRAVEDAD * dt; tr.x += tr.vx * dt; tr.y += tr.vy * dt;
+        const col = Math.max(0, Math.min(B_ANCHO - 1, Math.round(tr.x + tr.w / 2)));
+        if (tr.y + tr.h >= SUELO_B - montonB[col]) {                         // choca con el suelo o con el montón: se rompe
+          trozos.splice(i, 1);
+          const cx = tr.x + tr.w / 2;
+          for (let k2 = 0; k2 < 10; k2++)
+            cascotes.push({ x: tr.x + Math.random() * tr.w, y: SUELO_B - montonB[col] - 4, vx: (Math.random() - 0.5) * 140, vy: -40 - Math.random() * 120,
+                            vida: 1.2 + Math.random(), w: 2 + Math.floor(Math.random() * 4), c: Math.random() < 0.6 ? '#a2432f' : '#8c857b', suelo: SUELO_B - 2 });
+          for (let k2 = 0; k2 < 3; k2++) polvo.push({ x: cx + (Math.random() - 0.5) * 30, y: SUELO_B - montonB[col] - 6, r: 6 + Math.random() * 8, vida: 1.4 });
+          for (let x = Math.floor(tr.x) - 6; x < tr.x + tr.w + 6; x++) if (x >= 0 && x < B_ANCHO) montonB[x] = Math.min(70, montonB[x] + 3 + Math.random() * 2);
+        }
+      }
+      if (t >= T_DERRUMBE) { derrumbeVisto = true; fase = 'saltar'; t = 0; empezarSaltos(api); }
+    }
 
-      // ---------- jugando ----------
+    function actualizarSaltos(dt, api) {
+      const K = escala(api), W = Math.floor(api.ancho / K), H = Math.floor(api.alto / K);
       const e = api.entrada;
-      golpeado = Math.max(0, golpeado - dt);
+      e.pulsado('accion'); e.pulsado('arriba');
       let dx = (e.derecha ? 1 : 0) - (e.izquierda ? 1 : 0);
-      if (!dx && e.puntero.abajo && Math.abs(e.puntero.x / mundo.K - jug.x) > 6) dx = Math.sign(e.puntero.x / mundo.K - jug.x);   // seguir el dedo
-      if (golpeado > 0.3) dx = 0;                                           // aturdida tras un golpe
-      jug.andando = dx !== 0 && jug.enSuelo;
+      if (!dx && e.puntero.abajo) dx = e.puntero.x / K < W / 2 ? -1 : 1;    // tocar a un lado de la pantalla
+      e.pulsado('toque');
       if (dx) jug.dir = dx;
-      const salta = e.pulsado('arriba') | e.pulsado('accion') | e.pulsado('toque');
-      if (salta && jug.enSuelo && golpeado <= 0.3) { jug.vy = -SALTO; jug.enSuelo = false; Sonido.efecto('saltar'); }
+      jug.x += dx * VEL * dt;
+      if (jug.x < -8) jug.x += W + 16; else if (jug.x > W + 8) jug.x -= W + 16;   // sale por un lado y entra por el otro
 
-      // movimiento horizontal: los montones se suben saltando (no se atraviesan si están más altos que los pies)
-      const nx = Math.max(8, Math.min(mundo.W - 8, jug.x + dx * VEL * dt));
-      if (alturaSuelo(nx) >= jug.y - 3) jug.x = nx;                        // altura del nuevo sitio no más alta que los pies
-      // vertical
-      jug.vy += GRAVEDAD * dt;
-      jug.y += jug.vy * dt;
-      const suelo = alturaSuelo(jug.x);
-      if (jug.y >= suelo && jug.vy >= 0) { jug.y = suelo; jug.vy = 0; jug.enSuelo = true; }
-      else if (jug.y < suelo - 0.5) jug.enSuelo = false;
-      if (jug.enSuelo && jug.y < suelo) jug.y = suelo;
+      for (const p of plataformas) {
+        if (p.tipo === 'movil') { p.x += p.vx * dt; if (p.x < 0 || p.x + p.w > W) { p.vx *= -1; p.x = Math.max(0, Math.min(W - p.w, p.x)); } }
+        if (p.roto) { p.vy += GRAVEDAD * dt; p.y += p.vy * dt; }
+      }
+      const antes = jug.y;
+      jug.vy += GRAVEDAD * dt; jug.y += jug.vy * dt;
+      if (jug.vy > 0) {                                                     // cayendo: rebota en la plataforma que pisa
+        const suelo = jug.y >= 0 && antes <= 0 && camara !== null && camara + H > 0;   // el montón de ruinas hace de suelo mientras se ve
+        const p = plataformas.find((q) => !q.roto && antes <= q.y && jug.y >= q.y && jug.x > q.x - 5 && jug.x < q.x + q.w + 5);
+        if (p || suelo) {
+          jug.y = p ? p.y : 0; jug.vy = -REBOTE; Sonido.efecto('saltar');
+          if (p && p.tipo === 'fragil') { p.roto = true; Sonido.efecto('golpe'); for (let k = 0; k < 6; k++) cascotes.push({ x: p.x + Math.random() * p.w, y: p.y, vx: (Math.random() - 0.5) * 60, vy: -20, vida: 0.8, w: 3, c: '#a2432f' }); }
+        }
+      }
+      alturaMax = Math.max(alturaMax, -jug.y);
 
       // regalos
       for (let i = regalos.length - 1; i >= 0; i--) {
-        const r = regalos[i];
-        r.t += dt;
-        if (Math.abs(r.x - jug.x) < 10 && Math.abs(r.y - jug.y) < 16) {
+        const g = regalos[i];
+        g.t += dt;
+        const gx = g.p.x + g.dx, gy = g.p.y - 4;
+        if (Math.abs(gx - jug.x) < 11 && jug.y > gy - 14 && jug.y < gy + 26) {
           regalos.splice(i, 1);
           recogidos++;
           Sonido.efecto('coger');
-          api.aviso(`${recogidos}/${META}`, Math.round(r.x * mundo.K), Math.round((mundo.H - 18 + r.y - 16) * mundo.K), C.oroClaro);
-          if (recogidos >= META) {
-            fase = 'reconstruir'; t = 0; piedras = [];
-            Sonido.efecto('completar');
-            decir('¡LA NAVIDAD SIGUE EN PIE!', C.oroClaro, 3);
-            return;
-          }
-          if (recogidos + regalos.length < META) ponerRegalo();
+          api.aviso(`${recogidos}/${META}`, Math.round(gx * K), Math.round((gy - camara - 16) * K), C.oroClaro);
+          if (recogidos >= META) { fase = 'reconstruir'; t = 0; Sonido.efecto('completar'); decir('¡LA NAVIDAD SIGUE EN PIE!', C.oroClaro, 4); return; }
         }
       }
 
-      // piedras: primero la sombra, luego caen deprisa
-      proxPiedra -= dt;
-      const avance = 1 - quedan / TIEMPO;
-      if (proxPiedra <= 0) {
-        proxPiedra = (1.1 - avance * 0.5 + Math.random() * 0.5) * Math.sqrt(320 / mundo.W);
-        // la mitad de las veces apunta cerca de la chica
-        const x = Math.random() < 0.5 ? jug.x + (Math.random() - 0.5) * 50 : 10 + Math.random() * (mundo.W - 20);
-        piedras.push({ x: Math.max(8, Math.min(mundo.W - 8, x)), aviso: 0.9, y: -mundo.H, vy: 0, r: 4 + Math.floor(Math.random() * 3) });
-      }
-      for (let i = piedras.length - 1; i >= 0; i--) {
-        const p = piedras[i];
-        if (p.aviso > 0) { p.aviso -= dt; continue; }
-        p.vy += GRAVEDAD * 1.3 * dt; p.y += p.vy * dt;
-        const suelo = alturaSuelo(p.x);
-        if (golpeado <= 0 && Math.abs(p.x - jug.x) < p.r + 5 && p.y > jug.y - 26 && p.y < jug.y + 2) {
-          piedras.splice(i, 1);
-          quedan = Math.max(0, quedan - CASTIGO); golpeado = 0.9;
-          Sonido.efecto('golpe'); api.sacudir(0.3);
-          api.aviso(`-${CASTIGO} S`, Math.round(jug.x * mundo.K), Math.round((mundo.H - 18 + jug.y - 34) * mundo.K), C.rojoClaro);
-          continue;
-        }
-        if (p.y >= suelo) {
-          piedras.splice(i, 1);
-          for (let k = 0; k < 5; k++) cascotes.push({ x: p.x, y: suelo - 1, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, vida: 0.6, w: 2, c: '#8c857b' });
-        }
-      }
-
-      quedan -= dt;
-      if (quedan <= 0) { quedan = 0; api.perder(`SE ACABO EL TIEMPO: ${recogidos} DE ${META} REGALOS`); }
+      // cámara: sigue a la chica hacia arriba (nunca baja); caer por debajo de la pantalla es perder
+      const objetivo = Math.min(-H + 40, jug.y - H * 0.55);
+      camara = camara === null ? objetivo : Math.min(camara, camara + (objetivo - camara) * Math.min(1, dt * 8));
+      if (jug.y - camara > H + 30) api.perder('¡TE HAS CAIDO! VUELVE A INTENTARLO');
     }
 
-    /* ---------- Dibujo (en unidades de la escena; el suelo de la calle está a 18 del borde de abajo) ---------- */
+    /* ---------- Dibujo ---------- */
     const r = (ctx, c, x, y, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
-
-    // El edificio entero (de pie) con sus ventanas encendidas; `plantas` = cuántas quedan de abajo arriba
-    function edificio(ctx, cx, plantas, grietas, encendidas) {
-      const x0 = Math.round(cx - ANCHO_EDIF / 2);
-      for (let p = 0; p < plantas; p++) {
-        const y = -(p + 1) * ALTO_PLANTA;
-        r(ctx, '#5e2620', x0, y, ANCHO_EDIF, ALTO_PLANTA);
-        for (let fy = 0; fy < ALTO_PLANTA; fy += 4) for (let fx = (fy / 4) % 2 * 4; fx < ANCHO_EDIF; fx += 8) r(ctx, '#a2432f', x0 + fx, y + fy, 7, 3);
-        r(ctx, '#cfc8bd', x0 - 2, y + ALTO_PLANTA - 2, ANCHO_EDIF + 4, 2);
-        for (let k = 0; k < 4; k++) {
-          const wx = x0 + 14 + k * 34, wy = y + 5;
-          r(ctx, '#2b1a14', wx - 1, wy - 1, 14, 12);
-          r(ctx, encendidas ? ((k + p) % 3 ? '#ffe9a0' : '#f0a93a') : '#141a3c', wx, wy, 12, 10);
-          r(ctx, '#2b1a14', wx + 5, wy, 2, 10);
-        }
-      }
-      if (plantas >= PLANTAS) {                                             // tejado nevado
-        r(ctx, '#4a3238', x0 - 6, -PLANTAS * ALTO_PLANTA - 6, ANCHO_EDIF + 12, 6);
-        r(ctx, C.nieve, x0 - 7, -PLANTAS * ALTO_PLANTA - 9, ANCHO_EDIF + 14, 3);
-      }
-      if (grietas > 0) {                                                    // grietas que crecen
-        ctx.fillStyle = C.tinta;
-        for (let g = 0; g < 5; g++) {
-          let gx = x0 + 20 + g * 28, gy = -PLANTAS * ALTO_PLANTA + 10 + (g * 17) % 40;
-          for (let k = 0; k < Math.floor(grietas * 18); k++) { ctx.fillRect(Math.round(gx), Math.round(gy), 1, 2); gx += ((g + k) % 3) - 1; gy += 2; }
-        }
-      }
-    }
-
-    // Ruinas: un montón de escombros con trozos de pared rota
-    function ruinas(ctx, cx) {
-      const x0 = Math.round(cx - ANCHO_EDIF / 2);
-      r(ctx, '#5e2620', x0 + 6, -40, 18, 40); r(ctx, '#5e2620', x0 + ANCHO_EDIF - 30, -56, 22, 56); r(ctx, '#5e2620', x0 + 60, -26, 14, 26);
-      for (let k = 0; k < 3; k++) r(ctx, '#a2432f', x0 + ANCHO_EDIF - 28, -52 + k * 12, 18, 3);
-      r(ctx, '#3a2622', x0 - 10, -12, ANCHO_EDIF + 20, 12);
-      for (let k = 0; k < 26; k++) r(ctx, k % 3 ? '#8c857b' : '#a2432f', x0 - 8 + (k * 41) % (ANCHO_EDIF + 16), -14 + (k * 7) % 8, 6 + (k % 4) * 2, 4);
-    }
 
     function regalo(ctx, x, y, color) {
       r(ctx, color, x - 5, y - 9, 10, 9); r(ctx, C.oro, x - 1, y - 9, 2, 9); r(ctx, C.oro, x - 5, y - 6, 10, 2);
       r(ctx, C.oro, x - 4, y - 12, 3, 3); r(ctx, C.oro, x + 1, y - 12, 3, 3);
     }
 
-    function dibujar(ctx, api) {
-      const m = medir(api), W = m.W, H = m.H, suelo = H - 18;
-      Comun.fondoNoche(ctx, api.t, api.alto, api.ancho);
-      ctx.save();
-      ctx.scale(m.K, m.K);
-      // calle
-      r(ctx, '#3a3f58', 0, suelo, W, 18); r(ctx, '#5a6278', 0, suelo, W, 2);
-      for (let x = 10; x < W; x += 34) r(ctx, '#d9c49a', x, suelo + 9, 14, 2);
-      ctx.translate(0, suelo);
-      const cx = Math.floor(W / 2);
-
-      if (fase === 'derrumbe') {
-        // de pie hasta que empieza a caer; después quedan menos plantas cada vez
-        const cayeron = t < 1.6 ? 0 : Math.min(PLANTAS, Math.floor((t - 1.6) / 0.5) + 1);
-        if (cayeron < PLANTAS) edificio(ctx, cx, PLANTAS - cayeron, Math.min(1, t / 1.6), t < 1.6);
-        if (cayeron > 0) ruinas(ctx, cx);
-      } else if (fase === 'reconstruir') {
-        // el edificio vuelve a levantarse planta a planta, con las luces encendidas
-        const sube = Math.min(PLANTAS, Math.floor(t / (T_RECONSTRUIR * 0.7) * PLANTAS) + 1);
-        if (sube < PLANTAS) ruinas(ctx, cx);
-        edificio(ctx, cx, sube, 0, true);
-        if (sube >= PLANTAS) for (let k = 0; k < 10; k++) if ((Math.floor(api.t * 6) + k) % 3 === 0) r(ctx, C.oroClaro, cx - 80 + (k * 37) % 160, -PLANTAS * ALTO_PLANTA - 10 - (k * 13) % 30, 2, 2);
-      } else ruinas(ctx, cx);
-
-      // montones de escombros (plataformas)
-      if (fase !== 'reconstruir') for (const mo of montones) {
-        r(ctx, '#3a2622', mo.x, -mo.h, mo.w, mo.h);
-        for (let k = 0; k < Math.floor(mo.w / 6); k++) r(ctx, k % 3 ? '#8c857b' : '#a2432f', mo.x + k * 6 + (k % 2), -mo.h + ((k * 5) % 6), 6, 4);
-        r(ctx, '#b9b2a6', mo.x, -mo.h, mo.w, 1);
-      }
-      // regalos
-      for (const g of regalos) regalo(ctx, g.x, g.y - Math.round(Math.abs(Math.sin(g.t * 3)) * 2), g.color);
-      // sombras de las piedras que van a caer y las piedras
-      for (const p of piedras) {
-        const sy = alturaSuelo(p.x);
-        if (p.aviso > 0 || p.y < sy - 4) {
-          const w = Math.round((p.r + 2) * (p.aviso > 0 ? 1 - p.aviso / 1.8 : 1)) * 2;
-          Sprites.tramar(ctx, Math.round(p.x - w / 2), sy - 1, w, 2, C.tinta, () => (p.aviso > 0 ? 0.6 : 0.9));
-        }
-        if (p.aviso <= 0) {                                                  // piedra redondeada con luz arriba a la izquierda
-          const px = Math.round(p.x), py = Math.round(p.y - p.r);
-          ctx.fillStyle = '#4a4e60'; Sprites.disco(ctx, px, py, p.r);
-          ctx.fillStyle = '#6a6f84'; Sprites.disco(ctx, px - 1, py - 1, p.r - 1);
-          r(ctx, '#9aa0b0', px - p.r + 2, py - p.r + 2, 2, 2);
-        }
-      }
-      // cascotes y polvo
-      for (const c of cascotes) r(ctx, c.c, c.x, c.y - c.w, c.w, c.w);
-      for (const p of polvo) Sprites.tramar(ctx, Math.round(p.x - p.r), Math.round(p.y - p.r), Math.round(p.r * 2), Math.round(p.r * 2), '#b4a8a0',
-        (x, y) => (1 - Math.hypot(x - p.x, y - p.y) / p.r) * Math.min(1, p.vida));
-      // la chica (parpadea tras un golpe)
-      if (golpeado <= 0 || Math.floor(api.t * 12) % 2)
-        Sprites.personaje(ctx, Math.round(jug.x), Math.round(jug.y), jug.dir, !jug.enSuelo ? 'subir' : jug.andando ? 'andar' : 'idle', api.t);
+    // Vista del edificio (derrumbe y reconstrucción): la imagen de la pantalla principal centrada,
+    // con la cámara vertical `cam` (en coordenadas de la imagen) y el suelo nevado de lado a lado
+    function vistaEdificio(ctx, api, cam, dibujarDentro) {
+      const K = escala(api), W = Math.floor(api.ancho / K), H = Math.floor(api.alto / K), ox = Math.floor((W - B_ANCHO) / 2);
+      ctx.save(); ctx.scale(K, K);
+      const yg = SUELO_B - cam;
+      r(ctx, '#f4f8ff', 0, yg, W, 1); r(ctx, '#dbe5f5', 0, yg + 1, W, H);
+      ctx.translate(ox, -cam);
+      dibujarDentro(ctx);
       ctx.restore();
+      return { K, W, H, ox };
+    }
 
-      // textos y marcadores
-      const e = api.textoEscala;
-      if (aviso) {
-        const em = Comun.medir(aviso.texto, e + 1) <= api.ancho - 12 ? e + 1 : e;
-        texto(ctx, aviso.texto, Math.floor(api.ancho / 2), Math.floor(api.alto * 0.22), aviso.color, { escala: em, centro: true, sombra: C.tinta });
-      }
-      if (fase === 'jugar') {
-        const altoCaja = Comun.altoTexto(e) + 8, t1 = `REGALOS ${recogidos}/${META}`;
-        Comun.caja(ctx, 6, 6, Comun.medir(t1, e) + 8, altoCaja);
-        texto(ctx, t1, 10, 10, C.oroClaro, { escala: e });
-        const anchoBarra = 50, anchoNum = Comun.medir('60', e), w2 = anchoBarra + anchoNum + 12;
-        let x2 = Math.max(Comun.medir(t1, e) + 22, Math.floor((api.ancho - w2) / 2)), y2 = 6;
-        if (x2 + w2 > api.ancho - api.margenDerecho) { x2 = 6; y2 = 6 + altoCaja + 6; }
-        Comun.caja(ctx, x2, y2, w2, altoCaja);
-        ctx.fillStyle = C.nocheClara; ctx.fillRect(x2 + 4, y2 + 4, anchoBarra, altoCaja - 8);
-        ctx.fillStyle = quedan < 15 ? C.rojoClaro : C.verde; ctx.fillRect(x2 + 4, y2 + 4, Math.round(anchoBarra * quedan / TIEMPO), altoCaja - 8);
-        texto(ctx, String(Math.ceil(quedan)), x2 + anchoBarra + 8, y2 + 4, quedan < 15 ? C.rojoClaro : C.nieve, { escala: e });
+    function camaraEdificio(api, frac) {                                    // frac 0 = mirando el tejado, 1 = mirando la calle
+      const H = Math.floor(api.alto / escala(api));
+      const arriba = TECHO_B - 30, abajo = B_ALTO - H;
+      if (abajo <= arriba) return abajo;                                    // cabe entero
+      return Math.round(arriba + (abajo - arriba) * Math.max(0, Math.min(1, frac)));
+    }
+
+    function dibujarMonton(ctx) {
+      for (let x = 0; x < B_ANCHO; x += 3) {
+        const h = Math.round(montonB[x]);
+        if (h <= 0) continue;
+        r(ctx, '#3a2622', x, SUELO_B - h, 3, h);
+        if ((x * 7) % 5 < 2) r(ctx, '#a2432f', x, SUELO_B - h, 3, 2); else if ((x * 3) % 7 < 2) r(ctx, '#8c857b', x, SUELO_B - h, 3, 2);
       }
     }
 
-    // Solo en modo debug: estado, y llevar a la chica a un sitio (para las pruebas automáticas)
+    function dibujarParticulas(ctx) {
+      for (const c of cascotes) r(ctx, c.c, c.x, c.y - c.w, c.w, c.w);
+      for (const p of polvo) Sprites.tramar(ctx, Math.round(p.x - p.r), Math.round(p.y - p.r), Math.round(p.r * 2), Math.round(p.r * 2), '#b4a8a0',
+        (x, y) => (1 - Math.hypot(x - p.x, y - p.y) / p.r) * Math.min(1, p.vida));
+    }
+
+    function dibujar(ctx, api) {
+      Comun.fondoNoche(ctx, api.t, api.alto, api.ancho);
+      const img = fotoEdificio();
+      const e = api.textoEscala;
+
+      if (fase === 'derrumbe') {
+        // la cámara mira el tejado mientras tiembla y baja con los trozos que caen
+        const avance = t < T_TEMBLOR ? 0 : (t - T_TEMBLOR) / (FRANJAS.length * T_ENTRE_TROZOS + 0.6);
+        vistaEdificio(ctx, api, camaraEdificio(api, avance), (g) => {
+          const enPie = ultimaFranja + 1 < FRANJAS.length ? FRANJAS[ultimaFranja + 1].y0 : SUELO_B;   // lo que sigue en pie
+          g.drawImage(img, 0, enPie, B_ANCHO, B_ALTO - enPie, 0, enPie, B_ANCHO, B_ALTO - enPie);
+          if (t < T_TEMBLOR * 1.5) {                                        // grietas que crecen
+            g.fillStyle = C.tinta;
+            for (let k = 0; k < 7; k++) {
+              let gx = 50 + k * 32, gy = TECHO_B + 30 + (k * 23) % 60;
+              for (let s = 0; s < Math.floor(Math.min(1, t / T_TEMBLOR) * 30); s++) { g.fillRect(gx, gy, 1, 2); gx += ((k + s) % 3) - 1; gy += 2; }
+            }
+          }
+          for (const tr of trozos) g.drawImage(img, tr.sx, tr.sy, tr.w, tr.h, Math.round(tr.x), Math.round(tr.y), tr.w, tr.h);
+          dibujarMonton(g);
+          dibujarParticulas(g);
+        });
+      } else if (fase === 'reconstruir') {
+        // el edificio vuelve a levantarse desde el suelo (y la cámara sube con él)
+        const f = Math.min(1, t / T_RECONSTRUIR), alto = Math.round((B_ALTO - TECHO_B) * f);
+        vistaEdificio(ctx, api, camaraEdificio(api, 1 - f), (g) => {
+          g.drawImage(img, 0, B_ALTO - alto, B_ANCHO, alto, 0, B_ALTO - alto, B_ANCHO, alto);
+          if (f < 1) for (let x = 0; x < B_ANCHO; x += 6) r(g, (x / 6) % 2 ? C.oroClaro : C.blanco, x + (Math.floor(api.t * 20) % 3), B_ALTO - alto - 1, 2, 1);
+          else for (let k = 0; k < 14; k++) if ((Math.floor(api.t * 6) + k) % 3 === 0) r(g, C.oroClaro, (k * 47) % B_ANCHO, TECHO_B - 10 - (k * 13) % 30, 2, 2);
+        });
+      } else {
+        dibujarSaltos(ctx, api);
+      }
+
+      if (aviso) {                                                         // en varias líneas si no cabe
+        const em = Comun.medir(aviso.texto, e + 1) <= api.ancho - 12 ? e + 1 : e;
+        Comun.envolver(aviso.texto, api.ancho - 16, em).forEach((l, i) =>
+          texto(ctx, l, Math.floor(api.ancho / 2), Math.floor(api.alto * 0.2) + i * (Comun.altoTexto(em) + 3 * em), aviso.color, { escala: em, centro: true, sombra: C.tinta }));
+      }
+      if (fase === 'saltar') {
+        const altoCaja = Comun.altoTexto(e) + 8, t1 = `REGALOS ${recogidos}/${META}`, t2 = `ALTURA ${Math.floor(alturaMax / 10)} M`;
+        Comun.caja(ctx, 6, 6, Comun.medir(t1, e) + 8, altoCaja);
+        texto(ctx, t1, 10, 10, C.oroClaro, { escala: e });
+        const w2 = Comun.medir(t2, e) + 8;
+        let x2 = Math.max(Comun.medir(t1, e) + 22, Math.floor((api.ancho - w2) / 2)), y2 = 6;
+        if (x2 + w2 > api.ancho - api.margenDerecho) { x2 = 6; y2 = 6 + altoCaja + 6; }
+        Comun.caja(ctx, x2, y2, w2, altoCaja);
+        texto(ctx, t2, x2 + 4, y2 + 4, C.nieve, { escala: e });
+      }
+    }
+
+    function dibujarSaltos(ctx, api) {
+      const K = escala(api), W = Math.floor(api.ancho / K), H = Math.floor(api.alto / K), img = fotoEdificio();
+      const cam = camara === null ? -H + 40 : camara;
+      ctx.save(); ctx.scale(K, K); ctx.translate(0, -cam);
+      // polvo en el aire (lejos)
+      for (let k = 0; k < 30; k++) {
+        const y = Math.floor(cam + ((k * 97 + Math.floor(-cam * 0.5)) % (H + 40)));
+        if ((k + Math.floor(api.t * 2)) % 4) r(ctx, '#5a5070', (k * 53) % W, y, 1, 1);
+      }
+      // el montón de ruinas abajo, de donde se sale
+      if (cam > -H - 80) {
+        r(ctx, '#3a2622', 0, 0, W, 60);
+        for (let x = 0; x < W; x += 5) r(ctx, (x * 7) % 3 ? '#8c857b' : '#a2432f', x, -3 - ((x * 13) % 7), 6, 5 + ((x * 13) % 7));
+      }
+      // plataformas: trozos del edificio
+      for (const p of plataformas) {
+        if (p.y < cam - 20 || p.y > cam + H + 20) continue;
+        ctx.drawImage(img, p.sx, p.sy, Math.round(p.w), 8, Math.round(p.x), Math.round(p.y), Math.round(p.w), 8);
+        r(ctx, '#2b1a14', p.x, p.y + 8, p.w, 2);
+        r(ctx, p.tipo === 'movil' ? '#8ab0ff' : '#cfc8bd', p.x, p.y, p.w, 1);
+        if (p.tipo === 'fragil') { ctx.fillStyle = C.tinta; for (let k = 4; k < p.w - 2; k += 7) { ctx.fillRect(Math.round(p.x + k), Math.round(p.y + 1), 1, 3); ctx.fillRect(Math.round(p.x + k + 1), Math.round(p.y + 4), 1, 3); } }
+      }
+      for (const g of regalos) regalo(ctx, g.p.x + g.dx, g.p.y - Math.round(Math.abs(Math.sin(g.t * 3)) * 2), g.color);
+      dibujarParticulas(ctx);
+      Sprites.personaje(ctx, Math.round(jug.x), Math.round(jug.y), jug.dir, jug.vy < 0 ? 'subir' : 'idle', api.t);
+      ctx.restore();
+    }
+
+    // Solo en modo debug: estado y atajos para las pruebas automáticas
     if (Dias.debug) window.rescateDebug = {
-      estado: () => ({ fase, recogidos, quedan, jug: { x: jug.x, y: jug.y }, regalos: regalos.map((g) => ({ x: g.x, y: g.y })), piedras: piedras.length }),
-      llevar: (x, y) => { jug.x = x; jug.y = y; jug.vy = 0; }
+      estado: () => ({ fase, recogidos, alturaMax: Math.round(alturaMax), camara, jug: jug ? { x: Math.round(jug.x), y: Math.round(jug.y) } : null,
+                       regalos: regalos ? regalos.map((g) => ({ x: g.p.x + g.dx, y: g.p.y })) : [] }),
+      llevar: (x, y) => { jug.x = x; jug.y = y; jug.vy = -REBOTE; }
     };
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: '¡SALVA LA NAVIDAD!',
-      instruccion: 'ALGO VA MAL EN EL EDIFICIO... RECOGE LOS 10 REGALOS ENTRE LAS RUINAS: ← → PARA CORRER, ↑ O ESPACIO PARA SALTAR. ¡CUIDADO CON LAS PIEDRAS! VERAS SU SOMBRA ANTES DE QUE CAIGAN.',
+      instruccion: 'ALGO VA MAL EN EL EDIFICIO... CUANDO PUEDAS, SALTA POR LOS ESCOMBROS Y RECOGE LOS 10 REGALOS. LA CHICA REBOTA SOLA: DIRIGELA CON ← → O TOCANDO A UN LADO. ¡NO TE CAIGAS!',
       pantallaCompleta: true,
       musica: 'heraldo',
       reiniciar, actualizar, dibujar
