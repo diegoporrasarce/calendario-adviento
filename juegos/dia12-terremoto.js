@@ -49,32 +49,61 @@ window.JUEGOS['dia12-terremoto'] = {
       if (fase === 'saltar') empezarSaltos(api);
     }
 
-    /* ---------- Saltos ---------- */
-    function empezarSaltos(api) {
-      const W = Math.floor(api.ancho / escala(api));
-      jug = { x: W / 2, y: -1, vy: -REBOTE, dir: 1 };
-      plataformas = []; regalos = []; recogidos = 0; camara = null; alturaMax = 0;
-      // plataformas cada vez más separadas y con más trampas; un regalo cada ~170 px de subida
-      let y = -40;
-      const objetivo = 160 + META * 170 + 120;
-      while (y > -objetivo) {
-        const altura = -y, w = 34 + Math.floor(Math.random() * 14);
-        const hueco = Math.min(78, 30 + altura * 0.02 + Math.random() * 18);
-        y -= hueco;
-        const tipo = altura > 500 && Math.random() < 0.22 ? 'fragil' : altura > 900 && Math.random() < 0.25 ? 'movil' : 'normal';
-        plataformas.push({
-          x: Math.random() * (W - w), y, w, tipo, vx: tipo === 'movil' ? (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 30) : 0,
-          sx: 40 + Math.floor(Math.random() * (B_ANCHO - 120)), sy: 130 + Math.floor(Math.random() * 230), roto: false, vy: 0
-        });
+    /* ---------- Saltos: un mapa único (siempre el mismo) dentro de una columna de COL px ---------- */
+    const COL = 240;                     // ancho de la columna por la que se sube (con paredes de escombros a los lados)
+    const DY_MIN = 34, DY_MAX = 52;      // separación vertical entre plataformas (el salto llega a unos 96 px)
+    const DX_MAX = 70;                   // separación horizontal máxima (se recorre de sobra durante un salto)
+    // generador pseudoaleatorio con semilla fija: el mapa sale idéntico en cada partida
+    function azarFijo(semilla) {
+      let a = semilla >>> 0;
+      return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    }
+    // El mapa se genera hacia arriba según hace falta, siempre con la misma semilla (sale idéntico cada vez)
+    let azarMapa, genX, genY, genN;
+    function extenderMapa(hastaY) {
+      while (genY > hastaY) {
+        const w = 40 + Math.floor(azarMapa() * 10);
+        genY -= DY_MIN + Math.floor(azarMapa() * (DY_MAX - DY_MIN + 1));
+        genX = Math.max(w / 2 + 2, Math.min(COL - w / 2 - 2, genX + (azarMapa() * 2 - 1) * DX_MAX));
+        // camino principal: siempre se puede pisar; más arriba, alguna se balancea despacio y poco
+        const movil = -genY > 700 && genN % 4 === 3;
+        plataformas.push({ base: genX - w / 2, x: genX - w / 2, y: genY, w, tipo: movil ? 'movil' : 'normal', fase: azarMapa() * 6,
+                           sx: 40 + Math.floor(azarMapa() * (B_ANCHO - 120)), sy: 130 + Math.floor(azarMapa() * 230), roto: false, vy: 0 });
+        // de vez en cuando, un escombro extra que se desmorona (no hace falta pisarlo)
+        if (-genY > 300 && genN % 5 === 2) {
+          const xe = genX > COL / 2 ? genX - 90 : genX + 90;
+          const sx = 40 + Math.floor(azarMapa() * (B_ANCHO - 120)), sy = 130 + Math.floor(azarMapa() * 230);
+          if (xe > 24 && xe < COL - 24) plataformas.push({ base: xe - 18, x: xe - 18, y: genY - 16, w: 36, tipo: 'fragil', fase: 0, sx, sy, roto: false, vy: 0 });
+        }
+        genN++;
       }
+    }
+
+    // Si un regalo se queda por debajo de la pantalla sin cogerlo, se "escapa" a una plataforma fija más arriba
+    function recolocarRegalos(arriba, abajo) {
+      for (const g of regalos) {
+        if (g.p.y <= abajo) continue;
+        const libre = plataformas.find((p) => p.tipo === 'normal' && p.y < arriba - 20 && !regalos.some((o) => o.p === p));
+        if (libre) { g.p = libre; g.dx = libre.w / 2; }
+      }
+    }
+
+    function empezarSaltos(api) {
+      jug = { x: COL / 2, y: -1, vy: -REBOTE, dir: 1 };
+      plataformas = []; azarMapa = azarFijo(1212); genX = COL / 2; genY = 0; genN = 0;
+      extenderMapa(-(160 + (META - 1) * 170 + 200));
+      regalos = []; recogidos = 0; camara = null; alturaMax = 0; reloj = 0; pisada = -1;
+      // un regalo cada ~170 px de subida, sobre una plataforma fija del camino principal
+      const fijas = plataformas.filter((p) => p.tipo === 'normal');
       for (let k = 0; k < META; k++) {
         const ya = -(160 + k * 170);
-        let mejor = plataformas[0], d = Infinity;
-        for (const p of plataformas) if (p.tipo === 'normal' && Math.abs(p.y - ya) < d) { d = Math.abs(p.y - ya); mejor = p; }
-        regalos.push({ p: mejor, dx: mejor.w / 2, color: [C.rojo, C.verde, '#4a7ad8', C.lila][k % 4], t: Math.random() * 6 });
+        let mejor = fijas[0], d = Infinity;
+        for (const p of fijas) if (Math.abs(p.y - ya) < d && !regalos.some((g) => g.p === p)) { d = Math.abs(p.y - ya); mejor = p; }
+        regalos.push({ p: mejor, dx: mejor.w / 2, color: [C.rojo, C.verde, '#4a7ad8', C.lila][k % 4], t: k });
       }
       decir('¡SALTA POR LOS ESCOMBROS Y RECOGE LOS REGALOS!', C.oroClaro, 2.4);
     }
+    let reloj = 0, pisada = -1;
 
     const escala = (api) => (api.alto >= 440 ? 2 : 1);
     function decir(txt, color, vida = 1.4) { aviso = { texto: txt, color: color || C.oroClaro, vida }; }
@@ -137,10 +166,11 @@ window.JUEGOS['dia12-terremoto'] = {
       e.pulsado('toque');
       if (dx) jug.dir = dx;
       jug.x += dx * VEL * dt;
-      if (jug.x < -8) jug.x += W + 16; else if (jug.x > W + 8) jug.x -= W + 16;   // sale por un lado y entra por el otro
+      if (jug.x < -6) jug.x += COL + 12; else if (jug.x > COL + 6) jug.x -= COL + 12;   // sale por un lado de la columna y entra por el otro
 
+      reloj += dt;
       for (const p of plataformas) {
-        if (p.tipo === 'movil') { p.x += p.vx * dt; if (p.x < 0 || p.x + p.w > W) { p.vx *= -1; p.x = Math.max(0, Math.min(W - p.w, p.x)); } }
+        if (p.tipo === 'movil') p.x = p.base + Math.sin(reloj * 0.8 + p.fase) * 22;   // se balancea despacio y poco
         if (p.roto) { p.vy += GRAVEDAD * dt; p.y += p.vy * dt; }
       }
       const antes = jug.y;
@@ -150,6 +180,7 @@ window.JUEGOS['dia12-terremoto'] = {
         const p = plataformas.find((q) => !q.roto && antes <= q.y && jug.y >= q.y && jug.x > q.x - 5 && jug.x < q.x + q.w + 5);
         if (p || suelo) {
           jug.y = p ? p.y : 0; jug.vy = -REBOTE; Sonido.efecto('saltar');
+          pisada = p ? plataformas.indexOf(p) : -1;
           if (p && p.tipo === 'fragil') { p.roto = true; Sonido.efecto('golpe'); for (let k = 0; k < 6; k++) cascotes.push({ x: p.x + Math.random() * p.w, y: p.y, vx: (Math.random() - 0.5) * 60, vy: -20, vida: 0.8, w: 3, c: '#a2432f' }); }
         }
       }
@@ -164,11 +195,13 @@ window.JUEGOS['dia12-terremoto'] = {
           regalos.splice(i, 1);
           recogidos++;
           Sonido.efecto('coger');
-          api.aviso(`${recogidos}/${META}`, Math.round(gx * K), Math.round((gy - camara - 16) * K), C.oroClaro);
+          api.aviso(`${recogidos}/${META}`, Math.round((gx + Math.floor((W - COL) / 2)) * K), Math.round((gy - camara - 16) * K), C.oroClaro);
           if (recogidos >= META) { fase = 'reconstruir'; t = 0; Sonido.efecto('completar'); decir('¡LA NAVIDAD SIGUE EN PIE!', C.oroClaro, 4); return; }
         }
       }
 
+      extenderMapa(camara - 2 * H);
+      recolocarRegalos(camara, camara + H + 10);
       // cámara: sigue a la chica hacia arriba (nunca baja); caer por debajo de la pantalla es perder
       const objetivo = Math.min(-H + 40, jug.y - H * 0.55);
       camara = camara === null ? objetivo : Math.min(camara, camara + (objetivo - camara) * Math.min(1, dt * 8));
@@ -283,6 +316,16 @@ window.JUEGOS['dia12-terremoto'] = {
         r(ctx, '#3a2622', 0, 0, W, 60);
         for (let x = 0; x < W; x += 5) r(ctx, (x * 7) % 3 ? '#8c857b' : '#a2432f', x, -3 - ((x * 13) % 7), 6, 5 + ((x * 13) % 7));
       }
+      // paredes de escombros a los lados de la columna (marcan por dónde se sube)
+      const ox = Math.floor((W - COL) / 2);
+      for (const [x0, x1] of [[0, ox - 4], [ox + COL + 4, W]]) {
+        if (x1 <= x0) continue;
+        r(ctx, '#24181c', x0, cam, x1 - x0, Math.min(H + 2, -cam));
+        for (let y = Math.floor(cam / 12) * 12; y < Math.min(0, cam + H); y += 12)
+          for (let x = x0 + ((y / 12) % 2) * 6; x < x1; x += 14) r(ctx, ((x + y) / 2) % 3 ? '#3a2622' : '#5e2620', x, y, 11, 8);
+        r(ctx, '#8c857b', x0 === 0 ? x1 - 2 : x0, cam, 2, Math.min(H + 2, -cam));
+      }
+      ctx.translate(ox, 0);
       // plataformas: trozos del edificio
       for (const p of plataformas) {
         if (p.y < cam - 20 || p.y > cam + H + 20) continue;
@@ -299,7 +342,8 @@ window.JUEGOS['dia12-terremoto'] = {
 
     // Solo en modo debug: estado y atajos para las pruebas automáticas
     if (Dias.debug) window.rescateDebug = {
-      estado: () => ({ fase, recogidos, alturaMax: Math.round(alturaMax), camara, jug: jug ? { x: Math.round(jug.x), y: Math.round(jug.y) } : null,
+      estado: () => ({ fase, recogidos, alturaMax: Math.round(alturaMax), camara, pisada, vy: jug ? jug.vy : 0,
+                       plataformas: plataformas ? plataformas.map((p) => ({ x: p.x, y: p.y, w: p.w, tipo: p.tipo })) : [], jug: jug ? { x: Math.round(jug.x), y: Math.round(jug.y) } : null,
                        regalos: regalos ? regalos.map((g) => ({ x: g.p.x + g.dx, y: g.p.y })) : [] }),
       llevar: (x, y) => { jug.x = x; jug.y = y; jug.vy = -REBOTE; }
     };
