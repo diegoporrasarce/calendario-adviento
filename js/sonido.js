@@ -83,6 +83,12 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «We Three Kings» (J. H. Hopkins, 1857), primera frase en compás ternario de corcheas
+    reyes: {
+      tempo: 0.22, compas: 3, tipo: 'triangle',
+      melodia: [0, 1, 2].flatMap((k) => [[59, 2], [57, 1], [55, 2], [52, 1], [54, 1], [55, 1], [54, 1], [52, 3]]),
+      bajo: [52, 52, 47, 52, 52, 52, 47, 52, 55, 52, 47, 52]
+    },
     // «God Rest Ye Merry Gentlemen» (tradicional inglés, en mi menor), primera frase dos veces
     caballeros: {
       tempo: 0.25, compas: 4, tipo: 'square',
