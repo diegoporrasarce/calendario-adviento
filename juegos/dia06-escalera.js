@@ -11,10 +11,11 @@ window.JUEGOS['dia06-escalera'] = {
     const TIEMPO = 40;
     const VENTANA = 0.17, PERFECTO = 0.08;     // segundos de margen para acertar (y para "¡PERFECTO!")
     const VEL_FLECHA = 95;                     // px por segundo que suben las flechas
-    const SEP = 6, K = 2;                      // separación entre peldaños (px) y aumento de la escena
+    const SEP = 8;                             // separación entre peldaños (px, en unidades de la escena)
+    const ALTO_ESCENA = PISOS * PELDANOS_PISO * SEP + 34;   // del suelo a lo alto de la puerta del tejado
     const TEMPO_SIN_AUDIO = 0.28;              // si no hay audio, el mismo ritmo con un reloj propio
 
-    let peldano, altura, flechas, siguienteCompas, quedan, aviso, ganada, camara, tSubir, relojPropio, latido;
+    let peldano, altura, flechas, siguienteCompas, quedan, aviso, ganada, tSubir, relojPropio, latido;
 
     // Pulso actual de la música (o del reloj propio si el audio no está en marcha)
     function reloj() {
@@ -24,7 +25,7 @@ window.JUEGOS['dia06-escalera'] = {
     }
 
     function reiniciar() {
-      peldano = 0; altura = 0; flechas = []; quedan = TIEMPO; aviso = null; ganada = 0; camara = null; tSubir = 0;
+      peldano = 0; altura = 0; flechas = []; quedan = TIEMPO; aviso = null; ganada = 0; tSubir = 0;
       relojPropio = 0; latido = 0;
       const r = reloj();
       siguienteCompas = Math.floor(r.pulso / r.compas) + 2;          // las flechas empiezan dos compases después
@@ -117,8 +118,8 @@ window.JUEGOS['dia06-escalera'] = {
           const ys = y - PELDANOS_PISO * SEP;
           r('#3b2622', -70, ys + 7, 16, 13); r('#ffe9a0', -69, ys + 8, 14, 5); r('#f0a93a', -69, ys + 13, 14, 6);
           r('#3b2622', -63, ys + 8, 2, 11);
-          r(C.tinta, -40, ys + 9, 13, 9);
-          Sprites.numero(ctx, p, -33, ys + 11, C.oroClaro);
+          r(C.tinta, -42, ys + 7, 11, 11); r(C.oro, -42, ys + 7, 11, 1);
+          Comun.texto(ctx, String(p), -39, ys + 9, C.oroClaro);
         }
       }
       // tejado nevado y la puerta de casa arriba del todo
@@ -126,11 +127,11 @@ window.JUEGOS['dia06-escalera'] = {
       r('#f4f8ff', -100, yt - 3, 120, 3);
       r('#2b1a14', -30, yt - 22, 14, 20); r('#c2802a', -29, yt - 21, 12, 19); r('#f6cf63', -20, yt - 12, 2, 2);
       Sprites.corona(ctx, -23, yt - 16, '#c2802a');
+      r(C.tinta, -46, yt - 19, 11, 11); r(C.oro, -46, yt - 19, 11, 1);      // placa del piso 6 (casa)
+      Comun.texto(ctx, String(PISOS), -43, yt - 17, C.oroClaro);
       // escalera de mano
       r('#8a92b0', -5, yt - 10, 1, -yt + 10); r('#8a92b0', 5, yt - 10, 1, -yt + 10);
       for (let i = 0; i <= META + 1; i++) r('#6a7190', -4, -i * SEP - 1, 9, 1);
-      // suelo nevado
-      r('#f4f8ff', -200, 0, 400, 2); r('#dbe5f5', -200, 2, 400, 40);
       Sprites.abeto(ctx, 40, 6, 46); Sprites.abeto(ctx, -120, 6, 40);
       // la chica en la escalera
       const y = -Math.round(altura * SEP);
@@ -149,21 +150,24 @@ window.JUEGOS['dia06-escalera'] = {
       const ancho = api.ancho, alto = api.alto;
       Comun.fondoNoche(ctx, api.t, alto, ancho);
 
-      // cámara: la chica a un 60 % de la altura de la pantalla
-      const sueloPantalla = alto - 16;
-      const objetivo = Math.min(0, Math.floor(alto * 0.62) - sueloPantalla + Math.round(altura * SEP * K));
-      camara = camara === null ? objetivo : camara + (objetivo - camara) * 0.15;
-      const xEscalera = Math.floor(ancho * 0.42);
+      // el edificio entero siempre a la vista: al doble si cabe (móvil vertical), si no a tamaño normal
+      const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
+      const arribaLibre = 6 + altoCaja + 10 + (ancho - api.margenDerecho < 230 ? altoCaja + 6 : 0);
+      const sueloPantalla = alto - 14;
+      const K = (sueloPantalla - arribaLibre) >= ALTO_ESCENA * 2 ? 2 : 1;
+      const xEscalera = Math.floor(ancho * 0.42) + (K === 1 ? 20 : 0);
+      // suelo nevado de lado a lado
+      ctx.fillStyle = '#f4f8ff'; ctx.fillRect(0, sueloPantalla, ancho, 2);
+      ctx.fillStyle = '#dbe5f5'; ctx.fillRect(0, sueloPantalla + 2, ancho, alto - sueloPantalla);
       ctx.save();
-      ctx.translate(xEscalera, sueloPantalla + Math.round(camara));
+      ctx.translate(xEscalera, sueloPantalla);
       ctx.scale(K, K);
       escena(ctx, api.t);
       ctx.restore();
 
       // carril de las flechas a la derecha
       const r = reloj();
-      const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
-      const carrilX = Math.min(ancho - 34, xEscalera + 120), carrilW = 26;
+      const carrilX = Math.min(ancho - 34, xEscalera + 40 * K + 50), carrilW = 26;
       const receptorY = 6 + altoCaja + 22 + (ancho - api.margenDerecho < 230 ? altoCaja + 6 : 0);
       ctx.fillStyle = '#0b0d22'; ctx.fillRect(carrilX - carrilW / 2, receptorY - 8, carrilW, alto - receptorY + 8);
       ctx.fillStyle = '#26305f'; ctx.fillRect(carrilX - carrilW / 2, receptorY - 8, 1, alto); ctx.fillRect(carrilX + carrilW / 2 - 1, receptorY - 8, 1, alto);
