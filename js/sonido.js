@@ -83,6 +83,15 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «Hark! The Herald Angels Sing» (F. Mendelssohn), primera frase
+    heraldo: {
+      tempo: 0.24, compas: 4, tipo: 'square',
+      melodia: [[55, 1], [60, 1], [60, 1.5], [59, .5], [60, 1], [64, 1], [64, 1], [62, 1],
+        [67, 1], [67, 1], [67, 1.5], [65, .5], [64, 1], [62, 1], [64, 2],
+        [55, 1], [60, 1], [60, 1.5], [59, .5], [60, 1], [64, 1], [64, 1], [62, 1],
+        [67, 1], [62, 1], [62, 1.5], [59, .5], [59, 1], [57, 1], [55, 2]],
+      bajo: [48, 48, 48, 55, 48, 48, 50, 55]
+    },
     // «O Tannenbaum» (tradicional alemán), primera frase dos veces
     tannenbaum: {
       tempo: 0.34, compas: 3, tipo: 'triangle',
@@ -259,6 +268,8 @@ const Sonido = (() => {
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07, t + 0.05); g.gain.linearRampToValueAtTime(0.0001, t + 0.55);
       osc.connect(f).connect(g).connect(salida); osc.start(t); osc.stop(t + 0.6);
     }
+    else if (nombre === 'derrumbe') { ruido(t, 1.2, 0.25, 300); ruido(t + 0.3, 0.9, 0.2, 180); nota(33, t, 1, 'square', 0.06); }
+    else if (nombre === 'saltar') { nota(67, t, 0.06, 'square', 0.05); nota(74, t + 0.04, 0.06, 'square', 0.05); }
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 
