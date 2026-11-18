@@ -2,22 +2,21 @@
 /* Día 9 — Chocolate caliente (cocina al estilo Overcooked, vista desde arriba).
    La chica se mueve por la cocina (flechas, o tocando donde ir) y usa cada puesto con Espacio o tocándolo.
    Solo puede llevar una cosa. Receta: leche de la nevera al cazo → se calienta → cacao al cazo → remover
-   (pulsar varias veces) → servir en una taza → nata (y nubes si el pedido las lleva) → entregar.
-   Si la leche caliente espera mucho sin cacao, se quema. El cazo da para 2 tazas.
-   Hay que servir los 3 pedidos antes de que se acabe el tiempo. */
+   (pulsar varias veces) → recogerlo del cazo con una taza → nata y nubes → entregar.
+   Si la leche caliente espera mucho sin cacao, se quema. Un solo pedido, antes de que se acabe el tiempo. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia09-chocolate'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
-    const TIEMPO = 150, VEL = 85;
-    const T_CALENTAR = 4, T_QUEMAR = 9, VUELTAS = 6, RACIONES = 2;
-    const PEDIDOS = [{ nubes: false }, { nubes: true }, { nubes: false }];
+    const TIEMPO = 90, VEL = 85;
+    const T_CALENTAR = 4, T_QUEMAR = 9, VUELTAS = 6, RACIONES = 1;
+    const PEDIDOS = [{ nubes: true }];   // un solo pedido, con todo
     // suelo transitable de la cocina (escena de 320x210) y puestos: rect sobre la encimera y punto de uso delante
     const SUELO = { x0: 42, x1: 278, y0: 64, y1: 192 };
     const PUESTOS = [
       { id: 'nevera', nombre: 'NEVERA (LECHE)', x: 32, y: 6, w: 32, h: 46, fx: 48, fy: 66 },
       { id: 'tazas', nombre: 'TAZAS', x: 78, y: 20, w: 30, h: 30, fx: 93, fy: 66 },
-      { id: 'fogon', nombre: 'FOGON', x: 132, y: 18, w: 48, h: 32, fx: 156, fy: 66 },
+      { id: 'fogon', nombre: 'CAZO', x: 132, y: 18, w: 48, h: 32, fx: 156, fy: 66 },
       { id: 'cacao', nombre: 'CACAO', x: 198, y: 20, w: 24, h: 30, fx: 210, fy: 66 },
       { id: 'nata', nombre: 'NATA', x: 236, y: 20, w: 24, h: 30, fx: 248, fy: 66 },
       { id: 'nubes', nombre: 'NUBES', x: 290, y: 68, w: 28, h: 30, fx: 276, fy: 84 },
@@ -73,11 +72,11 @@ window.JUEGOS['dia09-chocolate'] = {
         case 'entrega': {
           if (!taza) { decir('TRAE UN CHOCOLATE', C.lila, p); return; }
           const pd = pedido();
-          const falta = !taza.choco ? 'LE FALTA EL CHOCOLATE' : !taza.nata ? 'LE FALTA LA NATA' : pd.nubes && !taza.nubes ? 'ESTE LLEVA NUBES' : !pd.nubes && taza.nubes ? 'ESTE VA SIN NUBES' : '';
+          const falta = !taza.choco ? 'LE FALTA EL CHOCOLATE' : !taza.nata ? 'LE FALTA LA NATA' : pd.nubes && !taza.nubes ? 'LE FALTAN LAS NUBES' : !pd.nubes && taza.nubes ? 'ESTE VA SIN NUBES' : '';
           if (falta) { decir(falta, C.rojoClaro, p); Sonido.efecto('bloqueada'); return; }
           mano = null; servidos++;
           Sonido.efecto('pareja');
-          decir(servidos >= PEDIDOS.length ? '¡TODOS SERVIDOS!' : '¡PEDIDO SERVIDO!', C.oroClaro, p);
+          decir('¡PEDIDO SERVIDO!', C.oroClaro, p);
           if (servidos >= PEDIDOS.length) ganada = 1.2;
           return;
         }
@@ -173,26 +172,27 @@ window.JUEGOS['dia09-chocolate'] = {
         for (let k = 0; k < 3; k++) taza(ctx, x + 6 + k * 9, y + h - 16, {});
         r(ctx, '#7a4a28', x, y + h - 16, w, 2);
       } else if (p.id === 'fogon') {
-        r(ctx, '#2c2f3e', x, y, w, h); r(ctx, '#3e4256', x + 2, y + 2, w - 4, h - 4);
-        for (const [bx, by] of [[x + 12, y + 10], [x + 36, y + 10], [x + 12, y + 24], [x + 36, y + 24]]) { r(ctx, '#1a1c28', bx - 5, by - 3, 10, 6); }
-        // cazo en el fuego de arriba a la izquierda (con llama si está encendido)
-        const cx = x + 22, cy = y + 14, enc = cazo.estado === 'calentando' || cazo.estado === 'caliente' || cazo.estado === 'mezclar';
-        if (enc) { r(ctx, Math.floor(t * 12) % 2 ? '#f08a2c' : '#ffd24a', cx - 6, cy + 5, 12, 2); r(ctx, '#5cd6ff', cx - 4, cy + 6, 8, 1); }
-        r(ctx, '#9aa0b0', cx - 9, cy - 6, 18, 11); r(ctx, '#6a7088', cx + 9, cy - 2, 9, 2);              // cazo y mango
+        // un cazo grande sobre un fuego (con llama mientras está encendido)
+        const cx = x + w / 2, enc = cazo.estado === 'calentando' || cazo.estado === 'caliente' || cazo.estado === 'mezclar';
+        r(ctx, '#2c2f3e', cx - 14, y + h - 6, 28, 6); r(ctx, '#1a1c28', cx - 10, y + h - 5, 20, 3);          // fuego
+        if (enc) for (let k = 0; k < 5; k++) r(ctx, (Math.floor(t * 12) + k) % 2 ? '#f08a2c' : '#ffd24a', cx - 9 + k * 4, y + h - 8 - ((Math.floor(t * 10) + k) % 2), 2, 3);
+        const top = y + 6;                                                                                       // borde del cazo
+        r(ctx, '#6a7088', cx - 16, top, 32, 18); r(ctx, '#9aa0b0', cx - 15, top + 1, 30, 16); r(ctx, '#c6cbd8', cx - 15, top + 1, 4, 16);
+        r(ctx, '#6a7088', cx + 16, top + 4, 12, 3); r(ctx, '#3a3e4e', cx + 24, top + 4, 4, 3);                   // mango
         const dentro = { vacio: '#4a4e60', calentando: C.nieve2, caliente: C.blanco, mezclar: '#8a5a32', listo: '#6b3a1e', quemado: C.tinta }[cazo.estado];
-        r(ctx, dentro, cx - 7, cy - 4, 14, 7);
-        if (cazo.estado === 'mezclar') r(ctx, '#c08d52', cx - 4 + (cazo.vueltas % 3) * 3, cy - 2, 2, 2);          // remolino
-        if (cazo.estado === 'caliente' || cazo.estado === 'listo')                                             // vapor
-          for (let k = 0; k < 3; k++) r(ctx, C.nieve3, cx - 5 + k * 5, cy - 9 - ((Math.floor(t * 4) + k) % 3) * 2, 1, 2);
-        if (cazo.estado === 'quemado') for (let k = 0; k < 4; k++) r(ctx, '#5a5a6a', cx - 6 + k * 4, cy - 12 - ((Math.floor(t * 6) + k) % 4) * 2, 3, 3);
-        // barras de estado sobre el fogón
+        r(ctx, '#c6cbd8', cx - 15, top - 2, 30, 3);                                                              // boca
+        r(ctx, dentro, cx - 13, top - 1, 26, 4);
+        if (cazo.estado === 'mezclar') { r(ctx, '#c08d52', cx - 9 + (cazo.vueltas % 3) * 6, top, 4, 2); r(ctx, '#c98a3a', cx - 2 + ((cazo.vueltas + 1) % 2) * 6, top - 10, 2, 12); }   // remolino y cuchara
+        if (cazo.estado === 'caliente' || cazo.estado === 'listo')                                               // vapor
+          for (let k = 0; k < 4; k++) r(ctx, C.nieve3, cx - 9 + k * 6, top - 5 - ((Math.floor(t * 4) + k) % 3) * 2, 1, 2);
+        if (cazo.estado === 'quemado') for (let k = 0; k < 4; k++) r(ctx, '#5a5a6a', cx - 8 + k * 5, top - 8 - ((Math.floor(t * 6) + k) % 4) * 2, 3, 3);
+        // barras de estado sobre el cazo
         if (cazo.estado === 'calentando') barra(ctx, x + 4, y - 6, w - 8, cazo.t / T_CALENTAR, C.naranja);
         if (cazo.estado === 'caliente') {
           barra(ctx, x + 4, y - 6, w - 8, 1 - cazo.t / T_QUEMAR, cazo.t > T_QUEMAR * 0.6 ? C.rojoClaro : C.oro);
           if (cazo.t > T_QUEMAR * 0.6 && Math.floor(t * 6) % 2) { r(ctx, C.rojoClaro, x + w / 2 - 1, y - 16, 3, 6); r(ctx, C.rojoClaro, x + w / 2 - 1, y - 9, 3, 2); }   // ¡!
         }
         if (cazo.estado === 'mezclar') barra(ctx, x + 4, y - 6, w - 8, cazo.vueltas / VUELTAS, '#c08d52');
-        if (cazo.estado === 'listo') for (let k = 0; k < cazo.raciones; k++) taza(ctx, x + w - 8 - k * 9, y + h - 2, { choco: true });
       } else if (p.id === 'cacao') {
         r(ctx, '#6b3a1e', x + 4, y + 6, 16, 22); r(ctx, C.oro, x + 4, y + 6, 16, 3); r(ctx, '#a0602e', x + 8, y + 13, 8, 8); r(ctx, '#4a2410', x + 4, y + 26, 16, 2);
       } else if (p.id === 'nata') {
@@ -233,7 +233,7 @@ window.JUEGOS['dia09-chocolate'] = {
 
     /* ---------- Receta siempre a la vista, con el paso que toca resaltado ---------- */
     const RECETA = ['1 LECHE AL CAZO', '2 ESPERA QUE HIERVA', '3 ECHA EL CACAO', '4 REMUEVE (6 VECES)',
-                    '5 SIRVE EN UNA TAZA', '6 PON NATA (Y NUBES)', '7 A LA VENTANILLA'];
+                    '5 SIRVE EN UNA TAZA', '6 PON NATA Y NUBES', '7 A LA VENTANILLA'];
     const AVISO_RECETA = '¡SIN CACAO SE QUEMA!';
 
     // Paso actual (0..6) según el cazo y lo que lleva en las manos
@@ -268,7 +268,7 @@ window.JUEGOS['dia09-chocolate'] = {
       texto(ctx, AVISO_RECETA, x + 8, y + 6 + m.linea * (RECETA.length + 1) + 6, cazo.estado === 'caliente' ? C.rojoClaro : C.lila, { escala: e });
     }
 
-    // Cocina y receta: la receta va a la derecha si cabe; si no, debajo; si no, se reduce la cocina
+    // Cocina y receta: la receta va a la izquierda si cabe; si no, debajo; si no, se reduce la cocina
     function disposicion(api) {
       const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
       const arriba = 6 + (altoCaja + 6) * (api.ancho - api.margenDerecho < 300 ? 3 : 2) + 2;
@@ -277,9 +277,10 @@ window.JUEGOS['dia09-chocolate'] = {
       for (let K = kMax; K >= 1; K--) {
         const libreAlto = api.alto - arriba - 4;
         if (api.ancho - 320 * K - 20 >= rec.w && 210 * K <= libreAlto) {                     // al lado
-          const x0 = Math.floor((api.ancho - (320 * K + 10 + rec.w)) / 2);
+          const xr = Math.floor((api.ancho - (320 * K + 10 + rec.w)) / 2);                         // receta a la izquierda
+          const x0 = xr + rec.w + 10;
           const y0 = arriba + Math.max(0, Math.floor((libreAlto - 210 * K) / 2));
-          return { K, x0, y0, altoCaja, e, receta: { x: x0 + 320 * K + 10, y: y0 + Math.max(0, Math.floor((210 * K - rec.h) / 2)) } };
+          return { K, x0, y0, altoCaja, e, receta: { x: xr, y: y0 + Math.max(0, Math.floor((210 * K - rec.h) / 2)) } };
         }
         if (210 * K + 8 + rec.h <= libreAlto && rec.w <= api.ancho - 8) {                       // debajo
           const x0 = Math.floor((api.ancho - 320 * K) / 2);
@@ -319,11 +320,11 @@ window.JUEGOS['dia09-chocolate'] = {
         texto(ctx, aviso.texto, Math.round(ax), Math.max(d.y0 - 10, d.y0 + Math.round(aviso.y * d.K) - 12), aviso.color, { centro: true, sombra: C.tinta, escala: em });
       }
 
-      // marcadores: pedidos servidos, tiempo, y la comanda actual (con o sin nubes)
-      const t1 = `PEDIDOS ${servidos}/${PEDIDOS.length}`;
+      // marcadores: pedido, tiempo y la comanda
+      const t1 = servidos ? 'PEDIDO SERVIDO' : 'PEDIDO 0/1';
       Comun.caja(ctx, 6, 6, Comun.medir(t1, e) + 8, d.altoCaja);
       texto(ctx, t1, 10, 10, C.oroClaro, { escala: e });
-      const anchoBarra = 50, anchoNum = Comun.medir('150', e), w2 = anchoBarra + anchoNum + 12;
+      const anchoBarra = 50, anchoNum = Comun.medir('90', e), w2 = anchoBarra + anchoNum + 12;
       let x2 = Math.max(Comun.medir(t1, e) + 22, Math.floor((api.ancho - w2) / 2)), y2 = 6;
       if (x2 + w2 > api.ancho - api.margenDerecho) { x2 = 6; y2 = 6 + d.altoCaja + 6; }
       Comun.caja(ctx, x2, y2, w2, d.altoCaja);
@@ -349,7 +350,7 @@ window.JUEGOS['dia09-chocolate'] = {
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'CHOCOLATE CALIENTE',
-      instruccion: 'LECHE AL CAZO, ESPERA A QUE SE CALIENTE Y ECHA EL CACAO. REMUEVE, SIRVE EN UNA TAZA, PON NATA (Y NUBES SI LAS PIDEN) Y ENTREGA. ¡QUE NO SE QUEME LA LECHE! MUEVETE CON LAS FLECHAS Y USA CON ESPACIO, O TOCA DONDE IR.',
+      instruccion: 'PREPARA UN CHOCOLATE CON NATA Y NUBES: LECHE AL CAZO, ESPERA A QUE SE CALIENTE, ECHA EL CACAO Y REMUEVE. COGE UNA TAZA PARA SERVIRLO, PONLE NATA Y NUBES Y ENTREGALO. ¡QUE NO SE QUEME LA LECHE! MUEVETE CON LAS FLECHAS Y USA CON ESPACIO, O TOCA DONDE IR.',
       pantallaCompleta: true,
       musica: 'caballeros',
       reiniciar,
