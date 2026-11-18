@@ -83,6 +83,13 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «O Tannenbaum» (tradicional alemán), primera frase dos veces
+    tannenbaum: {
+      tempo: 0.34, compas: 3, tipo: 'triangle',
+      melodia: [0, 1].flatMap((k) => [[55, .75], [55, .25], [55, 1.5], [57, .5], [59, .75], [59, .25], [59, 1.5], [59, .5],
+                                      [57, .5], [59, .5], [60, 1], [54, 1], ...(k === 0 ? [[57, 1], [55, 1], [50, 1]] : [[57, 1], [55, 2]])]),
+      bajo: [43, 43, 50, 43, 43, 43, 50, 43]
+    },
     // «We Three Kings» (J. H. Hopkins, 1857), primera frase en compás ternario de corcheas
     reyes: {
       tempo: 0.22, compas: 3, tipo: 'triangle',

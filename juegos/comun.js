@@ -79,6 +79,7 @@ const Comun = (() => {
       lienzo.setPointerCapture(ev.pointerId);
       posicion(ev);
       e.puntero.abajo = true;
+      e.puntero.xInicio = e.puntero.x; e.puntero.yInicio = e.puntero.y;   // dónde se pulsó (para coger y arrastrar)
       pulsados.add('toque'); pulsados.add('accion');
     });
     escuchar(lienzo, 'pointermove', (ev) => posicion(ev));

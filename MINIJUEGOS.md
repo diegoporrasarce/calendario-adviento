@@ -30,10 +30,10 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
 - **Base compartida `juegos/comun.js`** (se carga desde `index.html`): cada juego llama a
   `Comun.crearJuego(contenedor, alTerminar, { titulo, instruccion, sinDerrota, pantallaCompleta, musica, reiniciar, actualizar, dibujar })`
   y devuelve lo que esta devuelve (su `destruir`). La base pone el lienzo de 320×240 escalado, la entrada unificada
-  (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
+  (`api.entrada`: flechas, Espacio/Enter, toques con `puntero` (con `xInicio`/`yInicio` = dónde se pulsó, para arrastrar), botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`, `api.fallo()` (cuenta un fallo para "Saltar" sin pantalla de derrota),
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
-  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8), `caballeros` (día 9), `reyes` (día 10).
+  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8), `caballeros` (día 9), `reyes` (día 10), `tannenbaum` (día 11).
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
   - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
@@ -103,6 +103,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **8 — El gato del vecino:** 10 escondites en la fachada (4 cortinas, 3 macetas, 3 cajas de la mudanza). Pistas: la cola asoma cada pocos segundos y al fallar sale FRÍO / TEMPLADO / ¡CALIENTE!. Tras 3 fallos el gato cambia de sitio. Encontrarlo 3 veces. Sin derrota.
 - **9 — Chocolate caliente (estilo Overcooked):** cocina vista desde arriba con nevera, tazas, cazo, cacao, nata, nubes, entrega y papelera. Leche al cazo → se calienta (4 s) → cacao → remover 6 veces → el chocolate se queda en el cazo y se recoge con una taza → nata y nubes → entregar. La leche caliente sin cacao se quema a los 9 s. Un solo pedido (con todo) en 90 s. Receta siempre a la vista a la izquierda de la cocina (debajo en móvil vertical) con el paso actual resaltado. Flechas + Espacio, o tocar el puesto (la chica va sola).
 - **10 — Adivina la palabra:** Wordle de 5 letras y 6 intentos; palabra en `dias.json` (`palabra`). Teclado del ordenador o en pantalla (con Ñ); cualquier combinación de 5 letras vale; sin tildes; letras repetidas como en el original. Al agotar los intentos se pierde (sin revelar la palabra) y se reintenta.
+- **11 — Decorar el árbol:** arrastrar 8 adornos y la estrella (solo en la punta) desde la caja a los huecos del árbol; también con flechas + Espacio. Al terminar, luces y temblor creciente ("...¿Y ESTE TEMBLOR?") como gancho del día 12. Sin derrota.
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
