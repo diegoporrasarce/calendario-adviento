@@ -231,12 +231,65 @@ window.JUEGOS['dia09-chocolate'] = {
       return cv;
     }
 
+    /* ---------- Receta siempre a la vista, con el paso que toca resaltado ---------- */
+    const RECETA = ['1 LECHE AL CAZO', '2 ESPERA QUE HIERVA', '3 ECHA EL CACAO', '4 REMUEVE (6 VECES)',
+                    '5 SIRVE EN UNA TAZA', '6 PON NATA (Y NUBES)', '7 A LA VENTANILLA'];
+    const AVISO_RECETA = '¡SIN CACAO SE QUEMA!';
+
+    // Paso actual (0..6) según el cazo y lo que lleva en las manos
+    function pasoActual() {
+      const tz = mano && mano.tipo === 'taza' ? mano : null;
+      if (tz && tz.choco) return !tz.nata || (pedido().nubes && !tz.nubes) ? 5 : 6;
+      switch (cazo.estado) {
+        case 'calentando': return 1;
+        case 'caliente': return 2;
+        case 'mezclar': return 3;
+        case 'listo': return 4;
+        default: return 0;
+      }
+    }
+
+    function medidasReceta(e) {
+      const linea = Comun.altoTexto(e) + 3 * e;
+      const w = Math.max(...RECETA.map((l) => Comun.medir('→' + l, e)), Comun.medir(AVISO_RECETA, e)) + 16;
+      return { w, h: 12 + linea * (RECETA.length + 2) + 6, linea };
+    }
+
+    function pintarReceta(ctx, x, y, e, t) {
+      const m = medidasReceta(e), paso = pasoActual();
+      Comun.caja(ctx, x, y, m.w, m.h);
+      texto(ctx, 'RECETA', x + 8, y + 6, C.oroClaro, { escala: e });
+      RECETA.forEach((l, i) => {
+        const actual = i === paso, ly = y + 6 + m.linea * (i + 1) + 2;
+        const color = actual ? C.oroClaro : i < paso ? C.nieve4 : C.nieve;
+        if (actual && Math.floor(t * 3) % 3) texto(ctx, '→', x + 4, ly, C.oroClaro, { escala: e });
+        texto(ctx, l, x + 8 + Comun.medir('→', e) + 2 * e, ly, color, { escala: e });
+      });
+      texto(ctx, AVISO_RECETA, x + 8, y + 6 + m.linea * (RECETA.length + 1) + 6, cazo.estado === 'caliente' ? C.rojoClaro : C.lila, { escala: e });
+    }
+
+    // Cocina y receta: la receta va a la derecha si cabe; si no, debajo; si no, se reduce la cocina
     function disposicion(api) {
       const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
       const arriba = 6 + (altoCaja + 6) * (api.ancho - api.margenDerecho < 300 ? 3 : 2) + 2;
-      const K = Math.max(1, Math.min(3, Math.floor(Math.min(api.ancho / 322, (api.alto - arriba - 4) / 212))));
-      const x0 = Math.floor((api.ancho - 320 * K) / 2), y0 = arriba + Math.max(0, Math.floor((api.alto - arriba - 210 * K) / 2));
-      return { K, x0, y0, altoCaja, e };
+      const rec = medidasReceta(e);
+      const kMax = Math.max(1, Math.min(3, Math.floor(Math.min(api.ancho / 322, (api.alto - arriba - 4) / 212))));
+      for (let K = kMax; K >= 1; K--) {
+        const libreAlto = api.alto - arriba - 4;
+        if (api.ancho - 320 * K - 20 >= rec.w && 210 * K <= libreAlto) {                     // al lado
+          const x0 = Math.floor((api.ancho - (320 * K + 10 + rec.w)) / 2);
+          const y0 = arriba + Math.max(0, Math.floor((libreAlto - 210 * K) / 2));
+          return { K, x0, y0, altoCaja, e, receta: { x: x0 + 320 * K + 10, y: y0 + Math.max(0, Math.floor((210 * K - rec.h) / 2)) } };
+        }
+        if (210 * K + 8 + rec.h <= libreAlto && rec.w <= api.ancho - 8) {                       // debajo
+          const x0 = Math.floor((api.ancho - 320 * K) / 2);
+          const y0 = arriba + Math.max(0, Math.floor((libreAlto - 210 * K - 8 - rec.h) / 2));
+          return { K, x0, y0, altoCaja, e, receta: { x: Math.floor((api.ancho - rec.w) / 2), y: y0 + 210 * K + 8 } };
+        }
+      }
+      // no cabe en ningún sitio: cocina centrada y la receta encima, en una esquina de abajo
+      const x0 = Math.floor((api.ancho - 320 * kMax) / 2), y0 = arriba + Math.max(0, Math.floor((api.alto - arriba - 210 * kMax) / 2));
+      return { K: kMax, x0, y0, altoCaja, e, receta: { x: Math.max(4, api.ancho - rec.w - 6), y: Math.max(arriba, api.alto - rec.h - 6) } };
     }
 
     function dibujar(ctx, api) {
@@ -258,6 +311,7 @@ window.JUEGOS['dia09-chocolate'] = {
       ctx.restore();
 
       const e = d.e;
+      pintarReceta(ctx, d.receta.x, d.receta.y, e, api.t);
       // nombre del puesto cercano y mensajes
       if (cercano && !aviso) texto(ctx, cercano.nombre, d.x0 + Math.round(cercano.fx * d.K), d.y0 + Math.round((cercano.y + cercano.h + 6) * d.K), C.nieve, { centro: true, sombra: C.tinta, escala: e });
       if (aviso) {
@@ -289,7 +343,7 @@ window.JUEGOS['dia09-chocolate'] = {
     // Solo en modo debug: estado y puntos de uso de cada puesto en coordenadas del lienzo, para las pruebas
     let ultima = { K: 1, x0: 0, y0: 0 };
     if (Dias.debug) window.cocinaDebug = () => ({
-      mano, cazo: cazo.estado, raciones: cazo.raciones, servidos, quedan, andando: !!objetivo,
+      mano, cazo: cazo.estado, raciones: cazo.raciones, servidos, quedan, andando: !!objetivo, paso: pasoActual(),
       puestos: Object.fromEntries(PUESTOS.map((p) => [p.id, { x: ultima.x0 + (p.x + p.w / 2) * ultima.K, y: ultima.y0 + (p.y + p.h / 2) * ultima.K }]))
     });
 
