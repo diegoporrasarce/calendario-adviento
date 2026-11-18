@@ -68,7 +68,7 @@ Cada día tiene la descripción del usuario. Las **propuestas** son recomendacio
 | 8 | El gato del vecino | Un gato se ha escondido en el edificio y hay que encontrarlo detrás de las macetas o ventanas. |
 | 9 | Chocolate caliente | Prepararse una taza mezclando y preparando los ingredientes, con nata por encima, estilo Overcooked. |
 | 10 | Adivina la palabra | Wordle de 5 letras con una palabra vuestra. |
-| 11 | Decorar el árbol | Colocar adornos en el árbol del portal. Al terminar todo está precioso… y empieza a temblar. |
+| 11 | Decorar el árbol | Con tiempo: sale un árbol decorado de referencia y hay que copiarlo. 3 veces, cada vez más difícil. Al terminar todo está precioso… y empieza a temblar. |
 | 12 | Salva la Navidad | Ver detalle abajo. |
 | 13 | Apila ladrillos | Ladrillos que se mueven de lado a lado; hay que soltarlos encima de la torre (tipo Stack). |
 | 14 | Arregla las tuberías | Girar piezas para conectar el agua de principio a fin. |
@@ -103,7 +103,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **8 — El gato del vecino:** 10 escondites en la fachada (4 cortinas, 3 macetas, 3 cajas de la mudanza). Pistas: la cola asoma cada pocos segundos y al fallar sale FRÍO / TEMPLADO / ¡CALIENTE!. Tras 3 fallos el gato cambia de sitio. Encontrarlo 3 veces. Sin derrota.
 - **9 — Chocolate caliente (estilo Overcooked):** cocina vista desde arriba con nevera, tazas, cazo, cacao, nata, nubes, entrega y papelera. Leche al cazo → se calienta (4 s) → cacao → remover 6 veces → el chocolate se queda en el cazo y se recoge con una taza → nata y nubes → entregar. La leche caliente sin cacao se quema a los 9 s. Un solo pedido (con todo) en 90 s. Receta siempre a la vista a la izquierda de la cocina (debajo en móvil vertical) con el paso actual resaltado. Flechas + Espacio, o tocar el puesto (la chica va sola).
 - **10 — Adivina la palabra:** Wordle de 5 letras y 6 intentos; palabra en `dias.json` (`palabra`). Teclado del ordenador o en pantalla (con Ñ); cualquier combinación de 5 letras vale; sin tildes; letras repetidas como en el original. Al agotar los intentos se pierde (sin revelar la palabra) y se reintenta.
-- **11 — Decorar el árbol:** arrastrar 8 adornos y la estrella (solo en la punta) desde la caja a los huecos del árbol; también con flechas + Espacio. Al terminar, luces y temblor creciente ("...¿Y ESTE TEMBLOR?") como gancho del día 12. Sin derrota.
+- **11 — Decorar el árbol (copiar el modelo):** a la derecha, un árbol de MODELO decorado; hay que colgar cada adorno en su mismo hueco antes de que se acabe el tiempo. 3 rondas: 4, 6 y 8 adornos + estrella, con 45, 40 y 40 s (la caja trae siempre los 8, así que sobran). Poner uno donde no va lo devuelve a la caja y resta 3 s. Si se acaba el tiempo se repite la ronda. Al terminar la tercera, luces y temblor creciente ("...¿Y ESTE TEMBLOR?") como gancho del día 12. Arrastrar, o flechas + Espacio para coger y colgar.
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
