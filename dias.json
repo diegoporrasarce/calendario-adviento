@@ -16,7 +16,7 @@
     { "dia": 5, "tipo": "minijuego", "titulo": "Enciende las ventanas", "juego": "dia05-ventanas", "recompensa": "¡Feliz quinto día de diciembre! Todo el edificio brilla gracias a ti. Se nota que ya hay alguien nuevo en el barrio." },
     { "dia": 6, "tipo": "minijuego", "titulo": "Sube la escalera", "juego": "dia06-escalera", "recompensa": "¡Feliz sexto día de diciembre! Seis pisos al ritmo de las campanas… Ya conoces el edificio de arriba abajo." },
     { "dia": 7, "tipo": "minijuego", "titulo": "Muñeco de nieve", "juego": "dia07-muneco", "recompensa": "¡Feliz séptimo día de diciembre! Ya tienes vecino nuevo en el jardín: un muñeco de nieve con sombrero y todo. Cuídalo, que no se derrita." },
-    { "dia": 8, "tipo": "mensaje", "titulo": "Galletas", "texto": "Hoy, galletas de jengibre. Tú pones el horno, yo la masa." },
+    { "dia": 8, "tipo": "minijuego", "titulo": "El gato del vecino", "juego": "dia08-gato", "recompensa": "¡Feliz octavo día de diciembre! El gato del vecino ya te ha cogido cariño… Seguro que mañana vuelve a colarse en tu casa." },
     { "dia": 9, "tipo": "mensaje", "titulo": "Carta", "texto": "Escribe una carta corta a alguien que quieras." },
     { "dia": 10, "tipo": "minijuego", "titulo": "Segundo reto", "juego": "ejemplo", "texto": "Otro minijuego de ejemplo.", "recompensa": "Premio: una peli bajo la manta." },
     { "dia": 11, "tipo": "mensaje", "titulo": "Paseo", "texto": "Salimos a ver las luces de la ciudad." },

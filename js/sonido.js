@@ -83,6 +83,16 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «The First Noel» (tradicional inglés), estrofa dos veces
+    noel: {
+      tempo: 0.3, compas: 3, tipo: 'square',
+      melodia: [[null, 1], [52, 1], [50, 1],
+        ...[0, 1].flatMap((k) => [
+          [48, 1.5], [50, .5], [52, .5], [53, .5], [55, 2], [57, .5], [59, .5], [60, 1], [59, 1], [57, 1],
+          [55, 2], [57, .5], [59, .5], [60, 1], [59, 1], [57, 1], [55, 1], [57, 1], [59, 1],
+          [60, 1], [55, 1], [53, 1], ...(k === 0 ? [[52, 2], [52, .5], [50, .5]] : [[52, 3]])])],
+      bajo: [48, 48, 48, 53, 48, 53, 55, 48, 48, 48, 48, 53, 48, 53, 55, 48, 48]
+    },
     // «Joy to the World» (Händel / L. Mason)
     alegria: {
       tempo: 0.32, compas: 4, tipo: 'square',
@@ -221,6 +231,14 @@ const Sonido = (() => {
     else if (nombre === 'carta') { ruido(t, 0.04, 0.06, 2500); nota(81, t, 0.04, 'triangle', 0.06); }
     else if (nombre === 'pareja') [79, 84, 88].forEach((m, i) => nota(m, t + i * 0.06, 0.12, 'square', 0.07));
     else if (nombre === 'agua') { ruido(t, 0.6, 0.07, 1400); ruido(t + 0.15, 0.4, 0.05, 900); }
+    else if (nombre === 'miau') {                         // maullido: sube y baja de tono con un poco de vibrato
+      const osc = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      osc.type = 'sawtooth'; f.type = 'lowpass'; f.frequency.value = 1800;
+      osc.frequency.setValueAtTime(520, t); osc.frequency.linearRampToValueAtTime(820, t + 0.12);
+      osc.frequency.linearRampToValueAtTime(600, t + 0.35); osc.frequency.linearRampToValueAtTime(430, t + 0.5);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07, t + 0.05); g.gain.linearRampToValueAtTime(0.0001, t + 0.55);
+      osc.connect(f).connect(g).connect(salida); osc.start(t); osc.stop(t + 0.6);
+    }
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 

@@ -33,7 +33,7 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero`, botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`, `api.fallo()` (cuenta un fallo para "Saltar" sin pantalla de derrota),
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
-  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7).
+  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8).
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
   - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
@@ -100,6 +100,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **5 — Enciende las ventanas:** Lights Out 4×4 sobre la fachada; tableros generados desde "todo encendido" con 5 pulsaciones al azar (siempre con solución); botón REINICIAR y, desde 35 pulsaciones en total, botón PISTA que señala una ventana que falta pulsar; toque o flechas + Espacio. Sin derrota.
 - **6 — Sube la escalera:** ritmo sincronizado con la música (`Sonido.pulsoMusica()`, descontando la latencia); flechas al principio de cada compás y algunas dobles; acierto = peldaño, fallo = resbala (nunca por debajo del último piso). 6 pisos (24 peldaños) en 40 s.
 - **7 — Muñeco de nieve:** la pieza se balancea y se suelta al pulsar: base, cuerpo, cabeza y sombrero, cada vez más rápido. Centrada = ¡PERFECTO!; algo torcida aguanta; muy descentrada rueda y se rompe (derrota y reintento). Al final se añaden solos ojos, nariz, bufanda, botones y brazos.
+- **8 — El gato del vecino:** 10 escondites en la fachada (4 cortinas, 3 macetas, 3 cajas de la mudanza). Pistas: la cola asoma cada pocos segundos y al fallar sale FRÍO / TEMPLADO / ¡CALIENTE!. Tras 3 fallos el gato cambia de sitio. Encontrarlo 3 veces. Sin derrota.
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
