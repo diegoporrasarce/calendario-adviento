@@ -1,15 +1,15 @@
 'use strict';
 /* Día 4 — Riega la planta.
    Un indicador va y viene por una barra (izquierda = poca agua, derecha = demasiada).
-   Hay que pulsar cuando está en la zona verde cuatro veces seguidas: cada acierto la planta crece
-   y la zona se estrecha. Un fallo devuelve la planta a brote. Con 4 aciertos florece la flor de Pascua. */
+   Hay que pulsar cuando está en la zona verde cinco veces seguidas: cada acierto la planta crece
+   y la zona se estrecha. Un fallo devuelve la planta a brote. Con 5 aciertos florece la flor de Pascua. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia04-planta'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
-    const META = 4;
-    const ZONAS = [0.24, 0.18, 0.13, 0.09];      // ancho de la zona verde (fracción de la barra) en cada acierto
-    const VELOCIDADES = [0.55, 0.7, 0.85, 1.0];   // barridos por segundo
+    const META = 5;
+    const ZONAS = [0.24, 0.19, 0.15, 0.11, 0.08];       // ancho de la zona verde (fracción de la barra) en cada acierto
+    const VELOCIDADES = [0.55, 0.67, 0.79, 0.91, 1.03];  // barridos por segundo
 
     let racha, pos, dir, zona, vertiendo, gotas, mensaje, ganada, sacudida, crecer;
 
@@ -116,17 +116,18 @@ window.JUEGOS['dia04-planta'] = {
         r(C.verde, 0, -16, 1, 3); r(C.verde, -2, -17, 2, 1); r(C.verdeOsc, 1, -18, 2, 1);
         return;
       }
-      const alto = [0, 8, 13, 17, 19][etapa];
+      const alto = [0, 6, 10, 14, 17, 19][etapa];        // una etapa por acierto (META = 5)
       r(C.verdeOsc, 0, -13 - alto, 1, alto);
       const hoja = (y, lado, l) => { r(C.verde, lado > 0 ? 1 : -l, y, l, 2); r(C.verdeOsc, lado > 0 ? 1 + l - 1 : -l, y + 1, 1, 1); };
       hoja(-17, -1, 3); hoja(-19, 1, 3);
       if (etapa >= 2) { hoja(-23, -1, 4); hoja(-25, 1, 4); hoja(-21, 1, 5); }
-      if (etapa >= 3) { hoja(-28, -1, 4); hoja(-27, 1, 3); }
-      if (etapa === 3) {
+      if (etapa >= 3) { hoja(-27, -1, 4); hoja(-26, 1, 3); }
+      if (etapa >= 4) { hoja(-29, -1, 3); hoja(-30, 1, 3); }
+      if (etapa === META - 1) {
         // capullo cerrado, a punto de abrirse
         const cy = -13 - alto + vaiven;
         r(C.verde, -2, cy, 5, 3); r(C.rojo, -1, cy - 3, 3, 4); r(C.rojoOsc, 1, cy - 3, 1, 4); r(C.rojo, 0, cy - 4, 1, 1);
-      } else if (etapa >= 4) {
+      } else if (etapa >= META) {
         // flor de Pascua: brácteas rojas en estrella y centro amarillo
         const cy = -13 - alto + vaiven;
         r(C.verde, -6, cy + 2, 13, 2);
@@ -206,7 +207,7 @@ window.JUEGOS['dia04-planta'] = {
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'RIEGA LA PLANTA',
-      instruccion: 'PULSA ESPACIO O TOCA CUANDO LA FLECHA ESTE EN LA ZONA VERDE. ACIERTA 4 VECES SEGUIDAS PARA QUE LA PLANTA FLOREZCA.',
+      instruccion: 'PULSA ESPACIO O TOCA CUANDO LA FLECHA ESTE EN LA ZONA VERDE. ACIERTA 5 VECES SEGUIDAS PARA QUE LA PLANTA FLOREZCA.',
       pantallaCompleta: true,
       musica: 'nochedepaz',
       reiniciar, actualizar, dibujar

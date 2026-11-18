@@ -96,7 +96,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 ### Hechos
 - **2 — Atrapa copos:** 20 copos en 60 s, carámbanos que quitan 3, copos grandes. Mensaje escrito.
 - **3 — Memory:** 12 cartas con giro animado, 4×3 en horizontal y 3×4 en vertical; toque o flechas + Espacio. Sin derrota ("Saltar" a los 2 min).
-- **4 — Riega la planta:** barra con zona verde que se estrecha y se acelera; 4 aciertos seguidos (con capullo antes de abrirse) y florece la flor de Pascua. Un fallo vuelve a empezar la racha (cuenta para "Saltar").
+- **4 — Riega la planta:** barra con zona verde que se estrecha y se acelera; 5 aciertos seguidos (con capullo antes de abrirse) y florece la flor de Pascua. Un fallo vuelve a empezar la racha (cuenta para "Saltar").
 - **5 — Enciende las ventanas:** Lights Out 4×4 sobre la fachada; tableros generados desde "todo encendido" con 5 pulsaciones al azar (siempre con solución); botón REINICIAR y, desde 35 pulsaciones en total, botón PISTA que señala una ventana que falta pulsar; toque o flechas + Espacio. Sin derrota.
 - **6 — Sube la escalera:** ritmo sincronizado con la música (`Sonido.pulsoMusica()`, descontando la latencia); flechas al principio de cada compás y algunas dobles; acierto = peldaño, fallo = resbala (nunca por debajo del último piso). 6 pisos (24 peldaños) en 40 s.
 
