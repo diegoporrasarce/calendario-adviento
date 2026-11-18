@@ -251,27 +251,32 @@ window.JUEGOS['dia09-chocolate'] = {
 
     function medidasReceta(e) {
       const linea = Comun.altoTexto(e) + 3 * e;
-      const w = Math.max(...RECETA.map((l) => Comun.medir('→' + l, e)), Comun.medir(AVISO_RECETA, e)) + 16;
-      return { w, h: 12 + linea * (RECETA.length + 2) + 6, linea };
+      const w = Math.max(...RECETA.map((l) => Comun.medir('→' + l, e)), Comun.medir(AVISO_RECETA, e), Comun.medir(COMANDA, e) + 14) + 16;
+      return { w, h: 12 + linea * (RECETA.length + 3) + 10, linea };
     }
 
+    // La comanda va en la cabecera de la receta (así los marcadores de arriba ocupan una sola fila)
+    const COMANDA = 'PEDIDO: NATA Y NUBES';
     function pintarReceta(ctx, x, y, e, t) {
       const m = medidasReceta(e), paso = pasoActual();
       Comun.caja(ctx, x, y, m.w, m.h);
-      texto(ctx, 'RECETA', x + 8, y + 6, C.oroClaro, { escala: e });
+      texto(ctx, COMANDA, x + 8, y + 6, C.nieve, { escala: e });
+      ctx.save(); ctx.translate(x + 8 + Comun.medir(COMANDA, e) + 8, y + 6 + Comun.altoTexto(e)); taza(ctx, 0, 0, { choco: true, nata: true, nubes: true }); ctx.restore();
+      ctx.fillStyle = C.rojoOsc; ctx.fillRect(x + 4, y + 6 + m.linea + 2, m.w - 8, 1);
+      texto(ctx, 'RECETA', x + 8, y + 6 + m.linea + 6, C.oroClaro, { escala: e });
       RECETA.forEach((l, i) => {
-        const actual = i === paso, ly = y + 6 + m.linea * (i + 1) + 2;
+        const actual = i === paso, ly = y + 6 + m.linea * (i + 2) + 8;
         const color = actual ? C.oroClaro : i < paso ? C.nieve4 : C.nieve;
         if (actual && Math.floor(t * 3) % 3) texto(ctx, '→', x + 4, ly, C.oroClaro, { escala: e });
         texto(ctx, l, x + 8 + Comun.medir('→', e) + 2 * e, ly, color, { escala: e });
       });
-      texto(ctx, AVISO_RECETA, x + 8, y + 6 + m.linea * (RECETA.length + 1) + 6, cazo.estado === 'caliente' ? C.rojoClaro : C.lila, { escala: e });
+      texto(ctx, AVISO_RECETA, x + 8, y + 6 + m.linea * (RECETA.length + 2) + 12, cazo.estado === 'caliente' ? C.rojoClaro : C.lila, { escala: e });
     }
 
     // Cocina y receta: la receta va a la izquierda si cabe; si no, debajo; si no, se reduce la cocina
     function disposicion(api) {
       const e = api.textoEscala, altoCaja = Comun.altoTexto(e) + 8;
-      const arriba = 6 + (altoCaja + 6) * (api.ancho - api.margenDerecho < 300 ? 3 : 2) + 2;
+      const arriba = 6 + (altoCaja + 6) * (api.ancho - api.margenDerecho < 230 ? 2 : 1) + 2;   // pedido y tiempo
       const rec = medidasReceta(e);
       const kMax = Math.max(1, Math.min(3, Math.floor(Math.min(api.ancho / 322, (api.alto - arriba - 4) / 212))));
       for (let K = kMax; K >= 1; K--) {
@@ -288,9 +293,14 @@ window.JUEGOS['dia09-chocolate'] = {
           return { K, x0, y0, altoCaja, e, receta: { x: Math.floor((api.ancho - rec.w) / 2), y: y0 + 210 * K + 8 } };
         }
       }
-      // no cabe en ningún sitio: cocina centrada y la receta encima, en una esquina de abajo
+      // no cabe del todo: receta a la izquierda y la cocina a su lado (aunque se recorte un poco por abajo),
+      // o, si tampoco cabe a lo ancho, la receta encima de la cocina en la esquina de abajo a la izquierda
+      if (api.ancho - 320 - 20 >= rec.w) {
+        const xr = Math.floor((api.ancho - (320 + 10 + rec.w)) / 2);
+        return { K: 1, x0: xr + rec.w + 10, y0: arriba, altoCaja, e, receta: { x: xr, y: arriba } };
+      }
       const x0 = Math.floor((api.ancho - 320 * kMax) / 2), y0 = arriba + Math.max(0, Math.floor((api.alto - arriba - 210 * kMax) / 2));
-      return { K: kMax, x0, y0, altoCaja, e, receta: { x: Math.max(4, api.ancho - rec.w - 6), y: Math.max(arriba, api.alto - rec.h - 6) } };
+      return { K: kMax, x0, y0, altoCaja, e, receta: { x: 4, y: Math.max(arriba, api.alto - rec.h - 6) } };
     }
 
     function dibujar(ctx, api) {
@@ -331,14 +341,6 @@ window.JUEGOS['dia09-chocolate'] = {
       ctx.fillStyle = C.nocheClara; ctx.fillRect(x2 + 4, y2 + 4, anchoBarra, d.altoCaja - 8);
       ctx.fillStyle = quedan < 20 ? C.rojoClaro : C.verde; ctx.fillRect(x2 + 4, y2 + 4, Math.round(anchoBarra * quedan / TIEMPO), d.altoCaja - 8);
       texto(ctx, String(Math.ceil(quedan)), x2 + anchoBarra + 8, y2 + 4, quedan < 20 ? C.rojoClaro : C.nieve, { escala: e });
-      if (servidos < PEDIDOS.length) {
-        const t3 = pedido().nubes ? 'CON NATA Y NUBES' : 'CON NATA';
-        const largo = 'COMANDA: ' + t3, tx = Comun.medir(largo, e) + 30 <= api.ancho - 12 ? largo : t3;   // si no cabe, más corto
-        const y3 = Math.max(y2, 6) + d.altoCaja + 6, w3 = Comun.medir(tx, e) + 24;
-        Comun.caja(ctx, 6, y3, w3, d.altoCaja);
-        texto(ctx, tx, 10, y3 + 4, C.nieve, { escala: e });
-        ctx.save(); ctx.translate(6 + w3 - 10, y3 + d.altoCaja - 3); taza(ctx, 0, 0, { choco: true, nata: true, nubes: pedido().nubes }); ctx.restore();
-      }
     }
 
     // Solo en modo debug: estado y puntos de uso de cada puesto en coordenadas del lienzo, para las pruebas
