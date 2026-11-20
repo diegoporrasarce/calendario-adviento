@@ -1,17 +1,18 @@
 'use strict';
 /* Día 22 — Reparte los regalos.
    Desde el tejado, la chica lanza regalos a la chimenea de las casas vecinas: se mantiene pulsado (Espacio o
-   el dedo) para cargar la fuerza y se suelta para lanzar. El viento cambia en cada tiro y empuja el regalo.
-   Hay que meter 5 regalos con 12. Cada vez la chimenea está en una casa distinta. */
+   el dedo) para cargar la fuerza y se suelta para lanzar. Sin viento y con regalos sin límite: hay que meter 5
+   en la chimenea marcada (ancha), que cada vez está en una casa distinta. No se puede perder. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia22-regalos'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
-    const META = 5, REGALOS = 12, G = 260, ANG = 0.8;                     // ángulo fijo del lanzamiento (rad)
+    const META = 5, G = 260, CH = 22,       ANG = 0.8;                     // ángulo fijo del lanzamiento (rad)
     const V_MIN = 90, V_MAX = 250, T_CARGA = 1.1;
     const ESC_W = 320, ESC_H = 200, TEJADO_Y = 112, MANO = [44, 92];      // de dónde sale el regalo
 
-    let casas, objetivo, viento, carga, cargando, vuelo, dentro, quedan, final, aviso, avisoT, intento;
+    let casas, objetivo, carga, cargando, vuelo, dentro, tiros, final, aviso, avisoT;
+    const enBoca = (x, c) => Math.abs(x - (c.chim + CH / 2)) <= CH / 2 + 3;   // boca de la chimenea (más un margen)
 
     // Simula el lanzamiento con cada fuerza y devuelve una carga (0..1) que mete el regalo, o null si ninguna
     function cargaBuena() {
@@ -21,29 +22,27 @@ window.JUEGOS['dia22-regalos'] = {
         let x = MANO[0], y = MANO[1], vx = Math.cos(ANG) * v, vy = -Math.sin(ANG) * v;
         for (let s = 0; s < 600; s++) {
           const dt = 1 / 120, ay = y;
-          vx += viento * dt; vy += G * dt; x += vx * dt; y += vy * dt;
-          if (vy > 0 && ay <= bocaY && y >= bocaY) { if (Math.abs(x - (c.chim + 5)) <= 5) return k / 100; break; }
+          vy += G * dt; x += vx * dt; y += vy * dt;
+          if (vy > 0 && ay <= bocaY && y >= bocaY) { if (enBoca(x, c)) return k / 100; break; }
           if (casas.some((q) => x > q.x && x < q.x + q.w && y > q.techo)) break;
         }
       }
       return null;
     }
-    const nuevoViento = () => { viento = Math.round((Math.random() * 2 - 1) * 30); };   // px/s²: + derecha, - izquierda
 
     function nuevaRonda() {
       // tres casas a distinta distancia; una tiene la chimenea marcada (el objetivo). Siempre alcanzable.
       do {
         casas = [0, 1, 2].map((i) => {
           const x = 120 + i * 66 + Math.floor(Math.random() * 20), alto = 60 + Math.floor(Math.random() * 40);
-          return { x, w: 54, techo: ESC_H - alto, chim: x + 12 + Math.floor(Math.random() * 26) };
+          return { x, w: 56, techo: ESC_H - alto, chim: x + 6 + Math.floor(Math.random() * 22) };
         });
         objetivo = Math.floor(Math.random() * casas.length);
-        nuevoViento();
       } while (cargaBuena() === null);
     }
 
     function reiniciar() {
-      dentro = 0; quedan = REGALOS; final = 0; aviso = null; avisoT = 0; carga = 0; cargando = false; vuelo = null; intento = 0;
+      dentro = 0; tiros = 0; final = 0; aviso = null; avisoT = 0; carga = 0; cargando = false; vuelo = null;
       nuevaRonda();
     }
 
@@ -52,7 +51,7 @@ window.JUEGOS['dia22-regalos'] = {
     function lanzar() {
       const v = V_MIN + (V_MAX - V_MIN) * carga;
       vuelo = { x: MANO[0], y: MANO[1], vx: Math.cos(ANG) * v, vy: -Math.sin(ANG) * v, t: 0 };
-      quedan--; carga = 0; cargando = false; intento++;
+      tiros++; carga = 0; cargando = false;
       Sonido.efecto('saltar');
     }
 
@@ -63,18 +62,18 @@ window.JUEGOS['dia22-regalos'] = {
       const pulsando = e.accion || e.puntero.abajo;
       const nueva = e.pulsado('toque') | e.pulsado('accion');             // solo empieza a cargar con una pulsación nueva
       if (!vuelo) {
-        if (!cargando && nueva && quedan > 0) cargando = true;
+        if (!cargando && nueva) cargando = true;
         if (cargando && pulsando) carga = Math.min(1, carga + dt / T_CARGA);
         else if (cargando) lanzar();
       } else {
-        // el regalo vuela: gravedad y viento
+        // el regalo vuela
         vuelo.t += dt;
-        vuelo.vx += viento * dt; vuelo.vy += G * dt;
+        vuelo.vy += G * dt;
         const antesY = vuelo.y;
         vuelo.x += vuelo.vx * dt; vuelo.y += vuelo.vy * dt;
         const c = casas[objetivo], bocaY = c.techo - 18;
         // entra si cruza la boca de la chimenea bajando
-        if (vuelo.vy > 0 && antesY <= bocaY && vuelo.y >= bocaY && Math.abs(vuelo.x - (c.chim + 5)) <= 7) {
+        if (vuelo.vy > 0 && antesY <= bocaY && vuelo.y >= bocaY && enBoca(vuelo.x, c)) {
           dentro++; vuelo = null;
           Sonido.efecto('pareja'); decir('¡DENTRO!', C.oroClaro);
           if (dentro >= META) { final = 0.001; Sonido.efecto('completar'); return; }
@@ -82,10 +81,8 @@ window.JUEGOS['dia22-regalos'] = {
         } else if (vuelo.y > ESC_H + 20 || vuelo.x > ESC_W + 30 || vuelo.x < -30 || casas.some((k) => vuelo.x > k.x && vuelo.x < k.x + k.w && vuelo.y > k.techo)) {
           vuelo = null;
           Sonido.efecto('golpe'); decir('¡UY! CASI', C.lila);
-          do nuevoViento(); while (cargaBuena() === null);                 // el viento cambia (sin dejarlo imposible)
         }
       }
-      if (!vuelo && quedan <= 0 && dentro < META && final === 0) api.perder(`TE QUEDASTE SIN REGALOS: ${dentro} DE ${META} EN LA CHIMENEA`);
     }
 
     /* ---------- Dibujo (escena de 320 x 200) ---------- */
@@ -116,10 +113,11 @@ window.JUEGOS['dia22-regalos'] = {
         for (let y = c.techo + 8; y < ESC_H - 6; y += 16) for (let x = c.x + 6; x < c.x + c.w - 10; x += 18) r(ctx, (x + y) % 3 ? '#ffe9a0' : '#3a2f45', x, y, 8, 8);
         r(ctx, '#4a3238', c.x - 4, c.techo - 4, c.w + 8, 6); r(ctx, C.nieve, c.x - 5, c.techo - 6, c.w + 10, 3);
         const objetivoMarcado = i === objetivo;
-        r(ctx, '#7a3a2c', c.chim, c.techo - 18, 10, 16); r(ctx, '#cfc8bd', c.chim - 1, c.techo - 20, 12, 3); r(ctx, '#1d1216', c.chim + 2, c.techo - 19, 6, 1);
+        r(ctx, '#7a3a2c', c.chim, c.techo - 18, CH, 16); r(ctx, '#cfc8bd', c.chim - 1, c.techo - 20, CH + 2, 3); r(ctx, '#1d1216', c.chim + 2, c.techo - 19, CH - 4, 1);
+        for (let y = c.techo - 14; y < c.techo - 2; y += 4) r(ctx, '#5e2c22', c.chim + ((y / 4) % 2 ? 2 : 8), y, 8, 1);
         if (objetivoMarcado) {
-          const o = Math.floor(t * 3) % 2;
-          r(ctx, C.oroClaro, c.chim + 3, c.techo - 34 - o, 4, 8); r(ctx, C.oroClaro, c.chim + 1, c.techo - 28 - o, 8, 2); r(ctx, C.oroClaro, c.chim + 3, c.techo - 26 - o, 4, 2);   // flecha
+          const o = Math.floor(t * 3) % 2, m = c.chim + CH / 2 - 5;
+          r(ctx, C.oroClaro, m + 3, c.techo - 34 - o, 4, 8); r(ctx, C.oroClaro, m + 1, c.techo - 28 - o, 8, 2); r(ctx, C.oroClaro, m + 3, c.techo - 26 - o, 4, 2);   // flecha
         }
       });
       // la chica en el tejado, con el saco de regalos
@@ -130,14 +128,9 @@ window.JUEGOS['dia22-regalos'] = {
         const v = V_MIN + (V_MAX - V_MIN) * carga;
         let x = MANO[0], y = MANO[1], vx = Math.cos(ANG) * v, vy = -Math.sin(ANG) * v;
         ctx.fillStyle = C.blanco;
-        for (let k = 0; k < 9; k++) { for (let s = 0; s < 6; s++) { vx += viento * 0.016; vy += G * 0.016; x += vx * 0.016; y += vy * 0.016; } ctx.fillRect(Math.round(x), Math.round(y), 1, 1); }
+        for (let k = 0; k < 9; k++) { for (let s = 0; s < 6; s++) { vy += G * 0.016; x += vx * 0.016; y += vy * 0.016; } ctx.fillRect(Math.round(x), Math.round(y), 1, 1); }
       }
       if (vuelo) regalo(ctx, vuelo.x, vuelo.y); else regalo(ctx, MANO[0], MANO[1]);
-      // veleta del viento
-      r(ctx, C.tinta, 8, 8, 64, 14); texto(ctx, 'VIENTO', 11, 11, C.nieve);
-      const fx = 54 + Math.round(viento / 30 * 8);
-      r(ctx, C.hielo2, Math.min(54, fx), 13, Math.abs(fx - 54) + 1, 3);
-      if (viento !== 0) r(ctx, C.hielo2, fx + (viento > 0 ? 0 : -2), 11, 3, 7);
       ctx.restore();
 
       // barra de fuerza
@@ -152,18 +145,19 @@ window.JUEGOS['dia22-regalos'] = {
         const em = Comun.medir(msg, e + 1) <= api.ancho - 12 ? e + 1 : e;
         texto(ctx, msg, Math.floor(api.ancho / 2), d.y0 + 30 * d.K, col, { escala: em, centro: true, sombra: C.tinta });
       }
-      const t1 = `CHIMENEAS ${dentro}/${META}  REGALOS ${quedan}`;
-      const t1c = Comun.medir(t1, e) + 14 > api.ancho - api.margenDerecho ? `${dentro}/${META} · QUEDAN ${quedan}` : t1;
+      const t1 = `CHIMENEAS ${dentro}/${META}`;
+      const t1c = Comun.medir(t1, e) + 14 > api.ancho - api.margenDerecho ? `${dentro}/${META}` : t1;
       Comun.caja(ctx, 6, 6, Comun.medir(t1c, e) + 8, d.altoCaja);
       texto(ctx, t1c, 10, 10, C.oroClaro, { escala: e });
     }
 
     // Solo en modo debug: estado y una carga que entra, para las pruebas automáticas
-    if (Dias.debug) window.regalosDebug = () => ({ dentro, quedan, final: final > 0, carga, vuelo: !!vuelo, cargando, cargaBuena: cargaBuena() });
+    if (Dias.debug) window.regalosDebug = () => ({ dentro, tiros, final: final > 0, carga, vuelo: !!vuelo, cargando, cargaBuena: cargaBuena() });
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'REPARTE LOS REGALOS',
-      instruccion: 'MANTEN PULSADO (ESPACIO O EL DEDO) PARA COGER FUERZA Y SUELTA PARA LANZAR EL REGALO A LA CHIMENEA MARCADA. ¡OJO CON EL VIENTO! METE 5 CON 12 REGALOS.',
+      instruccion: 'MANTEN PULSADO (ESPACIO O EL DEDO) PARA COGER FUERZA Y SUELTA PARA LANZAR EL REGALO A LA CHIMENEA MARCADA. METE 5 REGALOS (TIENES TODOS LOS QUE QUIERAS).',
+      sinDerrota: true,
       pantallaCompleta: true,
       musica: 'reparto',
       reiniciar,
