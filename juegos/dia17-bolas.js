@@ -130,8 +130,12 @@ window.JUEGOS['dia17-bolas'] = {
           r(ctx, C.nieve, v.x + 5, v.y + 5, 3, 3);
         }
       }
-      // muro de nieve a los lados (de ahí salen los niños) y calle
-      r(ctx, C.nieve2, 0, SUELO - 40, W, 40); r(ctx, C.nieve, 0, SUELO - 40, W, 2);
+      // muro de piedra oscura detrás de la calle (con nieve encima) para que las bolas blancas resalten
+      r(ctx, '#2f3a5e', 0, SUELO - 40, W, 40);
+      for (let y = SUELO - 36, f = 0; y < SUELO; y += 8, f++)
+        for (let x = (f % 2) * -10; x < W; x += 20) { r(ctx, '#3d4a74', x + 1, y + 1, 18, 6); r(ctx, '#4a5886', x + 1, y + 1, 18, 1); }
+      r(ctx, C.nieve, 0, SUELO - 42, W, 4); r(ctx, C.nieve2, 0, SUELO - 38, W, 1);
+      for (let x = 3; x < W; x += 11) r(ctx, C.nieve, x, SUELO - 38, 3, 1 + (x % 3));
       r(ctx, '#dbe5f5', 0, SUELO, W, ESC_H - SUELO + 60); r(ctx, C.nieve, 0, SUELO, W, 2);
       // sombras de las bolas que caen (dónde van a dar)
       for (const b of bolas) if (b.tipo === 'parabola') {
@@ -144,7 +148,7 @@ window.JUEGOS['dia17-bolas'] = {
         r(ctx, C.rojoClaro, x, SUELO - 24, 6, 14); r(ctx, C.blanco, x + 2, SUELO - 22, 2, 6); r(ctx, C.blanco, x + 2, SUELO - 14, 2, 2);
       }
       if (!(golpe > 0 && Math.floor(t * 12) % 2)) chica(ctx, t);
-      for (const b of bolas) { r(ctx, C.nieve3, b.x - 3, b.y - 2, 6, 5); r(ctx, C.nieve, b.x - 2, b.y - 3, 5, 5); r(ctx, C.blanco, b.x - 1, b.y - 2, 1, 1); }
+      for (const b of bolas) { r(ctx, C.tinta, b.x - 4, b.y - 3, 8, 7); r(ctx, C.nieve3, b.x - 3, b.y - 2, 6, 5); r(ctx, C.nieve, b.x - 2, b.y - 3, 5, 5); r(ctx, C.blanco, b.x - 1, b.y - 2, 1, 1); }
       ctx.fillStyle = C.nieve;
       for (const s of nieve) ctx.fillRect(Math.round(s.x), Math.round(s.y), 2, 2);
       ctx.restore();
