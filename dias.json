@@ -31,7 +31,7 @@
     { "dia": 20, "tipo": "minijuego", "titulo": "Sopa de letras", "juego": "dia20-sopa", "palabras": ["NAVIDAD", "NIEVE", "REGALO", "ESTRELLA", "ABRAZO", "TURRON"], "nota": "TODO: cambia palabras por 6 de vuestra historia (sin tildes, de 3 a 10 letras)", "recompensa": "¡Feliz vigésimo día de diciembre! Entre los escombros también estaban nuestros mejores recuerdos." },
     { "dia": 21, "tipo": "minijuego", "titulo": "Ascensor", "juego": "dia21-ascensor", "recompensa": "¡Feliz vigesimoprimer día de diciembre! Los vecinos ya están cada uno en su casa. Y el ascensor, de nuevo en marcha." },
     { "dia": 22, "tipo": "minijuego", "titulo": "Reparte los regalos", "juego": "dia22-regalos", "recompensa": "¡Feliz vigesimosegundo día de diciembre! Puntería de Papá Noel: cinco regalos por la chimenea." },
-    { "dia": 23, "tipo": "minijuego", "titulo": "La estrella del tejado", "juego": "dia23-estrella", "recompensa": "¡Feliz vigesimotercer día de diciembre! La estrella ya brilla en lo alto del edificio. Mañana… la última puerta." },
+    { "dia": 23, "tipo": "minijuego", "titulo": "La estrella del tejado", "juego": "dia23-estrella", "saludos": ["¡BUENAS NOCHES, VECINA!", "¡QUÉ ESTRELLA TAN BONITA!", "¡GRACIAS POR ARREGLAR EL EDIFICIO!", "¡YA QUEDA POCO PARA NAVIDAD!", "¡FELICES FIESTAS! ¡MIAU!", "¡SUBE, QUE EL TEJADO TE ESPERA!"], "recompensa": "¡Feliz vigesimotercer día de diciembre! La estrella ya brilla en lo alto del edificio. Mañana… la última puerta." },
     { "dia": 24, "tipo": "mensaje", "titulo": "¡Feliz Nochebuena!", "texto": "Has llegado a la última puerta.\nGracias por subir hasta aquí. ¡Feliz Navidad!" }
   ]
 }

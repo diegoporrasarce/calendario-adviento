@@ -115,7 +115,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **20 — Sopa de letras:** 10×10 con 6 palabras de `dias.json` (`palabras`, sin tildes, 3–10 letras) en horizontal, vertical y diagonal, también al revés; se marcan arrastrando de la primera a la última letra (o flechas + Espacio en inicio y final). Sin derrota.
 - **21 — Ascensor:** edificio de 6 plantas visto de lado; los vecinos esperan con un bocadillo de su planta de destino; ↑ ↓ o tocar una planta para moverse, Espacio o tocar la planta actual para abrir (salen los que llegan, entran los que esperan; caben 3). 8 vecinos en 60 s.
 - **22 — Reparte los regalos:** mantener pulsado para cargar la fuerza y soltar; ángulo fijo, viento variable (veleta) y trayectoria orientativa mientras se carga. 5 en la chimenea marcada con 12 regalos. Cada ronda se comprueba por simulación que existe una fuerza que entra.
-- **23 — La estrella del tejado:** plataformas por la fachada del mismo edificio de la pantalla principal, con andamios (uno se mueve) hasta el tejado, donde se coloca la estrella. Saltos de ~59 px de alto y ~75 de largo con huecos menores; caer solo devuelve a un andamio más bajo. Sin derrota.
+- **23 — La estrella del tejado:** el edificio por dentro, en corte: la chica sube con la estrella por escaleras en zigzag, planta a planta, hasta el tejado. En cada planta un vecino la saluda al pasar (bocadillo con el texto de `saludos` en `dias.json`; en la 4.ª está el gato). ← → andan (también por la escalera), ↑ avanza, ↓ retrocede, con el dedo se mantiene pulsado por encima. Sin derrota.
 
 ### Propuestas pendientes de confirmar
 - **2:** algún carámbano que reste, para que tenga reto. En el móvil, tocar la mitad izquierda o derecha de la pantalla.
