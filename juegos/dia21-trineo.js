@@ -8,7 +8,7 @@ window.JUEGOS['dia21-trineo'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
     const META = 12, W = 190, CALLE = [22, 168], LIBRE = [30, 160];       // ancho de la escena, bordes de la calle y por dónde va el trineo
-    const TRINEO_Y = 58, V_INI = 72, V_MAX = 132, LATERAL = 115;
+    const TRINEO_Y = 58, V_INI = 72, V_MAX = 210, LATERAL = 115;
     const COLORES = [[C.rojo, C.oro], [C.verde, C.nieve], ['#4a7ad8', C.oroClaro], ['#9a5ad0', C.nieve], [C.oro, C.rojo]];
     const RADIO = { muneco: 6, abeto: 6, roca: 8, nino: 7 };
 
@@ -60,14 +60,16 @@ window.JUEGOS['dia21-trineo'] = {
       if (final > 0) { final += dt; vel = Math.max(0, vel - 90 * dt); dist += vel * dt; if (final > 2.2) api.ganar(); return; }
 
       // velocidad: va subiendo poco a poco; tras un choque arranca despacio
-      const objetivoV = Math.min(V_MAX, V_INI + dist * 0.02);
+      // la velocidad no para de subir (hasta V_MAX); el giro también se hace algo más rápido para poder esquivar
+      const objetivoV = Math.min(V_MAX, V_INI + dist * 0.045);
       vel = aturdido > 0 ? 0 : Math.min(objetivoV, vel + 40 * dt);
       dist += vel * dt;
 
       // dirección: flechas con un poco de inercia, o el dedo (va hacia donde está)
       const e = api.entrada;
-      let meta = ((e.derecha ? 1 : 0) - (e.izquierda ? 1 : 0)) * LATERAL;
-      if (!e.derecha && !e.izquierda && e.puntero.abajo) meta = Math.max(-LATERAL, Math.min(LATERAL, ((e.puntero.x / d.K - d.ox) - x) * 6));
+      const lateral = LATERAL * (0.85 + 0.45 * (objetivoV - V_INI) / (V_MAX - V_INI));
+      let meta = ((e.derecha ? 1 : 0) - (e.izquierda ? 1 : 0)) * lateral;
+      if (!e.derecha && !e.izquierda && e.puntero.abajo) meta = Math.max(-lateral, Math.min(lateral, ((e.puntero.x / d.K - d.ox) - x) * 6));
       if (aturdido > 0) meta = 0;
       vx += (meta - vx) * Math.min(1, dt * 9);
       x = Math.max(LIBRE[0], Math.min(LIBRE[1], x + vx * dt));
@@ -75,7 +77,7 @@ window.JUEGOS['dia21-trineo'] = {
       if (vel > 0 && Math.floor(dist / 3) !== Math.floor((dist - vel * dt) / 3)) { rastro.push({ x, y: dist + TRINEO_Y }); if (rastro.length > 90) rastro.shift(); }
 
       // filas nuevas por debajo de la pantalla; los objetos que ya quedaron arriba se borran
-      while (proxFila < dist + d.H + 40) { nuevaFila(proxFila); proxFila += Math.max(62, 92 - dist * 0.008); }
+      while (proxFila < dist + d.H + 40) { nuevaFila(proxFila); proxFila += Math.max(70, 92 - dist * 0.006); }
       objetos = objetos.filter((o) => o.y > dist - 40 && !o.cogido);
       for (const o of objetos) if (o.vx) {                                  // los otros trineos cruzan la calle
         o.x += o.vx * dt;

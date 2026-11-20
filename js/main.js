@@ -214,6 +214,21 @@
     }
   }
 
+  // En modo debug se puede abrir una puerta haciendo clic en ella, sin llevar a la chica hasta allí.
+  if (Dias.debug) lienzo.addEventListener('pointerdown', (ev) => {
+    if (Dias.hayModal()) return;
+    const r = lienzo.getBoundingClientRect();
+    const x = (ev.clientX - r.left) / r.width * lienzo.width - ox, y = (ev.clientY - r.top) / r.height * lienzo.height + Math.round(camY);
+    for (let n = 1; n <= Dias.TOTAL; n++) {
+      const d = Edificio.puerta(n);
+      if (Math.abs(x - d.cx) <= 12 && y >= d.y - 36 && y <= d.y + 2) {
+        if (Dias.abrirPuerta(n)) Sonido.efecto('abrir');
+        else { Sonido.efecto('bloqueada'); sacudidas[n] = 0.45; avisar(`La puerta ${n} se abre el ${n} de diciembre`); }
+        return;
+      }
+    }
+  });
+
   function actualizar(dt) {
     jug.t += dt;
     actualizarNoel(dt);
