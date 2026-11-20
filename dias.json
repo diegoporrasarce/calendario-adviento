@@ -21,7 +21,7 @@
     { "dia": 10, "tipo": "minijuego", "titulo": "Adivina la palabra", "juego": "dia10-palabra", "palabra": "NIEVE", "recompensa": "¡Feliz décimo día de diciembre! NIEVE: la palabra más bonita del invierno. Que no falte en estas fiestas… ni los abrazos para entrar en calor." },
     { "dia": 11, "tipo": "minijuego", "titulo": "Decorar el árbol", "juego": "dia11-arbol", "recompensa": "¡Feliz undécimo día de diciembre! El árbol del portal ha quedado precioso… aunque, ¿no has notado que algo ha temblado? Mañana lo sabremos." },
     { "dia": 12, "tipo": "minijuego", "titulo": "¡Salva la Navidad!", "juego": "dia12-terremoto", "recompensa": "¡Feliz duodécimo día de diciembre! Menudo susto: el edificio tembló, se vino abajo… y aun así rescataste todos los regalos. La Navidad sigue en pie, ¡y el edificio también!" },
-    { "dia": 13, "tipo": "foto", "titulo": "Luces", "imagen": "fotos/ejemplo.svg", "texto": "Aquí iría una foto de las luces de Navidad." },
+    { "dia": 13, "tipo": "minijuego", "titulo": "Apila ladrillos", "juego": "dia13-ladrillos", "recompensa": "¡Feliz decimotercer día de diciembre! Ladrillo a ladrillo, el edificio vuelve a estar en pie. Y tú, como una auténtica maestra de obras." },
     { "dia": 14, "tipo": "mensaje", "titulo": "Adivinanza", "texto": "Blanca por fuera, fría por dentro, y si me abrazas, me deshago. ¿Qué soy?" },
     { "dia": 15, "tipo": "minijuego", "titulo": "Tercer reto", "juego": "ejemplo", "texto": "Mitad de camino. Completa el reto.", "recompensa": "Premio: cena sorpresa." },
     { "dia": 16, "tipo": "mensaje", "titulo": "Cuento", "texto": "Había una vez una chica que subía un edificio entero buscando puertas..." },

@@ -83,6 +83,13 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // «Adeste Fideles» («Venid, fieles»), primera frase
+    fieles: {
+      tempo: 0.3, compas: 4, tipo: 'square',
+      melodia: [[55, 2], [50, 1], [55, 1], [57, 2], [50, 2], [59, 1], [57, 1], [59, 1], [60, 1], [59, 2], [57, 1], [55, 1],
+        [55, 2], [54, 1], [52, 1], [54, 1], [55, 1], [57, 1], [59, 1], [54, 2], [52, 1.5], [50, .5], [50, 4]],
+      bajo: [43, 50, 43, 50, 52, 50, 45, 50]
+    },
     // «Hark! The Herald Angels Sing» (F. Mendelssohn), primera frase
     heraldo: {
       tempo: 0.24, compas: 4, tipo: 'square',
