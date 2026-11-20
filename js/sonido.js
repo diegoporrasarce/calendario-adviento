@@ -83,6 +83,15 @@ const Sonido = (() => {
         [A3, 1], [D4, 1], [B3, 1], [C4, 2], [G3, 1]],
       bajo: [48, 53, 55, 52, 57, 53, 55, 48]
     },
+    // Melodía navideña original (compuesta para el calendario), alegre, en do mayor
+    fontanera: {
+      tempo: 0.27, compas: 4, tipo: 'square',
+      melodia: [[52, 1], [55, 1], [60, 1], [55, 1], [57, 1], [55, .5], [53, .5], [52, 2],
+        [50, 1], [53, 1], [57, 1], [53, 1], [55, 1], [53, .5], [52, .5], [50, 2],
+        [52, 1], [55, 1], [60, 1], [64, 1], [62, 1], [60, .5], [59, .5], [57, 2],
+        [55, 1], [57, .5], [59, .5], [60, 1], [62, 1], [60, 3], [null, 1]],
+      bajo: [48, 53, 50, 55, 48, 53, 55, 48]
+    },
     // «Adeste Fideles» («Venid, fieles»), primera frase
     fieles: {
       tempo: 0.3, compas: 4, tipo: 'square',

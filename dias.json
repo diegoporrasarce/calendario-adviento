@@ -22,7 +22,7 @@
     { "dia": 11, "tipo": "minijuego", "titulo": "Decorar el árbol", "juego": "dia11-arbol", "recompensa": "¡Feliz undécimo día de diciembre! El árbol del portal ha quedado precioso… aunque, ¿no has notado que algo ha temblado? Mañana lo sabremos." },
     { "dia": 12, "tipo": "minijuego", "titulo": "¡Salva la Navidad!", "juego": "dia12-terremoto", "recompensa": "¡Feliz duodécimo día de diciembre! Menudo susto: el edificio tembló, se vino abajo… y aun así rescataste todos los regalos. La Navidad sigue en pie, ¡y el edificio también!" },
     { "dia": 13, "tipo": "minijuego", "titulo": "Apila ladrillos", "juego": "dia13-ladrillos", "recompensa": "¡Feliz decimotercer día de diciembre! Ladrillo a ladrillo, el edificio vuelve a estar en pie. Y tú, como una auténtica maestra de obras." },
-    { "dia": 14, "tipo": "mensaje", "titulo": "Adivinanza", "texto": "Blanca por fuera, fría por dentro, y si me abrazas, me deshago. ¿Qué soy?" },
+    { "dia": 14, "tipo": "minijuego", "titulo": "Arregla las tuberías", "juego": "dia14-tuberias", "recompensa": "¡Feliz decimocuarto día de diciembre! Vuelve a correr el agua por el edificio. Fontanera oficial del barrio: puesto ganado." },
     { "dia": 15, "tipo": "minijuego", "titulo": "Tercer reto", "juego": "ejemplo", "texto": "Mitad de camino. Completa el reto.", "recompensa": "Premio: cena sorpresa." },
     { "dia": 16, "tipo": "mensaje", "titulo": "Cuento", "texto": "Había una vez una chica que subía un edificio entero buscando puertas..." },
     { "dia": 17, "tipo": "mensaje", "titulo": "Foto pendiente", "texto": "Mañana, foto juntos con gorro de Papá Noel." },
