@@ -9,7 +9,7 @@ Se añaden de uno en uno, en orden de fecha (cada uno solo tiene que estar listo
 - **Días 2–11, la mudanza:** la chica se instala en el edificio.
 - **Día 12, el terremoto:** el edificio se derrumba dentro del minijuego; al ganar, se salva y vuelve a verse bien.
 - **Días 13–23, preparando la Navidad:** el edificio ya se salvó en el día 12 y no se reconstruye nada. Los juegos y los mensajes hablan del piso nuevo, el barrio, los vecinos y los preparativos (como mucho se recuerda el susto del terremoto).
-- **Día 24, la persecución:** un ladrón roba los regalos y hay que alcanzarle.
+- **Día 24, la persecución:** el Grinch roba los regalos, hay que alcanzarle por los tejados y, al quitarse la máscara, resulta que era el autor del calendario.
 
 El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dentro del minijuego del día 12.
 
@@ -88,10 +88,10 @@ Al entrar en la puerta, la pantalla tiembla, caen cascotes y el edificio se derr
 El minijuego es correr entre los escombros esquivando piedras que caen y recoger 10 regalos antes de que se acabe el tiempo. Si pierde, puede reintentarlo sin límite. Al ganar, el edificio se salva y vuelve a verse bien.
 
 ### Día 24 — La persecución
-Cuando la chica entra en la puerta, aparece de noche el personaje del ladrón (el autor del calendario), coge el saco de regalos y sale corriendo por los tejados.
-El minijuego es un runner lateral: la chica corre sola por los tejados de la ciudad, salta chimeneas y huecos (Espacio o tocar la pantalla) y recoge los regalos que se le caen al ladrón. Tres fases cada vez más rápidas; al final lo alcanza.
-Al ganar, escena final: el ladrón devuelve el saco (o resulta que los robaba por un motivo tierno; pendiente de elegir), nieva sobre el edificio iluminado y aparece el mensaje principal con una foto.
-Necesita: una imagen del autor para su sprite y retrato, el texto del final y la foto.
+Al entrar, de noche en el tejado del edificio del calendario aparece el Grinch (pixel art propio: cara verde, ojos amarillos, gorro y abrigo de Papá Noel), coge el saco de regalos y sale corriendo por los tejados.
+Runner lateral: la chica corre sola y salta chimeneas y huecos (Espacio, ↑ o tocar), recogiendo los regalos que se le caen al ladrón del saco. Tres fases cada vez más rápidas; al final el ladrón se queda sin tejados y lo alcanza.
+Escena final: se rinde, suelta el saco, levanta las manos y se quita la máscara: era el autor del calendario disfrazado (disfraz verde y abrigo rojo, con su cara). Diálogo con su retrato y, al terminar, el mensaje final con una foto.
+En `dias.json`: `autor` (nombre en el diálogo), `dialogoFinal` (lo que dice al quitarse la máscara), `recompensa` (mensaje final) y `foto`.
 
 ### Hechos
 - **2 — Atrapa copos:** 20 copos en 60 s, carámbanos que quitan 3, copos grandes. Mensaje escrito.
@@ -133,3 +133,4 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **18:** 2 o 3 tableros diseñados a mano.
 - **20:** palabras sin tildes, selección arrastrando.
 - **23:** corto y con saltos generosos (las plataformas son lo más difícil en el móvil).
+- **24 — La persecución:** escena inicial (el Grinch sube al tejado, coge el saco y escapa; Espacio la salta). Carrera con recorrido fijo (semilla) en 3 fases de 92, 112 y 132 px/s con huecos cada vez más anchos; salto con margen (se puede pulsar un poco antes de aterrizar o justo después de dejar el borde). Chimeneas lejos de los bordes: chocar para a la chica hasta que salta y aleja al ladrón; caer por un hueco la sube al tejado siguiente (-2 regalos). Barra de progreso con la chica, el ladrón y las fases. Sin derrota. Retratos `autor` y `autorMascara` en `js/sprites.js`, sacados píxel a píxel de la imagen del autor (32×40). La recompensa admite `foto`.

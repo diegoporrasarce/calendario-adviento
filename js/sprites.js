@@ -375,6 +375,52 @@ const Sprites = (() => {
         '..ssssrrrsssssssssssssttttsstt..', '..ssssssssssssssssssssttttsstt..', '..ssssssssssssssssssssttttsstt..',
         '..ssssssssssssssssssssttttsstt..'
       ]
+    },
+    // El autor del calendario: con el disfraz verde sin máscara, y con la máscara puesta (día 24)
+    autor: {
+      paleta: {
+        b: '#88683e', c: '#aa8856', d: '#60482a', e: '#f2ccb4', f: '#60462a', g: '#c49278', h: '#d6a890',
+        i: '#3c2418', j: '#ffffff', k: '#ecb2a2', l: '#b27066', m: '#c48074', u: '#4f9a3c', v: '#6fb84c',
+        w: '#2f6b2a', x: '#c8383f', y: '#9c2630', z: '#f4f8ff'
+      },
+      filas: [
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '...........bbcccbbbbd...........', '.........bbcccccbbbbbdd.........', '........bbbcccccbbbbbbdd........',
+        '.......bbbbbccccbbbbbbbdd.......', '......bbbbbbbcccbbbbbbbbdd......', '......bbcbbbbcbbbbbbcbbbdd......',
+        '......bbbbeeeebbbbbbbbbbdd......', '......bbeeeeeeeeebbbbbbbdd......', '......bbeeeeeeeeeeeebbbbdd......',
+        '......bbeffffeeeeeffffebdd......', '......beeeggeeeeeeeggeeedd......', '......heeeijeeeeeeeijeeeeh......',
+        '......heeeiieeeeeeeiieeeeh......', '......heeeeeeeeeheeeeeeeeh......', '......hekeeeeeeeeeeeeeekeh......',
+        '.......eeeeeeeheheeeeeee........', '.......eeeeeeeeeeeeeeeee........', '.......eeeeeelmmmleeeeee........',
+        '.......eeeeeeeeeeeeeeeee........', '........heeeeeeeeeeeeeh.........', '.........hheeeeeeeeehh..........',
+        '...........heeeeeeeeh...........', '......uuuvuxxheeeehxxuuvww......', '....uvuuuuuxxxxzzxxxxuuuuuww....',
+        '...uuuuuvuuxxxxzzxxxxuvuuuwuw...', '..uuvuuuuuuxxxxzzxxxyuuuuwwu....', '..uuuuuvuuuxxxxzzxxxyvuuuwwu....',
+        '..uvuuuuuuvxxxxzzxxxyuuuvwwu....', '..uuuuvuuuuxxxxzzxxxyuuuuwwv....', '..vuuuuuuvuxxxxzzxxxyuuvuwwu....',
+        '..uuuvuuuuuxxxxzzxxxyuuuuwwu....'
+      ]
+    },
+    autorMascara: {
+      paleta: {
+        G: '#7cb342', H: '#5a8f2e', I: '#1f3d14', J: '#f2e24c', K: '#c8383f', L: '#e8505a', u: '#4f9a3c',
+        v: '#6fb84c', w: '#2f6b2a', x: '#c8383f', y: '#9c2630', z: '#f4f8ff'
+      },
+      filas: [
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '...........xxLLLxxxxy...x.......', '.........xxLLLLLxxxxxyy..x......', '........xxxLLLLLxxxxxxyy..x.....',
+        '.......xxxxxLLLLxxxxxxxyy.x.....', '......xxxxxxxLLLxxxxxxxxyyzz....', '......zzzzzzzzzzzzzzzzzzzzzz....',
+        '......zzzzGGGGzzzzzzzzzzzz......', '......HHGGGGGGGGGHHHHHHHHH......', '......HHGGGGGGGGGGGGHHHHHH......',
+        '......HHGIIIIGGGGGIIIIGHHH......', '......HGGGJJGGGGGGGJJGGGHH......', '......HGGGJJGGGGGGGJJGGGGH......',
+        '......HGGGKKGGGGGGGKKGGGGH......', '......HGGGGGGGGGHGGGGGGGGH......', '......HGHGGGGGGGGGGGGGGHGH......',
+        '.......GIGGGGGHGHGGGGGGI........', '.......GGIGGGGGGGGGGGGIG........', '.......GGGIIIIIIIIIIIIGG........',
+        '.......GGGGGzGzGzGzGGGGG........', '........HGGGGGGGGGGGGGH.........', '.........HHGGGGGGGGGHH..........',
+        '...........HGGGGGGGGH...........', '......uuuvuxxHGGGGHxxuuvww......', '....uvuuuuuxxxxzzxxxxuuuuuww....',
+        '...uuuuuvuuxxxxzzxxxxuvuuuwuw...', '..uuvuuuuuuxxxxzzxxxyuuuuwwu....', '..uuuuuvuuuxxxxzzxxxyvuuuwwu....',
+        '..uvuuuuuuvxxxxzzxxxyuuuvwwu....', '..uuuuvuuuuxxxxzzxxxyuuuuwwv....', '..vuuuuuuvuxxxxzzxxxyuuvuwwu....',
+        '..uuuvuuuuuxxxxzzxxxyuuuuwwu....'
+      ]
     }
   };
 

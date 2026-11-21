@@ -180,8 +180,15 @@ const Dias = (() => {
   function mostrarRecompensa(n, entrada) {
     $('modal-dia').textContent = `Día ${n}`;
     $('modal-titulo').textContent = entrada.titulo || `Día ${n}`;
-    $('modal-foto').classList.add('oculto');
+    const foto = $('modal-foto');
+    foto.classList.add('oculto');
     $('modal-texto').textContent = '¡Completado!' + (entrada.recompensa ? '\n' + entrada.recompensa : '');
+    if (entrada.foto) {                                  // foto opcional bajo el mensaje (p. ej., el final del día 24)
+      foto.alt = entrada.titulo || '';
+      foto.onerror = () => foto.classList.add('oculto');
+      foto.src = entrada.foto;
+      foto.classList.remove('oculto');
+    }
     $('modal').classList.remove('oculto');
     document.querySelector('#modal .caja').focus();
   }
