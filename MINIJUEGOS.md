@@ -8,7 +8,7 @@ Se añaden de uno en uno, en orden de fecha (cada uno solo tiene que estar listo
 - **Día 1:** diálogo de Henar (ya hecho, se queda como está; no es un minijuego).
 - **Días 2–11, la mudanza:** la chica se instala en el edificio.
 - **Día 12, el terremoto:** el edificio se derrumba dentro del minijuego; al ganar, se salva y vuelve a verse bien.
-- **Días 13–23, la reconstrucción:** cada juego trata de arreglar algo tras el terremoto (es ambientación: el edificio del mapa siempre se ve normal).
+- **Días 13–23, preparando la Navidad:** el edificio ya se salvó en el día 12 y no se reconstruye nada. Los juegos y los mensajes hablan del piso nuevo, el barrio, los vecinos y los preparativos (como mucho se recuerda el susto del terremoto).
 - **Día 24, la persecución:** un ladrón roba los regalos y hay que alcanzarle.
 
 El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dentro del minijuego del día 12.
@@ -33,7 +33,7 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
   (`api.entrada`: flechas, Espacio/Enter, toques con `puntero` (con `xInicio`/`yInicio` = dónde se pulsó, para arrastrar), botones táctiles y `pulsado(k)`), las pantallas de título
   y derrota, los reintentos, el botón "Saltar" y la celebración. El juego llama a `api.ganar()`, `api.perder(motivo)`, `api.fallo()` (cuenta un fallo para "Saltar" sin pantalla de derrota),
   `api.sacudir(seg)` y `api.aviso(texto, x, y)`. También hay `Comun.texto` (fuente pixel 5×7, mayúsculas; `Comun.medir` y `Comun.altoTexto` para medirla), `Comun.caja`, `Comun.fondoNoche` y `Comun.PALETA`.
-  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8), `caballeros` (día 9), `reyes` (día 10), `tannenbaum` (día 11), `heraldo` (día 12), `fieles` (día 13), `fontanera` (día 14), `pintura`, `puzle`, `bolas`, `cables` e `invasores` (días 15–19); `sopa`, `trineo` (con cascabeles), `reparto` y `estrella` (días 20–23); las de los días 14 a 23 son melodías originales.
+  - `musica`: cada minijuego tiene su villancico de dominio público, distinto del del edificio (pistas en `PISTAS` de `js/sonido.js`; al cerrar vuelve el del edificio). Hechas: `deck` (día 2), `wewish` (día 3), `nochedepaz` (día 4), `wenceslao` (día 5), `campanas` (día 6), `alegria` (día 7), `noel` (día 8), `caballeros` (día 9), `reyes` (día 10), `tannenbaum` (día 11), `heraldo` (día 12), `fieles` (día 13), `fontanera` (día 14), `pintura`, `puzle`, `bolas`, `cables` y `bolos` (días 15–19); `sopa`, `trineo` (con cascabeles), `reparto` y `estrella` (días 20–23); las de los días 14 a 23 son melodías originales.
   - `pantallaCompleta: true` (recomendado): el lienzo crece hasta llenar toda la pantalla, sin franjas negras. El juego lee `api.ancho` y `api.alto` en cada fotograma (mínimo 320×240).
   - `api.textoEscala` vale 2 cuando el lienzo se ve pequeño: úsalo en los marcadores para que se lean en el móvil.
   - La esquina superior derecha es de los botones de sonido, pantalla completa y cerrar: los marcadores no deben pasar de `api.ancho - api.margenDerecho` (en móvil, ponerlos en dos filas si no caben).
@@ -76,8 +76,8 @@ Cada día tiene la descripción del usuario. Las **propuestas** son recomendacio
 | 16 | Puzzle deslizante | Recomponer una foto vuestra rota por el terremoto (3×3). |
 | 17 | Esquiva bolas de nieve | Los vecinos montan una guerra de bolas; hay que aguantar 30 segundos sin que te den. |
 | 18 | Cables de la luz | Unir cada color con su enchufe sin que se crucen. |
-| 19 | Invasión navideña | Matamarcianos navideño: desde un trineo volador, lanzar bolas de nieve a una formación de duendes, hombrecillos de jengibre y bolas de Navidad que tiran carbón. |
-| 20 | Sopa de letras | Palabras de vuestra historia escondidas entre los escombros. |
+| 19 | Bolos de nieve | Lanzar una bola de nieve contra 10 muñecos de nieve en triángulo: dirección y fuerza con indicadores que oscilan. |
+| 20 | Sopa de letras | Palabras de vuestra historia escondidas en una sopa de letras. |
 | 21 | Trineo por la cuesta | Bajar en trineo por la calle nevada esquivando obstáculos y recogiendo regalos hasta llegar a la meta. |
 | 22 | Reparte los regalos | Lanzar regalos por las chimeneas desde el tejado calculando la fuerza. |
 | 23 | La estrella del tejado | Subir por el edificio en un pequeño plataformas y colocar la estrella. |
@@ -111,7 +111,7 @@ Necesita: una imagen del autor para su sprite y retrato, el texto del final y la
 - **16 — Puzzle deslizante:** 3×3 con la foto de `dias.json` (`imagen`) y miniatura guía; se desordena con movimientos válidos (siempre resoluble). Tocar pieza junto al hueco o flechas. Sin derrota.
 - **17 — Esquiva bolas de nieve:** bolas en parábola desde las ventanas (su sombra marca dónde caen: moverse) y rasantes desde los lados con aviso «!» (agacharse con ↓ o tocando el suelo). 30 s con 3 vidas.
 - **18 — Cables de la luz:** tipo Flow 5×5, arrastrar de enchufe a bombilla del mismo color; cruzar un cable lo corta. 3 cuadros diseñados a mano (no hace falta llenar el tablero). Sin derrota.
-- **19 — Invasión navideña:** formación de 8×4 (duendes, jengibre, bolas con cara) que avanza a saltos de lado a lado, baja al llegar al borde y acelera cuantos menos quedan; tira carbón desde abajo de cada columna. La chica en su trineo: ← →, Espacio dispara (máx. 2 bolas); con el dedo, mantener: va hacia él y dispara. 3 fuertes de nieve que se rompen a trozos. Un regalo con alas cruza a veces: darle devuelve una vida. 2 oleadas (la 2.ª más rápida), 3 vidas; se pierde con 3 golpes o si la formación llega a los fuertes.
+- **19 — Bolos de nieve:** pista vista desde arriba con canales de nieve a los lados y 10 muñequitos en triángulo. Por tirada: la flecha oscila (← → mueven la bola por la línea) y Espacio/tocar fija la dirección; luego oscila la fuerza y se fija igual. Física sencilla: la bola (que engorda al rodar) tira muñecos y estos empujan a otros; si cae al canal ya no toca nada. Los caídos se retiran entre tiradas. Hay que tirar los 10 en 3 tiradas; si no, se pierde y se repite.
 - **20 — Sopa de letras:** 10×10 con 6 palabras de `dias.json` (`palabras`, sin tildes, 3–10 letras) en horizontal, vertical y diagonal, también al revés; se marcan arrastrando de la primera a la última letra (o flechas + Espacio en inicio y final). Sin derrota.
 - **21 — Trineo por la cuesta:** en primera persona (pseudo-3D): la calle con bordillos rojos y blancos se pierde hacia el horizonte con curvas suaves, con abetos, farolas y pueblo al fondo; abajo, la punta del trineo y las manoplas con la cuerda. ← → (o tocar a un lado) para esquivar muñecos, abetos, rocas y otros trineos, y recoger 12 regalos. Cada vez más rápido (16 → 44 u/s); las filas llegan cada ~0,8 s y entre dos obstáculos siempre cabe el trineo. Al chocar: destello rojo, parada breve, -1 regalo y 2 s sin chocar. Sin derrota; al final, arco de META.
 - **22 — Reparte los regalos:** mantener pulsado para cargar la fuerza y soltar; ángulo fijo, sin viento y trayectoria orientativa mientras se carga. Chimeneas anchas (22 px); hay que meter 5 en la marcada, con regalos ilimitados (sin derrota). Cada ronda se comprueba por simulación que existe una fuerza que entra.

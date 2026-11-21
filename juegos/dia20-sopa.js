@@ -116,7 +116,7 @@ window.JUEGOS['dia20-sopa'] = {
     function dibujar(ctx, api) {
       const d = disposicion(api), L = d.lado, t = api.t, e = d.e;
       ctx.fillStyle = '#2a1c1c'; ctx.fillRect(0, 0, api.ancho, api.alto);
-      // escombros alrededor de la cuadrícula
+      // ladrillos sueltos de adorno alrededor de la cuadrícula
       for (let k = 0; k < 40; k++) r(ctx, k % 3 ? '#3a2622' : '#5e2620', (k * 97) % api.ancho, (k * 53) % api.alto, 10 + (k % 4) * 4, 6);
       r(ctx, C.tinta, d.x0 - 4, d.y0 - 4, L * N + 8, L * N + 8); r(ctx, '#e8dcc0', d.x0, d.y0, L * N, L * N);
       // palabras encontradas: franja de color bajo sus letras
@@ -155,7 +155,7 @@ window.JUEGOS['dia20-sopa'] = {
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'SOPA DE LETRAS',
-      instruccion: 'ENTRE LOS ESCOMBROS HAY 6 PALABRAS DE NUESTRA HISTORIA. ARRASTRA DE LA PRIMERA A LA ULTIMA LETRA (EN CUALQUIER DIRECCION) O USA FLECHAS Y ESPACIO.',
+      instruccion: 'EN LA SOPA SE ESCONDEN 6 PALABRAS DE NUESTRA HISTORIA. ARRASTRA DE LA PRIMERA A LA ULTIMA LETRA (EN CUALQUIER DIRECCION) O USA FLECHAS Y ESPACIO.',
       sinDerrota: true,
       pantallaCompleta: true,
       musica: 'sopa',

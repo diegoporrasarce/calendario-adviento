@@ -136,9 +136,9 @@ const Sonido = (() => {
                                      [60, 1], [55, 1], [52, 1], [48, 1]]),
       bajo: [48, 53, 55, 48, 48, 53, 55, 48]
     },
-    // Melodía original, rápida y saltarina, para la invasión navideña (día 19)
-    invasores: {
-      tempo: 0.2, compas: 4, tipo: 'square', cascabel: true,
+    // Melodía original, saltarina, para los bolos de nieve (día 19)
+    bolos: {
+      tempo: 0.26, compas: 4, tipo: 'square', cascabel: true,
       melodia: [[67, .5], [67, .5], [72, 1], [71, .5], [69, .5], [67, 1], [64, .5], [65, .5], [67, 1], [69, 1], [67, 1],
         [65, .5], [65, .5], [69, 1], [67, .5], [65, .5], [64, 1], [62, .5], [64, .5], [65, 1], [62, 1], [60, 1],
         [67, .5], [67, .5], [72, 1], [74, .5], [72, .5], [71, 1], [69, .5], [71, .5], [72, 1], [67, 1], [64, 1],

@@ -13,7 +13,7 @@ window.JUEGOS['dia23-estrella'] = {
     const MUNDO_ALTO = FY(0) + 18;
     const VEL = 72;                                                       // px por segundo a lo largo del camino
     const ESTRELLA_X = 168;
-    const SALUDOS_BASE = ['¡BUENAS NOCHES, VECINA!', '¡QUÉ ESTRELLA TAN BONITA!', '¡GRACIAS POR ARREGLAR EL EDIFICIO!',
+    const SALUDOS_BASE = ['¡BUENAS NOCHES, VECINA!', '¡QUÉ ESTRELLA TAN BONITA!', '¡MENOS MAL QUE SALVASTE LA NAVIDAD!',
       '¡YA QUEDA POCO PARA NAVIDAD!', '¡FELICES FIESTAS! ¡MIAU!', '¡SUBE, QUE EL TEJADO TE ESPERA!'];
     const SALUDOS = SALUDOS_BASE.map((s, i) => (Array.isArray(datos && datos.saludos) && datos.saludos[i] ? String(datos.saludos[i]) : s));
 
