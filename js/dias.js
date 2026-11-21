@@ -46,19 +46,22 @@ const Dias = (() => {
     if (!abiertas.has(n)) { abiertas.add(n); guardarProgreso(); }
   }
 
+  // Una puerta de un día que aún no ha llegado está siempre cerrada con candado, aunque se jugara antes
+  // (pasa al probar con ?dia=N o si cambia la fecha); las ya jugadas cuentan como 'abierta'.
   function estado(n) {
-    if (abiertas.has(n)) return 'abierta';
-    return n <= diaActual ? 'disponible' : 'bloqueada';
+    if (n > diaActual) return 'bloqueada';
+    return abiertas.has(n) ? 'abierta' : 'disponible';
   }
+  const jugadas = () => [...abiertas].filter((n) => n <= diaActual).length;
 
   function info() {
-    if (debug) return `DEBUG · hoy = ${diaActual} de diciembre · ${abiertas.size}/${TOTAL} abiertas`;
+    if (debug) return `DEBUG · hoy = ${diaActual} de diciembre · ${jugadas()}/${TOTAL} jugadas`;
     if (diaActual === 0) {
       const d = diasHastaDiciembre();
       return `Faltan ${d} ${d === 1 ? 'día' : 'días'} para el 1 de diciembre`;
     }
     if (diaActual > TOTAL) return `¡Feliz Navidad! Todas las puertas están abiertas · ${abiertas.size}/${TOTAL} vistas`;
-    return `Hoy: ${diaActual} de diciembre · ${abiertas.size}/${TOTAL} abiertas`;
+    return `Hoy: ${diaActual} de diciembre · ${jugadas()}/${TOTAL} jugadas`;
   }
 
   /* ---------- Carga de dias.json ---------- */

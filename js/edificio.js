@@ -243,8 +243,9 @@ const Edificio = (() => {
     else ctx.drawImage(halo('#ff8a3c', Math.round(pulso)), x, y);
   }
 
-  // estado: 'bloqueada' | 'disponible' | 'abierta'
+  // estado: 'bloqueada' | 'disponible' | 'abierta'. Una puerta ya jugada ('abierta') se ve cerrada, sin candado.
   function dibujarPuerta(ctx, n, estado, camY, t, sacudida) {
+    if (estado === 'abierta') estado = 'disponible';
     const R = (c, x, y, w, h) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
     const d = puerta(n);
     const sx = sacudida ? Math.round(Math.sin(t * 60) * 1.5) : 0;
@@ -260,24 +261,7 @@ const Edificio = (() => {
     R('#2b1a14', x - 1, y - 1, 22, 31);
 
     let colorNum, placa;
-    if (estado === 'abierta') {
-      R('#fff0c0', x, y, PUERTA_W, 6); R('#ffd98a', x, y + 6, PUERTA_W, 10);          // interior con luz
-      R('#f2b25c', x, y + 16, PUERTA_W, 10); R('#b8742e', x, y + 26, PUERTA_W, 4);
-      for (let i = x; i < x + PUERTA_W; i++) {                                         // trama entre tonos
-        if (i % 2 === 0) { R('#ffd98a', i, y + 5, 1, 1); R('#f2b25c', i, y + 15, 1, 1); }
-      }
-      R('#c98a3a', x + 8, y + 12, 10, 1);                                              // estante
-      R('#f4ecd0', x + 10, y + 9, 1, 3); R('#ff9a2c', x + 10, y + 8, 1, 1);            // vela
-      Sprites.regalo(ctx, x + 9, y + 21, 5, 5, '#c8383f', '#f2c94c');
-      Sprites.regalo(ctx, x + 15, y + 22, 4, 4, '#3c8a5a', '#f3ecd8');
-      for (let i = 0; i < 6; i++) R(i === 5 ? '#5c3414' : '#8f5524', x + i, y + i, 1, PUERTA_H - 2 * i);   // hoja entreabierta
-      if (regalo) {                                                                    // restos del envoltorio
-        R('#d8324a', x + 14, y, 6, 3); R('#d8324a', x + 17, y + 3, 3, 2); R('#ffd24a', x + 15, y, 2, 3);
-        R('#ffd24a', x + 6, y - 5, 4, 4); R('#ffd24a', x + 11, y - 5, 4, 4); R('#d49a1c', x + 9, y - 4, 3, 3);
-      }
-      ctx.globalAlpha = 0.3; R('#ffd27a', x - 2, suelo, PUERTA_W + 4, 2); ctx.globalAlpha = 1;
-      colorNum = '#f2d36b'; placa = '#4a2f14';
-    } else if (regalo) {
+    if (regalo) {
       papelRegalo(R, x, y, estado === 'bloqueada');
       if (estado === 'bloqueada') Sprites.candado(ctx, x + 7, y + 11);
       colorNum = estado === 'bloqueada' ? '#ffc0d4' : '#fff6c8';
