@@ -3,16 +3,19 @@
    Pista de nieve vista desde arriba, con 10 muñequitos de nieve en triángulo al fondo. En cada tirada:
    primero la flecha oscila (← → mueven la bola por la línea de salida) y se fija la dirección con Espacio o
    tocando; después oscila la barra de fuerza y se fija igual. La bola rueda (y engorda con la nieve), los
-   muñecos que golpea caen y empujan a otros. Hay que tirar los 10 en 3 tiradas; si no, se repite. */
+   muñecos que golpea caen y empujan a otros. 5 rondas de 2 tiros: 1 punto por muñeco, +5 por pleno y +2 por
+   semipleno. Por la pista cruzan niños en trineo (uno siempre, otro desde la ronda 3): si la bola les da,
+   rebota. Hay que llegar a META puntos; si se acaban las rondas sin llegar, se repite. */
 window.JUEGOS = window.JUEGOS || {};
 window.JUEGOS['dia19-bolos'] = {
   iniciarJuego(contenedor, alTerminar) {
     const { PALETA: C, texto } = Comun;
-    const W = 160, H = 230, CALLE = [34, 126], CENTRO = 80;              // 160 de ancho: en móvil cabe al doble              // escena y bordes de la pista
-    const SALIDA_Y = 196, TIRADAS = 3, R_BOLO = 4.5, R_BOLA = 5;
+    const W = 160, H = 230, CALLE = [34, 126], CENTRO = 80;              // 160 de ancho: en móvil cabe al doble
+    const SALIDA_Y = 196, RONDAS = 5, META = 45, R_BOLO = 4.5, R_BOLA = 5;
+    const OBST_W = 18, OBST_H = 8;                                        // trineo que cruza (caja de choque)
     const ANG_MAX = 0.3, V_MIN = 110, V_MAX = 270;
 
-    let bolos, bola, fase, tirada, angulo, potencia, bolaX, reloj, cartel, finTirada, final, rastro;
+    let bolos, bola, fase, ronda, tiro, puntos, angulo, potencia, bolaX, reloj, cartel, finTirada, final, rastro, obstaculos, antes;
 
     function colocarBolos() {
       bolos = [];
@@ -20,9 +23,14 @@ window.JUEGOS['dia19-bolos'] = {
         bolos.push({ x: CENTRO + (k - fila / 2) * 15, y: 70 - fila * 12, vx: 0, vy: 0, caido: false, giro: 0, fuera: false });
     }
 
+    function ponerObstaculos() {
+      obstaculos = [{ y: 122, x: CALLE[0] + 10, vx: 34 }];
+      if (ronda >= 3) obstaculos.push({ y: 96, x: CALLE[1] - 10, vx: -52 });
+    }
+
     function reiniciar() {
-      colocarBolos(); tirada = 1; final = 0; cartel = null; rastro = [];
-      nuevaTirada();
+      ronda = 1; tiro = 1; puntos = 0; final = 0; cartel = null; rastro = [];
+      colocarBolos(); ponerObstaculos(); nuevaTirada();
     }
 
     function nuevaTirada() {
@@ -34,7 +42,7 @@ window.JUEGOS['dia19-bolos'] = {
     function lanzar() {
       const v = V_MIN + (V_MAX - V_MIN) * potencia;
       bola = { x: bolaX, y: SALIDA_Y, vx: Math.sin(angulo) * v, vy: -Math.cos(angulo) * v, r: R_BOLA, canal: false };
-      fase = 'rodando'; finTirada = 0; Sonido.efecto('saltar');
+      fase = 'rodando'; finTirada = 0; antes = enPie(); Sonido.efecto('saltar');
     }
 
     // Choque entre dos cuerpos redondos (masa ma y mb); devuelve la velocidad del golpe
@@ -59,6 +67,12 @@ window.JUEGOS['dia19-bolos'] = {
           bola.canal = true; bola.vx = 0; bola.x = bola.x < CENTRO ? CALLE[0] - 7 : CALLE[1] + 7; Sonido.efecto('bloqueada');
         }
         if (bola.r < 7.5) bola.r += dt * 0.9;                             // la bola engorda al rodar
+        if (!bola.canal && !bola.rebote) for (const o of obstaculos) {
+          if (Math.abs(bola.x - o.x) < OBST_W / 2 + bola.r && Math.abs(bola.y - o.y) < OBST_H / 2 + bola.r) {
+            bola.rebote = true; bola.vy = Math.abs(bola.vy) * 0.35; bola.vx = (bola.x - o.x) * 4 + o.vx * 0.5;
+            Sonido.efecto('golpe'); cartel = { t: '¡CUIDADO CON EL TRINEO!', vida: 1.2 };
+          }
+        }
         if (!bola.canal) for (const b of bolos) {
           if (b.fuera) continue;
           const v = chocar(bola, b, bola.r, R_BOLO, 3, 1);
@@ -82,6 +96,10 @@ window.JUEGOS['dia19-bolos'] = {
 
     function actualizar(dt, api) {
       reloj += dt;
+      for (const o of obstaculos) {                                        // los trineos van y vienen siempre
+        o.x += o.vx * dt;
+        if (o.x < CALLE[0] + OBST_W / 2 || o.x > CALLE[1] - OBST_W / 2) { o.vx = -o.vx; o.x = Math.max(CALLE[0] + OBST_W / 2, Math.min(CALLE[1] - OBST_W / 2, o.x)); }
+      }
       if (cartel) { cartel.vida -= dt; }
       if (final > 0) { final += dt; if (final > 2) api.ganar(); return; }
       const e = api.entrada, pulsa = e.pulsado('accion') | e.pulsado('toque');
@@ -97,7 +115,7 @@ window.JUEGOS['dia19-bolos'] = {
       } else if (fase === 'rodando') {
         for (let k = 0; k < 4; k++) fisica(dt / 4);
         if (bola && Math.floor(reloj * 30) !== Math.floor((reloj - dt) * 30)) { rastro.push({ x: bola.x, y: bola.y, r: bola.r }); if (rastro.length > 40) rastro.shift(); }
-        const quieta = !bola || bola.y < -10 || Math.hypot(bola.vx, bola.vy) < 6;
+        const quieta = !bola || bola.y < -10 || bola.y > H + 10 || Math.hypot(bola.vx, bola.vy) < 6;
         const parados = bolos.every((b) => b.fuera || !b.caido || Math.hypot(b.vx, b.vy) < 4);
         finTirada += dt;
         if ((quieta && parados && finTirada > 0.6) || finTirada > 6) terminarTirada(api);
@@ -105,15 +123,18 @@ window.JUEGOS['dia19-bolos'] = {
     }
 
     function terminarTirada(api) {
-      const quedan = enPie(), tirados = 10 - quedan;
+      const quedan = enPie(), tirados = antes - quedan;
       bolos = bolos.filter((b) => !b.caido);                               // los caídos se retiran
-      if (quedan === 0) {
-        cartel = { t: tirada === 1 ? '¡PLENO!' : tirada === 2 ? '¡SEMIPLENO!' : '¡TODOS FUERA!', vida: 2 };
-        final = 0.001; Sonido.efecto('completar'); return;
-      }
-      if (tirada >= TIRADAS) { api.perder(`QUEDARON ${quedan} MUÑECOS EN PIE. ¡OTRA PARTIDA!`); return; }
-      cartel = { t: `${tirados} ${tirados === 1 ? 'MUÑECO' : 'MUÑECOS'} · QUEDAN ${quedan}`, vida: 1.4 };
-      tirada++;
+      let extra = 0, msg = `+${tirados}`;
+      if (quedan === 0) { extra = tiro === 1 ? 5 : 2; msg = tiro === 1 ? '¡PLENO! +15' : `¡SEMIPLENO! +${tirados + 2}`; }
+      puntos += tirados + extra;
+      if (tirados > 0) Sonido.efecto(quedan === 0 ? 'completar' : 'pareja');
+      if (puntos >= META) { cartel = { t: `¡${puntos} PUNTOS!`, vida: 2 }; final = 0.001; Sonido.efecto('completar'); return; }
+      if (quedan === 0 || tiro === 2) {
+        if (ronda >= RONDAS) { api.perder(`${puntos} PUNTOS DE ${META}. ¡OTRA PARTIDA!`); return; }
+        ronda++; tiro = 1; colocarBolos(); ponerObstaculos();
+        cartel = { t: `${msg} · RONDA ${ronda}`, vida: 1.5 };
+      } else { tiro = 2; cartel = { t: msg, vida: 1.1 }; }
       nuevaTirada();
     }
 
@@ -158,6 +179,15 @@ window.JUEGOS['dia19-bolos'] = {
       for (const p of rastro) r(ctx, '#cdd8ea', p.x - 1, p.y, 3, 2);
       // muñecos (de arriba abajo para que se tapen bien)
       [...bolos].sort((a, b) => a.y - b.y).forEach((b) => { if (!b.fuera) muneco(ctx, b, t); });
+      // niños en trineo cruzando la pista
+      for (const o of obstaculos) {
+        const x = Math.round(o.x), y = Math.round(o.y), dir = Math.sign(o.vx) || 1;
+        r(ctx, 'rgba(22,22,28,0.25)', x - 9, y + 3, 18, 2);
+        r(ctx, C.rojoOsc, x - 9, y + 2, 18, 1); r(ctx, C.rojoOsc, x + 8 * dir, y, 1, 2);
+        r(ctx, '#a9763f', x - 8, y - 1, 16, 3); r(ctx, '#c08d52', x - 8, y - 1, 16, 1);
+        r(ctx, '#4a7ad8', x - 3, y - 8, 7, 7); r(ctx, C.piel, x - 2, y - 13, 5, 5); r(ctx, C.verde, x - 3, y - 14, 7, 2); r(ctx, C.nieve, x, y - 16, 2, 2);
+        r(ctx, C.tinta, x + (dir > 0 ? 1 : -1), y - 11, 1, 1); r(ctx, C.rojo, x - 4 * dir, y - 7, 2, 2);
+      }
       // bola
       const bx = bola ? bola.x : bolaX, by = bola ? bola.y : SALIDA_Y, br = bola ? bola.r : R_BOLA;
       if (fase !== 'rodando' || (bola && bola.y > -10)) {
@@ -189,19 +219,19 @@ window.JUEGOS['dia19-bolos'] = {
         const bxc = Math.floor((api.ancho - w) / 2), byc = Math.floor(y0 + H * K * 0.42);
         Comun.caja(ctx, bxc, byc, w, h); texto(ctx, cartel.t, bxc + 6, byc + 6, C.oroClaro, { escala: em });
       }
-      const largo = `TIRADA ${Math.min(tirada, TIRADAS)}/${TIRADAS} · EN PIE ${enPie()}`;
-      const t1 = Comun.medir(largo, e) + 16 <= api.ancho - api.margenDerecho ? largo : `TIRO ${Math.min(tirada, TIRADAS)}/${TIRADAS} · ${enPie()}`;
+      const largo = `PUNTOS ${puntos}/${META} · RONDA ${ronda}/${RONDAS} · TIRO ${tiro}/2`;
+      const t1 = Comun.medir(largo, e) + 16 <= api.ancho - api.margenDerecho ? largo : `${puntos}/${META} · R${ronda} · T${tiro}`;
       Comun.caja(ctx, 6, 6, Comun.medir(t1, e) + 8, altoCaja);
       texto(ctx, t1, 10, 10, C.oroClaro, { escala: e });
     }
 
     // Solo en modo debug: estado para las pruebas automáticas
-    if (Dias.debug) window.bolosDebug = () => ({ final: final > 0, fase, tirada, angulo, potencia, bolaX, enPie: enPie(),
+    if (Dias.debug) window.bolosDebug = () => ({ final: final > 0, fase, tirada: tiro, ronda, puntos, obstaculos, potenciaV: [V_MIN, V_MAX], angulo, potencia, bolaX, enPie: enPie(),
       bolos: bolos.filter((b) => !b.caido).map((b) => ({ x: b.x, y: b.y })), salidaY: SALIDA_Y });
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'BOLOS DE NIEVE',
-      instruccion: 'DERRIBA LOS 10 MUÑECOS DE NIEVE EN 3 TIRADAS. LA FLECHA SE MUEVE: PULSA ESPACIO (O TOCA) PARA ELEGIR LA DIRECCIÓN Y OTRA VEZ PARA LA FUERZA. CON ← → MUEVES LA BOLA ANTES DE APUNTAR.',
+      instruccion: `CONSIGUE ${META} PUNTOS EN 5 RONDAS DE 2 TIROS: 1 POR MUÑECO, +5 POR PLENO, +2 POR SEMIPLENO. ¡OJO CON LOS NIÑOS EN TRINEO! LA FLECHA SE MUEVE: ESPACIO (O TOCA) FIJA LA DIRECCIÓN Y LUEGO LA FUERZA. ← → MUEVEN LA BOLA.`,
       pantallaCompleta: true,
       musica: 'bolos',
       reiniciar,
