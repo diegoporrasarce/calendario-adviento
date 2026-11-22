@@ -99,23 +99,37 @@ const Dias = (() => {
   }
 
   /* ---------- Diálogo estilo RPG (tipo "dialogo") ---------- */
-  let dialogo = null;             // { n, lineas, i, letras, reloj }
+  // Cada línea es { texto, nombre, retrato, lado, tono }: así un diálogo puede ser una conversación entre varios
+  let dialogo = null;             // { n, lineas, i, letras, reloj, quien }
 
   function pintarLinea() {
-    const linea = dialogo.lineas[dialogo.i];
+    const linea = dialogo.lineas[dialogo.i].texto;
     $('dialogo-texto').textContent = linea.slice(0, dialogo.letras);
     $('dialogo-sigue').classList.toggle('oculto', dialogo.letras < linea.length);
+  }
+
+  // Pone el retrato, el nombre y el lado del que habla (solo si cambia de personaje)
+  function ponerHablante(l) {
+    const clave = l.retrato + '|' + l.nombre + '|' + l.lado;
+    if (dialogo.quien === clave) return;
+    dialogo.quien = clave;
+    const retrato = $('dialogo-retrato');
+    retrato.classList.toggle('oculto', !Sprites.pintarRetrato(retrato, l.retrato));
+    $('dialogo-nombre').textContent = l.nombre || '';
+    $('dialogo').classList.toggle('derecha', l.lado === 'derecha');
   }
 
   function empezarLinea() {
     dialogo.letras = 0;
     clearInterval(dialogo.reloj);
+    const l = dialogo.lineas[dialogo.i];
+    ponerHablante(l);
     dialogo.reloj = setInterval(() => {            // el texto aparece letra a letra
       if (!dialogo) return;
-      Sonido.voz(dialogo.lineas[dialogo.i][dialogo.letras] || '');
+      Sonido.voz(l.texto[dialogo.letras] || '', l.tono);
       dialogo.letras++;
       pintarLinea();
-      if (dialogo.letras >= dialogo.lineas[dialogo.i].length) clearInterval(dialogo.reloj);
+      if (dialogo.letras >= l.texto.length) clearInterval(dialogo.reloj);
     }, 28);
     pintarLinea();
   }
@@ -123,7 +137,7 @@ const Dias = (() => {
   // Completa la línea si aún se está escribiendo; si no, pasa a la siguiente o termina.
   function avanzarDialogo() {
     if (!dialogo) return;
-    const linea = dialogo.lineas[dialogo.i];
+    const linea = dialogo.lineas[dialogo.i].texto;
     if (dialogo.letras < linea.length) {
       clearInterval(dialogo.reloj);
       dialogo.letras = linea.length;
@@ -138,13 +152,18 @@ const Dias = (() => {
     }
   }
 
+  // Las líneas pueden ser texto (habla el personaje de la entrada) u objetos { habla, texto },
+  // donde `habla` es una clave de entrada.personajes: { nombre, retrato, lado: 'izquierda'|'derecha', tono }.
   function abrirDialogo(n, entrada) {
-    const lineas = (Array.isArray(entrada.lineas) ? entrada.lineas : [entrada.texto || '']).map(String).filter(Boolean);
-    if (!lineas.length) lineas.push('...');
-    const retrato = $('dialogo-retrato');
-    retrato.classList.toggle('oculto', !Sprites.pintarRetrato(retrato, entrada.retrato));
-    $('dialogo-nombre').textContent = entrada.personaje || '';
-    dialogo = { n, lineas, i: 0, letras: 0, reloj: 0 };
+    const personajes = entrada.personajes || {};
+    const porDefecto = { nombre: entrada.personaje || '', retrato: entrada.retrato, lado: 'izquierda', tono: 0 };
+    const lineas = (Array.isArray(entrada.lineas) ? entrada.lineas : [entrada.texto || '']).map((l) => {
+      if (typeof l === 'string') return { ...porDefecto, texto: l };
+      const p = personajes[l.habla] || {};
+      return { nombre: p.nombre || l.habla || '', retrato: p.retrato, lado: p.lado || 'izquierda', tono: p.tono || 0, texto: String(l.texto || '') };
+    }).filter((l) => l.texto);
+    if (!lineas.length) lineas.push({ ...porDefecto, texto: '...' });
+    dialogo = { n, lineas, i: 0, letras: 0, reloj: 0, quien: null };
     $('dialogo').classList.remove('oculto');
     empezarLinea();
   }

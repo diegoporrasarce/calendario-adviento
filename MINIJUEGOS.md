@@ -5,7 +5,7 @@ Se añaden de uno en uno, en orden de fecha (cada uno solo tiene que estar listo
 
 ## Historia
 
-- **Bienvenida (cualquier día):** el muñeco de nieve del portal (planta baja, a la izquierda) explica cómo funciona el calendario al hablar con él (Espacio/ABRIR a su lado). Hasta la primera vez tiene un «!» encima. Texto en `dias.json` → `bienvenida`.
+- **Bienvenida (cualquier día):** el muñeco de nieve del portal (planta baja, a la izquierda) y Henar tienen una conversación (cada uno con su retrato, su lado y su voz) en la que él explica cómo funciona el calendario (Espacio/ABRIR a su lado). Hasta la primera vez tiene un «!» encima. Texto en `dias.json` → `bienvenida`.
 - **Día 1, la llegada:** cajas en equilibrio: sube a su piso con las cajas de la mudanza.
 - **Días 2–11, la mudanza:** la chica se instala en el edificio.
 - **Día 12, el terremoto:** el edificio se derrumba dentro del minijuego; al ganar, se salva y vuelve a verse bien.

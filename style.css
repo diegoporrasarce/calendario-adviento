@@ -136,6 +136,10 @@ body {
   filter: drop-shadow(4px 4px 0 rgba(5, 4, 18, 0.6));
 }
 #dialogo-retrato.oculto + .bocadillo { margin-left: 0; }
+/* conversación: quien habla a la derecha va al otro lado, mirando hacia el centro */
+#dialogo.derecha { flex-direction: row-reverse; }
+#dialogo.derecha #dialogo-retrato { transform: scaleX(-1); }
+#dialogo.derecha #dialogo-nombre { left: auto; right: 4px; background: #3a4478; }
 .bocadillo {
   position: relative;
   flex: 1;

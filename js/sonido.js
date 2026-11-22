@@ -372,13 +372,13 @@ const Sonido = (() => {
   /* ---------- Voz de los diálogos: un pitido corto por letra, con tono según la letra ---------- */
   const ESCALA = [0, 2, 4, 5, 7, 9, 11, 12];
   let letras = 0;
-  function voz(letra) {
+  function voz(letra, tono = 0) {                       // tono: semitonos (cada personaje, su voz)
     if (!ctx || silencio || !/[a-záéíóúüñ]/i.test(letra)) return;
     if (letras++ % 2) return;                            // una de cada dos, para que no se amontonen
     const t = ctx.currentTime;
     const vocal = 'aeiouáéíóú'.indexOf(letra.toLowerCase());
     const grado = vocal >= 0 ? ESCALA[(vocal % 5) + 2] : ESCALA[letra.toLowerCase().charCodeAt(0) % 5];
-    const base = frecuencia(76 + grado) * (0.97 + Math.random() * 0.06);
+    const base = frecuencia(76 + grado + tono) * (0.97 + Math.random() * 0.06);
     const osc = ctx.createOscillator(), g = ctx.createGain();
     osc.type = 'square';
     osc.frequency.setValueAtTime(base, t);

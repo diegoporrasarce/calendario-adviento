@@ -1,14 +1,25 @@
 {
-  "bienvenida": { "personaje": "Muñeco de nieve", "retrato": "muneco", "lineas": [
-      "¡Hola, Henar! Soy el muñeco de nieve del portal. ¡Bienvenida a tu nuevo edificio!",
-      "¡Y menudo edificio! Tiene 24 puertas, y detrás de cada una hay una sorpresa.",
-      "Funciona como un calendario de adviento: cada día de diciembre se puede abrir una puerta nueva.",
-      "El día 1 se abre la puerta 1, el día 2 la puerta 2... y así hasta el 24.",
-      "Si un día se te pasa, no te preocupes: las puertas de los días anteriores se pueden seguir abriendo.",
-      "Las que brillan ya se pueden abrir. Las que tienen candado tendrán que esperar a su día.",
-      "Muévete con las flechas, sube por la escalera de la derecha y pulsa Espacio delante de una puerta.",
-      "Si se te olvida algo, vuelve a hablar conmigo. ¡Aquí estaré, sin derretirme!"
-  ] },
+  "bienvenida": {
+    "personajes": {
+      "muneco": { "nombre": "Muñeco de nieve", "retrato": "muneco", "lado": "izquierda", "tono": -9 },
+      "henar": { "nombre": "Henar", "retrato": "henar", "lado": "derecha", "tono": 0 }
+    },
+    "lineas": [
+      { "habla": "muneco", "texto": "¡Hola! Tú debes de ser la vecina nueva, ¿verdad?" },
+      { "habla": "henar", "texto": "¡Sí! Soy Henar. Me acabo de mudar a este edificio." },
+      { "habla": "muneco", "texto": "¡Bienvenida! Yo soy el muñeco de nieve del portal. Me paso el invierno aquí, vigilando la entrada." },
+      { "habla": "henar", "texto": "¡Qué edificio tan bonito! ¿Por qué tiene tantas puertas con números?" },
+      { "habla": "muneco", "texto": "Porque es un calendario de adviento: tiene 24 puertas, y detrás de cada una hay una sorpresa." },
+      { "habla": "muneco", "texto": "Cada día de diciembre se abre una nueva: el día 1 la puerta 1, el día 2 la puerta 2... y así hasta el 24." },
+      { "habla": "henar", "texto": "¿Y si algún día se me pasa?" },
+      { "habla": "muneco", "texto": "No pasa nada: las puertas de los días anteriores se pueden seguir abriendo." },
+      { "habla": "muneco", "texto": "Las que brillan ya se pueden abrir. Las que tienen candado tendrán que esperar a su día." },
+      { "habla": "henar", "texto": "¿Y cómo llego hasta ellas?" },
+      { "habla": "muneco", "texto": "Muévete con las flechas, sube por la escalera de la derecha y pulsa Espacio (o ABRIR) delante de una puerta." },
+      { "habla": "henar", "texto": "¡Entendido! Muchas gracias, muñeco." },
+      { "habla": "muneco", "texto": "Si se te olvida algo, vuelve a hablar conmigo. ¡Aquí estaré, sin derretirme!" }
+    ]
+  },
   "dias": [
     { "dia": 1, "tipo": "minijuego", "titulo": "Cajas en equilibrio", "juego": "dia01-cajas", "recompensa": "¡Feliz primer día de diciembre! Todas las cajas, sanas y salvas, en tu piso nuevo. ¡Bienvenida a casa! Mañana empiezan las sorpresas." },
     { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "¡Feliz segundo día de diciembre! Has atrapado todos los copos, pero esto no ha hecho más que empezar: todavía quedan muchas pruebas por superar." },
