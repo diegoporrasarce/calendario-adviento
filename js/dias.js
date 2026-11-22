@@ -81,7 +81,7 @@ const Dias = (() => {
   function cargarScript(ruta) {
     return new Promise((ok, fallo) => {
       const s = document.createElement('script');
-      s.src = ruta + (debug ? '?t=' + Date.now() : '');
+      s.src = ruta + (debug ? '?t=' + Date.now() : '?v=' + (window.VERSION || ''));   // versión: nunca código viejo de la caché
       s.onload = ok;
       s.onerror = () => fallo(new Error('No se pudo cargar ' + ruta));
       document.head.appendChild(s);
