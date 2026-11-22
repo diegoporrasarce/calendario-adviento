@@ -34,16 +34,32 @@ window.JUEGOS['dia23-estrella'] = {
     const ESCALERAS = TRAMOS.filter((t) => t.escalera);
 
     // Vecinos: uno por planta, en el pasillo, delante de su puerta
+    // Plantas 0 a 2: vecinos que saludan al pasar. Plantas 3 a 5: ¡la familia de Henar! (charlan con ella, con sus caras)
     const ASPECTO = [
-      { ropa: '#4a7ad8', pelo: '#6b3f23' }, { ropa: '#9a5ad0', pelo: '#c9c9c9', abuela: true }, { ropa: '#3f8a5c', pelo: '#2b1a14', barba: true },
-      { ropa: '#f08a2c', pelo: '#c9a227', nino: true }, { ropa: '#c8383f', pelo: '#a8402a', gato: true }, { ropa: '#2c8a8a', pelo: '#2b1a14', gorro: true }
+      { ropa: '#4a7ad8', pelo: '#6b3f23' }, { ropa: '#9a5ad0', pelo: '#c9c9c9', abuela: true, gato: true }, { ropa: '#3f8a5c', pelo: '#2b1a14', barba: true },
+      { familia: 'cristina' }, { familia: 'agustin' }, { familia: 'dani' }
     ];
+    const PERSONAS = {
+      cristina: { nombre: 'CRISTINA', retrato: 'cristina' }, agustin: { nombre: 'AGUSTÍN', retrato: 'agustin' },
+      dani: { nombre: 'DANI', retrato: 'dani' }, henar: { nombre: 'HENAR', retrato: 'henar' }
+    };
+    const CHARLAS_BASE = {
+      cristina: [['cristina', '¡Sorpresa, Henar!'], ['henar', '¡¿Mamá?! ¿Pero qué haces tú aquí?'], ['cristina', '¡Hemos venido a pasar la Navidad contigo! Sigue subiendo, que hay más sorpresas.']],
+      agustin: [['agustin', '¡Ho, ho, ho! ¿A quién buscas, vecina?'], ['henar', '¡¿Papá?! ¡Pero si vas vestido de Papá Noel!'], ['agustin', '¡Esta noche me toca a mí! Venga, que la estrella te espera arriba.']],
+      dani: [['dani', '¿Qué pasa, hermanita?'], ['henar', '¡¿Dani?! ¿Tú también estás aquí?'], ['dani', '¡Claro! No me perdía tu primera Navidad en el piso nuevo. ¡Corre al tejado!']]
+    };
+    // en dias.json se pueden cambiar: "familia": { "cristina": [["cristina", "..."], ["henar", "..."]], ... }
+    const CHARLAS = {};
+    for (const k in CHARLAS_BASE) {
+      const otra = datos && datos.familia && Array.isArray(datos.familia[k]) ? datos.familia[k] : null;
+      CHARLAS[k] = (otra || CHARLAS_BASE[k]).map(([quien, txt]) => ({ quien: PERSONAS[quien] ? quien : k, texto: String(txt).replace(/…/g, '...') }));
+    }
     const VECINOS = ASPECTO.map((a, p) => ({ ...a, p, x: p % 2 === 0 ? 132 : 188, puerta: p % 2 === 0 ? 142 : 178 }));
 
-    let s, jug, camara, final, saludados;
+    let s, jug, camara, final, saludados, charla;
 
     function reiniciar() {
-      s = 0; camara = null; final = 0; saludados = 0;
+      s = 0; camara = null; final = 0; saludados = 0; charla = null;
       jug = { x: 24, y: FY(0), dir: 1, andando: false };
       for (const v of VECINOS) { v.saludado = false; v.t = 0; }
     }
@@ -64,6 +80,17 @@ window.JUEGOS['dia23-estrella'] = {
       for (const v of VECINOS) if (v.t > 0) v.t -= dt;
       if (final > 0) { final += dt; if (final > 2.6) api.ganar(); return; }
       const e = api.entrada;
+      if (charla) {
+        const l = charla.lineas[charla.i];
+        charla.letras = Math.min(l.texto.length, charla.letras + dt * 34);
+        if (e.pulsado('accion') | e.pulsado('toque') | e.pulsado('arriba')) {
+          if (charla.letras < l.texto.length) charla.letras = l.texto.length;
+          else if (charla.i < charla.lineas.length - 1) { charla.i++; charla.letras = 0; Sonido.efecto('carta'); }
+          else { charla.v.t = 0.01; charla = null; }
+        }
+        jug.andando = false;
+        return;
+      }
       let avance = (e.arriba ? 1 : 0) - (e.abajo ? 1 : 0), lado = 0;
       if (!avance) lado = (e.derecha ? 1 : 0) - (e.izquierda ? 1 : 0);
       if (!avance && !lado && e.puntero.abajo) {                           // dedo: por encima avanza, por debajo retrocede, a la altura anda hacia él
@@ -89,9 +116,10 @@ window.JUEGOS['dia23-estrella'] = {
       if (jug.andando && Math.floor(api.t * 4) !== Math.floor((api.t - dt) * 4)) Sonido.efecto(pt.t.escalera ? 'escalera' : 'paso');
       // los vecinos saludan cuando pasa por su planta
       for (const v of VECINOS) {
-        if (!v.saludado && Math.abs(jug.y - FY(v.p)) < 1 && Math.abs(jug.x - v.x) < 40) {
-          v.saludado = true; v.t = 4; saludados++;
-          Sonido.efecto(v.gato ? 'miau' : 'pareja');
+        if (!v.saludado && Math.abs(jug.y - FY(v.p)) < 1 && Math.abs(jug.x - v.x) < (v.familia ? 30 : 40)) {
+          v.saludado = true; saludados++;
+          if (v.familia) { v.t = 99; charla = { v, lineas: CHARLAS[v.familia], i: 0, letras: 0 }; Sonido.efecto('completar'); }
+          else { v.t = 4; Sonido.efecto(v.gato ? 'miau' : 'pareja'); }
         }
       }
       if (s >= total) { final = 0.001; Sonido.efecto('completar'); }
@@ -119,7 +147,42 @@ window.JUEGOS['dia23-estrella'] = {
       }
     }
 
+    function familiar(ctx, v, t) {                                        // (x, y) = pies; mira hacia Henar
+      const x = Math.round(v.x), y = FY(v.p), mira = Math.sign(jug.x - x) || 1, saluda = v.t > 0 && Math.floor(t * 4) % 2 === 0;
+      ctx.save(); ctx.translate(x, y); ctx.scale(mira, 1);
+      const R = (c, a, b, w, h) => r(ctx, c, a, b, w, h);
+      const RAYAS = ['#1f2f6b', '#f4f8ff'];
+      R(C.tinta, -4, -6, 3, 6); R(C.tinta, 1, -6, 3, 6);                                   // piernas
+      if (v.familia === 'dani') {                                                         // chaqueta militar verde
+        R('#5c6b34', -5, -17, 10, 12); R('#4a5628', -5, -17, 2, 12); R('#7a8a48', -3, -13, 3, 2); R('#7a8a48', 1, -13, 3, 2); R(C.oro, 0, -16, 1, 1); R(C.oro, 0, -12, 1, 1); R(C.oro, 0, -9, 1, 1);
+        R('#5c6b34', 5, saluda ? -27 : -16, 2, saluda ? 10 : 8); R(C.piel, 5, saluda ? -29 : -8, 2, 2);
+      } else {                                                                            // jersey de rayas marineras y bufanda
+        for (let k = 0; k < 6; k++) R(RAYAS[k % 2], -5, -17 + k * 2, 10, 2);
+        R(v.familia === 'cristina' ? '#d9a62c' : '#9c2630', -5, -18, 10, 2); R(v.familia === 'cristina' ? '#d9a62c' : '#9c2630', -4, -16, 2, 5);
+        R(RAYAS[0], 5, saluda ? -27 : -16, 2, saluda ? 10 : 8); R(C.piel, 5, saluda ? -29 : -8, 2, 2);
+      }
+      R(C.piel, -4, -26, 8, 8);                                                           // cara
+      R(C.tinta, 1, -23, 1, 1); R(C.tinta, 3, -23, 1, 1); R('#e88a8a', -2, -21, 2, 1);
+      if (v.familia === 'cristina') {                                                    // melena castaña y gorro de Navidad
+        R('#7a4a2a', -5, -26, 3, 10); R('#7a4a2a', -4, -27, 8, 2); R('#7a4a2a', 3, -26, 2, 2);
+        R(C.rojo, -4, -31, 8, 4); R(C.rojo, -1, -33, 4, 2); R('#e8dcc0', -5, -28, 10, 2); R(C.blanco, 2, -35, 3, 3);
+        R('#2b1a14', 1, -20, 3, 1);
+      } else if (v.familia === 'agustin') {                                              // barba gris y gorro de Navidad
+        R('#c9c6c0', -4, -21, 8, 4); R('#c9c6c0', -4, -24, 1, 3); R('#9a958e', -1, -19, 3, 1); R('#2b1a14', 0, -21, 3, 1);
+        R(C.rojo, -4, -31, 8, 4); R(C.rojo, -1, -33, 4, 2); R('#e8dcc0', -5, -28, 10, 2); R(C.blanco, 2, -35, 3, 3);
+      } else {                                                                            // pelo corto y barba de unos días
+        R('#5b493b', -4, -27, 8, 2); R('#947764', -2, -27, 1, 1); R('#947764', 1, -27, 1, 1); R('#5b493b', -4, -25, 1, 2);
+        for (let k = 0; k < 4; k++) R('#b99a80', -3 + k * 2, -20 + (k % 2), 1, 1);
+      }
+      ctx.restore();
+      if (v.saludado && v.t <= 0) {                                                      // corazón cuando ya han hablado
+        const hy = y - 40 - Math.floor(t * 2) % 2;
+        r(ctx, C.rojoClaro, x - 3, hy, 2, 2); r(ctx, C.rojoClaro, x + 1, hy, 2, 2); r(ctx, C.rojoClaro, x - 3, hy + 1, 6, 2); r(ctx, C.rojoClaro, x - 2, hy + 3, 4, 1); r(ctx, C.rojoClaro, x - 1, hy + 4, 2, 1);
+      }
+    }
+
     function vecino(ctx, v, t) {
+      if (v.familia) return familiar(ctx, v, t);
       const x = Math.round(v.x), y = FY(v.p), k = v.nino ? 0.8 : 1;
       const mira = Math.sign(jug.x - x) || 1, saluda = v.t > 0 && Math.floor(t * 5) % 2 === 0;
       ctx.save(); ctx.translate(x, y); ctx.scale(k * mira, k);
@@ -221,6 +284,31 @@ window.JUEGOS['dia23-estrella'] = {
       lineas.forEach((l, i) => texto(ctx, l, x + Math.round(w / 2), y + 4 + i * lh, '#2b1a14', { escala: e, centro: true }));
     }
 
+    // Caja de conversación arriba (abajo están los controles táctiles): retrato, nombre y texto letra a letra.
+    // La familia habla desde la izquierda; Henar, desde la derecha y mirando hacia el centro.
+    const retratos = {};
+    function retrato(nombre) {
+      if (!retratos[nombre]) { const cv = document.createElement('canvas'); Sprites.pintarRetrato(cv, nombre); retratos[nombre] = cv; }
+      return retratos[nombre];
+    }
+    function charlaCaja(ctx, api, e, t) {
+      const l = charla.lineas[charla.i], quien = PERSONAS[l.quien], derecha = l.quien === 'henar';
+      const P = 2, rw = 32 * P, rh = 40 * P;
+      const libre = api.ancho - api.margenDerecho - 12;                    // sin tapar los botones de arriba a la derecha
+      const ancho = Math.min(libre, 500 * Math.max(1, e * 0.8)), x0 = Math.max(6, Math.floor((libre - ancho) / 2) + 6), y0 = 10;
+      const lh = Comun.altoTexto(e) + 3 * e, todas = Comun.envolver(l.texto, ancho - rw - 24, e);
+      const alto = Math.max(rh + 10, Comun.altoTexto(e) + 14 + todas.length * lh + 10);
+      Comun.caja(ctx, x0, y0, ancho, alto);
+      ctx.imageSmoothingEnabled = false;
+      const rx = derecha ? x0 + ancho - rw - 5 : x0 + 5, tx = derecha ? x0 + 9 : x0 + rw + 14;
+      if (derecha) { ctx.save(); ctx.translate(rx + rw, y0 + 5); ctx.scale(-1, 1); ctx.drawImage(retrato(quien.retrato), 0, 0, rw, rh); ctx.restore(); }
+      else ctx.drawImage(retrato(quien.retrato), rx, y0 + 5, rw, rh);
+      texto(ctx, quien.nombre, tx, y0 + 6, derecha ? C.hielo2 : C.oroClaro, { escala: e });
+      Comun.envolver(l.texto.slice(0, Math.floor(charla.letras)) || ' ', ancho - rw - 24, e)
+        .forEach((f, i) => texto(ctx, f, tx, y0 + 10 + Comun.altoTexto(e) + 4 + i * lh, C.nieve, { escala: e }));
+      if (charla.letras >= l.texto.length && Math.floor(t * 2) % 2) texto(ctx, '↓', derecha ? x0 + ancho - rw - 18 : x0 + ancho - 12, y0 + alto - Comun.altoTexto(e) - 4, C.oroClaro, { escala: e });
+    }
+
     function dibujar(ctx, api) {
       const d = disposicion(api), t = api.t;
       Comun.fondoNoche(ctx, t, api.alto, api.ancho);
@@ -243,14 +331,16 @@ window.JUEGOS['dia23-estrella'] = {
 
       // bocadillos de los vecinos, en pantalla para que se lean bien
       const e = api.textoEscala, aPantalla = (x, y) => [(x + ox) * d.K, (y - cam) * d.K];
-      for (const v of VECINOS) if (v.t > 0) {
+      for (const v of VECINOS) if (v.t > 0 && !v.familia) {
         const [sx, sy] = aPantalla(v.x, FY(v.p) - (v.gorro ? 34 : 30));
         bocadillo(ctx, SALUDOS[v.p], sx, sy, e, api.ancho, api.alto);
       }
+      if (charla) charlaCaja(ctx, api, e, t);
       if (final > 0) {
         const em = Comun.medir('¡ESTRELLA COLOCADA!', e + 1) <= api.ancho - 12 ? e + 1 : e;
         texto(ctx, '¡ESTRELLA COLOCADA!', Math.floor(api.ancho / 2), Math.floor(api.alto * 0.42), C.oroClaro, { escala: em, centro: true, sombra: C.tinta });
       }
+      if (charla) return;                                                // durante la charla, sin marcadores encima
       const planta = Math.min(PISOS, Math.max(0, Math.floor((FY(0) - jug.y + 2) / AP)));
       const t1 = planta >= PISOS ? 'TEJADO' : `PLANTA ${planta}`, t2 = `VECINOS ${saludados}/${PISOS}`;
       const w1 = Comun.medir(t1, e) + 8, w2 = Comun.medir(t2, e) + 8, hc = Comun.altoTexto(e) + 8;
@@ -263,12 +353,12 @@ window.JUEGOS['dia23-estrella'] = {
     // Solo en modo debug: estado del camino para las pruebas automáticas
     if (Dias.debug) window.estrellaDebug = () => {
       const delante = TRAMOS.find((q) => s >= q.ini && s < q.fin);
-      return { final: final > 0, s, total, x: jug.x, y: jug.y, saludados, haciaDelante: delante ? delante.dx : 0, saludando: VECINOS.filter((v) => v.t > 0).length };
+      return { final: final > 0, s, total, x: jug.x, y: jug.y, saludados, haciaDelante: delante ? delante.dx : 0, saludando: VECINOS.filter((v) => v.t > 0).length, charla: !!charla };
     };
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'LA ESTRELLA DEL TEJADO',
-      instruccion: 'SUBE POR LAS ESCALERAS DEL EDIFICIO HASTA EL TEJADO Y COLOCA LA ESTRELLA. LOS VECINOS TE SALUDARÁN AL PASAR. ← → PARA ANDAR, ↑ PARA SEGUIR SUBIENDO.',
+      instruccion: 'SUBE POR LAS ESCALERAS DEL EDIFICIO HASTA EL TEJADO Y COLOCA LA ESTRELLA. LOS VECINOS TE SALUDARÁN AL PASAR... ¿O NO SON SOLO VECINOS? ← → PARA ANDAR, ↑ PARA SEGUIR SUBIENDO.',
       sinDerrota: true,
       pantallaCompleta: true,
       musica: 'estrella',

@@ -441,6 +441,78 @@ const Sprites = (() => {
         '.....ddwwwwwwwwkkwwrrRrwwdd.....', '....ddwwwwwwwwwwwwwrRrrwwwdd....', '....dwwwwwwwwwwkkwwRrrRwwwwd....',
         '...dwwwwwwwwwwwwwwwwwwwwwwwwd...'
       ]
+    },
+    // La familia de Henar (día 23): su madre Cristina, su padre Agustín y su hermano Dani
+    cristina: {
+      paleta: {
+        a: '#ededf3', b: '#c7c9d3', c: '#c83d3d', d: '#8e2a29', e: '#df574e', f: '#e7dcbe', g: '#c3b691',
+        h: '#8a4b2a', i: '#af6842', j: '#5f321c', k: '#f1c6a7', l: '#ffffff', m: '#e89c8f', n: '#c7856a',
+        o: '#d4a181', p: '#b15d5c', q: '#f9eddb', r: '#e1b13f', s: '#f9d079', t: '#af8127', u: '#2d3a68',
+        v: '#20274e'
+      },
+      filas: [
+        '..............aaaa..............', '.............aaaaab.............', '.............aaaabb.............',
+        '..............bbbb..............', '............cccccccc............', '..........cccccccccccd..........',
+        '.........ccccccccccccdd.........', '........cccccccccccccddd........', '.......eccccccccccccccddd.......',
+        '.......eccccccccccccccddd.......', '......eeccccccccccccccdddd......', '......ecccccccccccccccdddd......',
+        '......ffffffffffffffffffgg......', '......fffffffffffffffffggg......', '.....hhhhhhihjhhhhhihhhhjjj.....',
+        '.....hhhhkkkkhhhhhhhhhhhjjj.....', '.....hhhkkkkkkkkkhhhhhhhjjj.....', '.....hhhkkkkkkkkkkkkhhhhjjj.....',
+        '.....hhhkkkjjkkkkkkjjkkhjjj.....', '.....hhhkkkjlkkkkkkjlkkkjjj.....', '.....hihkkkjjkkkkkkjjkkkjjj.....',
+        '.....hhhkmmkkkkkkkkkkmmkjjj.....', '.....hhhkknknkkokknknkkkjjj.....', '.....hhhkkkkkpllllpkkkkkjjj.....',
+        '.....hhekkkkkkppppkkkkkkejj.....', '.....hiqokkkkkkkkkkkkkkoqjj.....', '.....hhejookkkkkkkkkkoojejj.....',
+        '....hhhhjjjjjokkkkojjjjjjjjj....', '....hhhirrrrrrrrrrrrrrrrjjjj....', '....hhhrssrrrrrrrrrrrrrrtjjj....',
+        '...ihhhrrrrrrrrrrrrrrrrrtjjjj...', '...hihhttrrrrrrrrrrrrrtttjjij...', '..ihhhursruuuuuuuuuuuuuuvjjjji..',
+        '..hiaaarrraaaaaaaaaaaaaabbjjih..', '...uuurrtuuuuuuuuuuuuuuuvvu.....', '..aaaaatttaaaaaaaaaaaaaabbba....',
+        '..uuuuuuuuuuuuuuuuuuuuuuvvvu....', '..aaaaaaaaaaaaaaaaaaaaaabbba....', '..uuuuuuuuuuuuuuuuuuuuuuvvvu....',
+        '..aaaaaaaaaaaaaaaaaaaaaabbba....'
+      ]
+    },
+    agustin: {
+      paleta: {
+        a: '#efeef3', b: '#d4d3ce', c: '#c83d3d', d: '#942c3b', e: '#e05355', f: '#e7dcbe', g: '#c1b68f',
+        h: '#80776a', i: '#a5a19a', j: '#dea985', k: '#5b534c', l: '#3a281c', m: '#af7957', n: '#c78b6a',
+        o: '#6d655b', p: '#96504a', q: '#962b43', r: '#b4475b', s: '#6c1b2d', t: '#2b3b67', u: '#1e274d',
+        v: '#c4c8dc'
+      },
+      filas: [
+        '..............aaaa..............', '.............aaaaab.............', '.............aaaavv.............',
+        '..............bvvv..............', '............cccccccc............', '..........cccccccccccd..........',
+        '.........ccccccccccccdd.........', '........cccccccccccccddd........', '.......eccccccccccccccddd.......',
+        '.......eccccccccccccccddd.......', '......eeccccccccccccccdddd......', '......ecccccccccccccccdddd......',
+        '......ffffffffffffffffffgg......', '......fffffffffffffffffggg......', '......hihhjhijjhjjihjjhikk......',
+        '......hhjjjjjjjjjjjjjjjjhk......', '......hjjjjjjjjjjjjjjjjjjk......', '......hjjjkkkjjjjjjkkkjjjk......',
+        '......ijjjjlajjjjjjlajjjji......', '......bjjmjlljjjjjjlljmjji......', '......bjjjjjjjjnjjjjjjjjji......',
+        '......bbjnjjjjjnnjjjjjnjbi......', '......bbbjjjoooooooojjjbbi......', '......bbbbbopaaaaaapobbbii......',
+        '......bbbbbboppppppobbbbii......', '......ibbbbbbbbbbbbbbbbbii......', '.......ibbbbbibbbbibbbbbi.......',
+        '........ibbbbbbbbbbbbbbi........', '.........ibbbbbbbbbbbbi.........', '.......qdddibbbbbbbbiqqdq.......',
+        '....qqqrrqqqqqqqqqqqqqqqqqss....', '....qqrrqdddddddddddddqqqsss....', '...aaqqqqddqqddqqddqqddqsssav...',
+        '..ttttqrdttttttttttttttttuut....', '..aaaaqdqaaaaaaaaaaaaaaaavva....', '..ttttqsstttttttttttttttuuut....',
+        '..aaaaassaaaaaaaaaaaaaaavvva....', '..ttttttttttttttttttttttuuut....', '..aaaaaaaaaaaaaaaaaaaaaavvva....',
+        '..ttttttttttttttttttttttuuut....'
+      ]
+    },
+    dani: {
+      paleta: {
+        a: '#60483b', b: '#8f7c5e', c: '#3f362a', d: '#edc1a0', e: '#241915', f: '#b57663', g: '#cfa285',
+        h: '#422219', i: '#fcfff9', j: '#c28063', k: '#282a31', l: '#98969e', m: '#e9a18d', n: '#686f3f',
+        o: '#888557', p: '#4b512a', q: '#c5a750', r: '#363915'
+      },
+      filas: [
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '................................', '................................', '................................',
+        '................................', '...........ababababab...........', '.........babababababacc.........',
+        '........bababababababacc........', '.......babababababababacc.......', '.......abddddddddddddddac.......',
+        '.......addddddddddddddddc.......', '.......adeeeeddddddeeeedc.......', '.......addffddddddddffddc.......',
+        '......gaddhidddddddhiddcg.......', '......gdddhhdddddddhhdddg.......', '......gdddddjdddgddjddddk.......',
+        '......gddddddddgdgddddddl.......', '.......ddmdddddddddddmdd........', '.......dgdddddffffddddgd........',
+        '.......gdgdgdgdgdgdgdgdg........', '........gdgdgdgdgdgdgdg.........', '.........gdgdgdgdgdgdg..........',
+        '...........gddddddddg...........', '........nnnnoogddddgoonnpp......', '.....nnnnnnoonngddgnnoonnnnpp...',
+        '....nnonnnnnnnnonnonnnnncnnp....', '...nnncnnnnnnnnqnnnnnncnnnppp...', '..nnonnnncnnpppnqnpppnnnnnnp....',
+        '..nnnnnpppppnnnnnnnpppppnnnp....', '..ncnnnpooopnnnqnnnpooopnncp....', '..nnnnnpooopnnnnnnnpooopnnnp....',
+        '..nncnnpppppnnnqnnnpppppnnnp....', '..nnnnnnnnnnnrnnnnnnnnnncnnp....', '..nnnncnnnnnnnnqnnnncnnnnnnp....',
+        '..nnnnnnnnnnnnnnnnnnnnnnnnnp....'
+      ]
     }
   };
 
