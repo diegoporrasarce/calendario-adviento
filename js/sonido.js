@@ -339,6 +339,16 @@ const Sonido = (() => {
     setInterval(programarMusica, 100);
   }
 
+  // Al salir del navegador, cambiar de app o de pestaña, todo el sonido se pausa; al volver, sigue donde estaba
+  function pausarSiOculta() {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend().catch(() => {});
+    else ctx.resume().catch(() => {});
+  }
+  document.addEventListener('visibilitychange', pausarSiOculta);
+  addEventListener('pagehide', () => { if (ctx) ctx.suspend().catch(() => {}); });
+  addEventListener('pageshow', pausarSiOculta);
+
   /* ---------- Efectos ---------- */
   function efecto(nombre) {
     if (!ctx || silencio) return;
