@@ -361,7 +361,7 @@ window.JUEGOS['dia24-persecucion'] = {
         const ancho = Math.min(api.ancho - 16, 420 * Math.max(1, e * 0.8)), x0 = Math.floor((api.ancho - ancho) / 2);
         const lineas = Comun.envolver(t2 || ' ', ancho - rw - 22, e), lh = Comun.altoTexto(e) + 3 * e;
         const alto = Math.max(rh + 10, Comun.altoTexto(e) + 14 + Comun.envolver(LINEAS[linea], ancho - rw - 22, e).length * lh + 10);
-        const y0 = api.alto - alto - 10;
+        const y0 = 10;                                                     // arriba: abajo están los controles táctiles
         Comun.caja(ctx, x0, y0, ancho, alto);
         ctx.imageSmoothingEnabled = false; ctx.drawImage(retrato('autor'), x0 + 5, y0 + 5, rw, rh);
         texto(ctx, AUTOR, x0 + rw + 14, y0 + 6, C.oroClaro, { escala: e });

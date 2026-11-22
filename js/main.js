@@ -37,8 +37,18 @@
   if (!document.fullscreenEnabled) botonPantalla.hidden = true;
   botonPantalla.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen()
+      .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))   // en móvil, apaisado
+      .catch(() => {});
     botonPantalla.blur();                  // para que Espacio/Enter no vuelvan a pulsarlo
+  });
+
+  /* ---------- Aviso de girar el móvil: se puede descartar (dura hasta cerrar la pestaña) ---------- */
+  const avisoGirar = document.getElementById('girar');
+  try { if (sessionStorage.getItem('adviento.vertical') === '1') avisoGirar.classList.add('descartado'); } catch (e) { /* sin almacenamiento */ }
+  document.getElementById('girar-seguir').addEventListener('click', () => {
+    avisoGirar.classList.add('descartado');
+    try { sessionStorage.setItem('adviento.vertical', '1'); } catch (e) { /* sin almacenamiento */ }
   });
 
   /* ---------- Sonido: arranca con el primer gesto; botón para silenciar ---------- */

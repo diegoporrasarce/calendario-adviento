@@ -39,18 +39,23 @@
     </div>
   </div>
 
+  <!-- Controles táctiles: cruceta abajo a la izquierda y botón de acción abajo a la derecha, sobre la escena -->
   <div id="tactil" aria-label="Controles táctiles">
-    <div class="grupo">
-      <button class="tecla" data-tecla="izquierda" aria-label="Izquierda">◀</button>
-      <button class="tecla" data-tecla="derecha" aria-label="Derecha">▶</button>
+    <div class="cruz">
+      <button class="tecla arriba" data-tecla="arriba" aria-label="Arriba">▲</button>
+      <button class="tecla izquierda" data-tecla="izquierda" aria-label="Izquierda">◀</button>
+      <span class="centro" aria-hidden="true"></span>
+      <button class="tecla derecha" data-tecla="derecha" aria-label="Derecha">▶</button>
+      <button class="tecla abajo" data-tecla="abajo" aria-label="Abajo">▼</button>
     </div>
-    <div class="grupo">
-      <button class="tecla" data-tecla="arriba" aria-label="Subir">▲</button>
-      <button class="tecla" data-tecla="abajo" aria-label="Bajar">▼</button>
-    </div>
-    <div class="grupo">
-      <button class="tecla grande" data-tecla="accion">ABRIR</button>
-    </div>
+    <button class="tecla grande" data-tecla="accion">ABRIR</button>
+  </div>
+
+  <!-- En el móvil en vertical: aviso para girarlo -->
+  <div id="girar" role="dialog" aria-label="Gira el móvil">
+    <div class="movil" aria-hidden="true"><span></span></div>
+    <p>Gira el móvil para jugar en horizontal</p>
+    <button id="girar-seguir" class="boton-pixel" type="button">Seguir en vertical</button>
   </div>
 
   <div id="modal" class="oculto" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">

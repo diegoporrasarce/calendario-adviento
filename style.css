@@ -198,20 +198,78 @@ body.jugando #silencio { z-index: 7; right: 88px; }
 #juego-contenedor .saltar { position: absolute; right: 10px; bottom: 10px; z-index: 2; }
 .juego-error { max-width: 420px; padding: 16px; text-align: center; }
 
-/* ---------- Controles táctiles ---------- */
+/* ---------- Controles táctiles: encima de la escena, sin quitarle sitio ---------- */
 #tactil {
   display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 8;                              /* por encima del minijuego, por debajo del modal */
   justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-  background: #0b0d22;
+  align-items: flex-end;
+  padding: 10px calc(14px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+  pointer-events: none;                    /* solo los botones reciben toques */
   touch-action: none;
 }
 @media (pointer: coarse), (max-width: 700px) {
   #tactil { display: flex; }
 }
-#tactil .grupo { display: flex; gap: 8px; }
+#tactil .tecla { pointer-events: auto; opacity: 0.82; }
+#tactil .tecla.activa { opacity: 1; }
+.cruz {
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 52px);
+}
+.cruz .tecla { width: 52px; height: 52px; margin: 0; font-size: 20px; }
+.cruz .arriba { grid-area: 1 / 2; }
+.cruz .izquierda { grid-area: 2 / 1; }
+.cruz .centro { grid-area: 2 / 2; background: #1b2245; opacity: 0.82; }
+.cruz .derecha { grid-area: 2 / 3; }
+.cruz .abajo { grid-area: 3 / 2; }
+#tactil .tecla.grande { width: 84px; height: 84px; border-radius: 0; margin: 0 0 10px; }
+/* con los controles encima, los textos de abajo suben y el diálogo no queda tapado por la cruceta */
+@media (pointer: coarse), (max-width: 700px) {
+  #pista { bottom: 172px; }
+  #dialogo { bottom: auto; top: 0; }
+}
+
+/* ---------- Aviso de girar el móvil (táctil en vertical) ---------- */
+#girar { display: none; }
+@media (pointer: coarse) and (orientation: portrait) {
+  #girar:not(.descartado) {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 24px;
+    background: #0b1030;
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.4;
+  }
+}
+#girar p { margin: 0; max-width: 260px; color: #f2c94c; }
+#girar .movil {
+  width: 46px;
+  height: 80px;
+  border: 6px solid #f4ecd0;
+  box-shadow: 0 0 0 3px #16161c;
+  background: #26305f;
+  position: relative;
+  animation: girar-movil 2.4s steps(1) infinite;
+}
+#girar .movil span { position: absolute; left: 50%; bottom: 4px; width: 8px; height: 4px; margin-left: -4px; background: #f4ecd0; }
+@keyframes girar-movil {
+  0%, 35% { transform: rotate(0deg); }
+  45%, 90% { transform: rotate(-90deg); }
+}
+@media (prefers-reduced-motion: reduce) { #girar .movil { animation: none; transform: rotate(-90deg); } }
 
 .tecla {
   width: 58px;
