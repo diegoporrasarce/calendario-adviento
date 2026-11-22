@@ -21,7 +21,7 @@
     ]
   },
   "dias": [
-    { "dia": 1, "tipo": "minijuego", "titulo": "Cajas en equilibrio", "juego": "dia01-cajas", "recompensa": "¡Feliz primer día de diciembre! Todas las cajas, sanas y salvas, en tu piso nuevo. ¡Bienvenida a casa! Mañana empiezan las sorpresas." },
+    { "dia": 1, "tipo": "minijuego", "titulo": "Descarga el camión", "juego": "dia01-camion", "recompensa": "¡Feliz primer día de diciembre! Cada caja en su sitio: tu piso nuevo ya empieza a parecer un hogar. ¡Bienvenida a casa! Mañana empiezan las sorpresas." },
     { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "¡Feliz segundo día de diciembre! Has atrapado todos los copos, pero esto no ha hecho más que empezar: todavía quedan muchas pruebas por superar." },
     { "dia": 3, "tipo": "minijuego", "titulo": "Memory navideño", "juego": "dia03-memory", "recompensa": "¡Feliz tercer día de diciembre! Qué buena memoria tienes… La vas a necesitar, porque las pruebas no han hecho más que empezar." },
     { "dia": 4, "tipo": "minijuego", "titulo": "Riega la planta", "juego": "dia04-planta", "recompensa": "¡Feliz cuarto día de diciembre! La flor de Pascua ya luce en tu piso nuevo. Poco a poco, esto empieza a parecer un hogar." },

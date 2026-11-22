@@ -6,7 +6,7 @@ Se añaden de uno en uno, en orden de fecha (cada uno solo tiene que estar listo
 ## Historia
 
 - **Bienvenida (cualquier día):** el muñeco de nieve del portal (planta baja, a la izquierda) y Henar tienen una conversación (cada uno con su retrato, su lado y su voz) en la que él explica cómo funciona el calendario (Espacio/ABRIR a su lado). Hasta la primera vez tiene un «!» encima. Texto en `dias.json` → `bienvenida`.
-- **Día 1, la llegada:** cajas en equilibrio: sube a su piso con las cajas de la mudanza.
+- **Día 1, la llegada:** descarga el camión de la mudanza y manda cada caja a su habitación.
 - **Días 2–11, la mudanza:** la chica se instala en el edificio.
 - **Día 12, el terremoto:** el edificio se derrumba dentro del minijuego; al ganar, se salva y vuelve a verse bien.
 - **Días 13–23, preparando la Navidad:** el edificio ya se salvó en el día 12 y no se reconstruye nada. Los juegos y los mensajes hablan del piso nuevo, el barrio, los vecinos y los preparativos (como mucho se recuerda el susto del terremoto).
@@ -135,4 +135,4 @@ En `dias.json`: `autor` (nombre en el diálogo), `dialogoFinal` (lo que dice al 
 - **20:** palabras sin tildes, selección arrastrando.
 - **23:** corto y con saltos generosos (las plataformas son lo más difícil en el móvil).
 - **24 — La persecución:** escena inicial (el Grinch sube al tejado, coge el saco y escapa; Espacio la salta). Carrera con recorrido fijo (semilla) en 3 fases de 92, 112 y 132 px/s con huecos cada vez más anchos; salto con margen (se puede pulsar un poco antes de aterrizar o justo después de dejar el borde). Chimeneas lejos de los bordes: chocar para a la chica hasta que salta y aleja al ladrón; caer por un hueco la sube al tejado siguiente (-2 regalos). Barra de progreso con la chica, el ladrón y las fases. Sin derrota. Retratos `autor` y `autorMascara` en `js/sprites.js`, sacados píxel a píxel de la imagen del autor (32×40). La recompensa admite `foto`.
-- **1 — Cajas en equilibrio:** la chica sube sola por la escalera (4 plantas, cada una más rápida) con una torre de cajas que es un péndulo invertido: tiende a caer hacia donde se inclina y cada escalón le da un meneo. ← → (o tocar a un lado) mueven los brazos para enderezarla; un nivel de burbuja arriba marca la inclinación (zona verde segura, «¡CUIDADO!» al salir). En cada rellano un vecino le da otra caja. Si pasa de ~35°, se caen y se repite. Música `mudanza`.
+- **1 — Descarga el camión:** delante del edificio, el camión de la mudanza saca las cajas de una en una, cada una con el dibujo de lo que lleva (almohada, osito, despertador / sartén, taza, cazo / libros, lámpara, planta / patito, toalla, cepillo). Se manda a su habitación tocando su cartel o con las flechas en cruz (↑ dormitorio, ← cocina, → salón, ↓ baño; los carteles están colocados en cruz). Fallar no castiga: la caja vuelve al camión y sale más tarde. 12 cajas, sin tiempo. Música `mudanza`.
