@@ -136,6 +136,15 @@ const Sonido = (() => {
                                      [60, 1], [55, 1], [52, 1], [48, 1]]),
       bajo: [48, 53, 55, 48, 48, 53, 55, 48]
     },
+    // Melodía original, alegre y tranquila, para la mudanza del día 1
+    mudanza: {
+      tempo: 0.3, compas: 4, tipo: 'triangle',
+      melodia: [[60, 1], [64, 1], [67, 1], [72, 1], [71, .5], [69, .5], [67, 1], [64, 1], [65, 1],
+        [67, 1], [65, .5], [64, .5], [62, 1], [60, 1], [62, 1], [64, 1], [62, 2],
+        [60, 1], [64, 1], [67, 1], [72, 1], [74, .5], [72, .5], [71, 1], [69, 1], [67, 1],
+        [65, 1], [69, 1], [67, .5], [65, .5], [64, 1], [62, 1], [59, 1], [60, 2]],
+      bajo: [48, 48, 53, 43, 48, 50, 53, 48]
+    },
     // Melodía original, rápida y con un punto de misterio, para la persecución del día 24
     persecucion: {
       tempo: 0.18, compas: 4, tipo: 'square', cascabel: true,
