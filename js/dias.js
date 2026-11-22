@@ -214,7 +214,8 @@ const Dias = (() => {
     $('modal-titulo').textContent = entrada.titulo || `Día ${n}`;
     const foto = $('modal-foto');
     foto.classList.add('oculto');
-    $('modal-texto').textContent = '¡Completado!' + (entrada.recompensa ? '\n' + entrada.recompensa : '');
+    const cabecera = entrada.sinCompletado ? '' : '¡Completado!';      // el final del día 24 va sin él
+    $('modal-texto').textContent = [cabecera, entrada.recompensa || ''].filter(Boolean).join('\n');
     if (entrada.foto) {                                  // foto opcional bajo el mensaje (p. ej., el final del día 24)
       foto.alt = entrada.titulo || '';
       foto.onerror = () => foto.classList.add('oculto');
