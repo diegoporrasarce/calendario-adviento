@@ -13,7 +13,7 @@ window.JUEGOS['dia16-puzle'] = {
     let fotoLista = false, fotoFallo = false;
     foto.onload = () => { fotoLista = true; };
     foto.onerror = () => { fotoFallo = true; };
-    foto.src = (datos && datos.imagen) || 'fotos/ejemplo.svg';
+    foto.src = (datos && datos.imagen) || 'fotos/postal-navidad.png';
 
     let piezas, movs, anim, final;      // piezas[posición] = número de pieza (HUECO = vacío)
 
@@ -140,7 +140,7 @@ window.JUEGOS['dia16-puzle'] = {
 
     return Comun.crearJuego(contenedor, alTerminar, {
       titulo: 'PUZZLE DESLIZANTE',
-      instruccion: 'EL TERREMOTO HA ROTO VUESTRA FOTO. TOCA UNA PIEZA JUNTO AL HUECO PARA MOVERLA (O USA LAS FLECHAS) HASTA RECOMPONERLA.',
+      instruccion: 'EL TERREMOTO HA ROTO LA POSTAL DE NAVIDAD. TOCA UNA PIEZA JUNTO AL HUECO PARA MOVERLA (O USA LAS FLECHAS) HASTA RECOMPONERLA.',
       sinDerrota: true,
       pantallaCompleta: true,
       musica: 'puzle',
