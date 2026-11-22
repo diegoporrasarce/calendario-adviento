@@ -43,14 +43,6 @@
     botonPantalla.blur();                  // para que Espacio/Enter no vuelvan a pulsarlo
   });
 
-  /* ---------- Aviso de girar el móvil: se puede descartar (dura hasta cerrar la pestaña) ---------- */
-  const avisoGirar = document.getElementById('girar');
-  try { if (sessionStorage.getItem('adviento.vertical') === '1') avisoGirar.classList.add('descartado'); } catch (e) { /* sin almacenamiento */ }
-  document.getElementById('girar-seguir').addEventListener('click', () => {
-    avisoGirar.classList.add('descartado');
-    try { sessionStorage.setItem('adviento.vertical', '1'); } catch (e) { /* sin almacenamiento */ }
-  });
-
   /* ---------- Sonido: arranca con el primer gesto; botón para silenciar ---------- */
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => Sonido.iniciar(), { capture: true });
   const botonSilencio = document.getElementById('silencio');

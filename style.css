@@ -235,10 +235,10 @@ body.jugando #silencio { z-index: 7; right: 88px; }
   #dialogo { bottom: auto; top: 0; }
 }
 
-/* ---------- Aviso de girar el móvil (táctil en vertical) ---------- */
+/* ---------- Aviso de girar el móvil (táctil en vertical): obligatorio, tapa todo ---------- */
 #girar { display: none; }
 @media (pointer: coarse) and (orientation: portrait) {
-  #girar:not(.descartado) {
+  #girar {
     position: fixed;
     inset: 0;
     z-index: 20;
