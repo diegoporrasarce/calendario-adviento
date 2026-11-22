@@ -5,7 +5,8 @@ Se añaden de uno en uno, en orden de fecha (cada uno solo tiene que estar listo
 
 ## Historia
 
-- **Día 1:** diálogo de Henar (ya hecho, se queda como está; no es un minijuego).
+- **Bienvenida (cualquier día):** el muñeco de nieve del portal (planta baja, a la izquierda) explica cómo funciona el calendario al hablar con él (Espacio/ABRIR a su lado). Hasta la primera vez tiene un «!» encima. Texto en `dias.json` → `bienvenida`.
+- **Día 1:** pendiente de contenido nuevo (la bienvenida ya no está en la puerta 1).
 - **Días 2–11, la mudanza:** la chica se instala en el edificio.
 - **Día 12, el terremoto:** el edificio se derrumba dentro del minijuego; al ganar, se salva y vuelve a verse bien.
 - **Días 13–23, preparando la Navidad:** el edificio ya se salvó en el día 12 y no se reconstruye nada. Los juegos y los mensajes hablan del piso nuevo, el barrio, los vecinos y los preparativos (como mucho se recuerda el susto del terremoto).

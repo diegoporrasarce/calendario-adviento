@@ -1,15 +1,16 @@
 {
-  "dias": [
-    { "dia": 1, "tipo": "dialogo", "titulo": "Una vecina nueva", "personaje": "Henar", "retrato": "henar", "lineas": [
-      "¡Hola! Soy Henar. Me acabo de mudar a este edificio.",
+  "bienvenida": { "personaje": "Muñeco de nieve", "retrato": "muneco", "lineas": [
+      "¡Hola, Henar! Soy el muñeco de nieve del portal. ¡Bienvenida a tu nuevo edificio!",
       "¡Y menudo edificio! Tiene 24 puertas, y detrás de cada una hay una sorpresa.",
       "Funciona como un calendario de adviento: cada día de diciembre se puede abrir una puerta nueva.",
       "El día 1 se abre la puerta 1, el día 2 la puerta 2... y así hasta el 24.",
       "Si un día se te pasa, no te preocupes: las puertas de los días anteriores se pueden seguir abriendo.",
       "Las que brillan ya se pueden abrir. Las que tienen candado tendrán que esperar a su día.",
       "Muévete con las flechas, sube por la escalera de la derecha y pulsa Espacio delante de una puerta.",
-      "¡Nos vemos mañana en la puerta 2!"
-    ] },
+      "Si se te olvida algo, vuelve a hablar conmigo. ¡Aquí estaré, sin derretirme!"
+  ] },
+  "dias": [
+    { "dia": 1, "tipo": "mensaje", "titulo": "¡Primer día de diciembre!", "texto": "TODO: contenido de la puerta 1. ¡Empieza la cuenta atrás! Cada día, una puerta nueva hasta Nochebuena.", "nota": "TODO: la bienvenida ahora la da el muñeco de nieve (campo bienvenida); esta puerta necesita contenido nuevo." },
     { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "¡Feliz segundo día de diciembre! Has atrapado todos los copos, pero esto no ha hecho más que empezar: todavía quedan muchas pruebas por superar." },
     { "dia": 3, "tipo": "minijuego", "titulo": "Memory navideño", "juego": "dia03-memory", "recompensa": "¡Feliz tercer día de diciembre! Qué buena memoria tienes… La vas a necesitar, porque las pruebas no han hecho más que empezar." },
     { "dia": 4, "tipo": "minijuego", "titulo": "Riega la planta", "juego": "dia04-planta", "recompensa": "¡Feliz cuarto día de diciembre! La flor de Pascua ya luce en tu piso nuevo. Poco a poco, esto empieza a parecer un hogar." },

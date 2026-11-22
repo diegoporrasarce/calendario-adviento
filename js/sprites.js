@@ -421,6 +421,26 @@ const Sprites = (() => {
         '..uvuuuuuuvxxxxzzxxxyuuuvwwu....', '..uuuuvuuuuxxxxzzxxxyuuuuwwv....', '..vuuuuuuvuxxxxzzxxxyuuvuwwu....',
         '..uuuvuuuuuxxxxzzxxxyuuuuwwu....'
       ]
+    },
+    // Muñeco de nieve del portal: explica el calendario al hablar con él
+    muneco: {
+      paleta: { w: '#f4f8ff', s: '#c5d3ea', d: '#8e9ecb', k: '#16161c', K: '#5c5866', h: '#2b2b36', H: '#45455a', r: '#c8383f', R: '#9c2630', o: '#f08a2c', O: '#c0601c' },
+      filas: [
+        '................................', '................................', '................................',
+        '..........HHhhhhhhhhhhh.........', '..........HHhhhhhhhhhhh.........', '..........HHhhhhhhhhhhh.........',
+        '..........HHhhhhhhhhhhh.........', '..........HHhhhhhhhhhhh.........', '..........rrrrrrrrrrrrr.........',
+        '..........rrrrrrrrrrrrr.........', '..........hhhhhhhhhhhhh.........', '.......hhhhhhhhhhhhhhhhhhh......',
+        '.......hhhhhhhhhhhhhhhhhhh......', '.............dddddd.............', '...........dddwwwwddd...........',
+        '.........ddwwwwwwwwwwdd.........', '........ddwwwwwwwwwwwwdd........', '........dwwwwwwwwwwwwwwd........',
+        '.......dwwwwwwwwwwwwwwwwd.......', '.......dwwwwwwwwwwwwwwwwd.......', '......ddwwwwKkwwwwwKkwwwdd......',
+        '......dwwwwwkkwwwwwkkwwwsd......', '......dwwwwwwwwwoooooosssd......', '......dwwwwwwwwwoooooooosd......',
+        '......dwwwwwwwwwOOOwsssssd......', '......ddwwwwwwwwwwssssssdd......', '.......dwwwkwwwwwsssskssd.......',
+        '.......dwwwwwkwwssskssssd.......', '........dwwwwwsksksssssd........', '........ddwwwsssssssssdd........',
+        '.........ddwsssssssssdd.........', '...........rrRrrrRrrr...........', '.......rRrrrRrrrRrrrRrrrRr......',
+        '.........rrRrrrRrrrrrRr.........', '........ddwwwwwwwwwrRrrd........', '......ddwwwwwwwkkwwRrrRwdd......',
+        '.....ddwwwwwwwwkkwwrrRrwwdd.....', '....ddwwwwwwwwwwwwwrRrrwwwdd....', '....dwwwwwwwwwwkkwwRrrRwwwwd....',
+        '...dwwwwwwwwwwwwwwwwwwwwwwwwd...'
+      ]
     }
   };
 

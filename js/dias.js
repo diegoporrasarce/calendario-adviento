@@ -7,6 +7,7 @@ const Dias = (() => {
   const CLAVE = debug ? 'adviento.progreso.debug' : 'adviento.progreso';
 
   let datos = [];                 // entradas de dias.json
+  let bienvenida = null;          // lo que cuenta el muñeco de nieve (dias.json → bienvenida)
   let abiertas = new Set(leerProgreso());
   let modalAbierto = false;
   let ficha = 0;                  // invalida cargas asíncronas de un modal ya cerrado
@@ -70,6 +71,7 @@ const Dias = (() => {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const json = await resp.json();
     datos = Array.isArray(json.dias) ? json.dias : [];
+    bienvenida = json.bienvenida || null;
   }
 
   /* ---------- Modal ---------- */
@@ -130,7 +132,8 @@ const Dias = (() => {
       dialogo.i++;
       empezarLinea();
     } else {
-      marcarAbierta(dialogo.n);
+      if (dialogo.n > 0) marcarAbierta(dialogo.n);
+      else { try { localStorage.setItem(CLAVE_MUNECO, '1'); } catch (e) { /* sin almacenamiento */ } }
       cerrarModal();
     }
   }
@@ -145,6 +148,16 @@ const Dias = (() => {
     $('dialogo').classList.remove('oculto');
     empezarLinea();
   }
+
+  // Hablar con el muñeco de nieve del portal: cuenta cómo funciona el calendario (cualquier día)
+  const CLAVE_MUNECO = debug ? 'adviento.muneco.debug' : 'adviento.muneco';
+  function hablarMuneco() {
+    if (modalAbierto || !bienvenida) return false;
+    abrirDialogo(0, bienvenida);
+    modalAbierto = true;
+    return true;
+  }
+  function munecoVisto() { try { return localStorage.getItem(CLAVE_MUNECO) === '1'; } catch (e) { return true; } }
 
   /* ---------- Minijuegos (tipo "minijuego"), a pantalla completa sobre la escena ---------- */
   // Devuelve la capa del minijuego. Si el navegador sirve un index.html antiguo (de caché) que no la
@@ -294,6 +307,6 @@ const Dias = (() => {
 
   return {
     TOTAL, debug, diaActual, cargar, estado, info, abrirPuerta, cerrarModal,
-    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo
+    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo, hablarMuneco, munecoVisto
   };
 })();

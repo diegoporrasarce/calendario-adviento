@@ -197,6 +197,8 @@
   let camY = objetivoCamara();
   const sacudidas = {};
   let puertaCercana = 0;
+  let munecoCerca = false;                 // junto al muñeco de nieve del portal (planta baja, a la izquierda)
+  const MUNECO_X = 27;
   let aviso = '', avisoHasta = 0;
   const VEL = 58, VEL_ESCALERA = 64;       // px/s andando y por la escalera
 
@@ -214,7 +216,9 @@
   function avisar(texto) { aviso = texto; avisoHasta = performance.now() + 2200; }
 
   function accion() {
-    if (Dias.hayModal() || jug.enEscalera || !puertaCercana) return;
+    if (Dias.hayModal() || jug.enEscalera) return;
+    if (!puertaCercana && munecoCerca) { if (Dias.hablarMuneco()) Sonido.efecto('abrir'); return; }
+    if (!puertaCercana) return;
     const n = puertaCercana;
     if (Dias.abrirPuerta(n)) Sonido.efecto('abrir');
     else {
@@ -279,7 +283,8 @@
       if (dx && Math.floor(jug.t * 4) !== Math.floor((jug.t - dt) * 4)) Sonido.efecto('paso');   // pisadas en la nieve
     }
 
-    // puerta que hay delante
+    // puerta que hay delante (o el muñeco de nieve, a la izquierda de la planta baja)
+    munecoCerca = !jug.enEscalera && jug.planta === 0 && jug.x <= X_MIN + 14;
     puertaCercana = 0;
     if (!jug.enEscalera) {
       for (let n = 1; n <= Dias.TOTAL; n++) {
@@ -295,6 +300,8 @@
     if (performance.now() < avisoHasta) return aviso;
     // Los controles están en la leyenda fija; aquí solo se avisa de las puertas aún cerradas.
     if (puertaCercana && Dias.estado(puertaCercana) === 'bloqueada') return `Día ${puertaCercana}: se abre el ${puertaCercana} de diciembre`;
+    if (munecoCerca && !puertaCercana) return 'Pulsa Espacio (o ABRIR) para hablar con el muñeco de nieve';
+    if (!Dias.munecoVisto() && !Dias.hayModal()) return 'El muñeco de nieve del portal quiere contarte algo';
     return '';
   }
 
@@ -319,6 +326,12 @@
     if (puertaCercana) {
       const d = Edificio.puerta(puertaCercana);
       Edificio.dibujarFlecha(ctx, d.cx, d.y - cam - 51, t);
+    } else if (munecoCerca) Edificio.dibujarFlecha(ctx, MUNECO_X, sueloY(0) - cam - 40, t);
+    else if (!Dias.munecoVisto()) {                // bocadillo con «!» sobre el muñeco hasta hablar con él
+      const bx = MUNECO_X - 4, by = sueloY(0) - cam - 46 + (Math.floor(t * 2) % 2);
+      ctx.fillStyle = '#16161c'; ctx.fillRect(bx - 1, by - 1, 10, 12);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(bx, by, 8, 10); ctx.fillRect(bx + 2, by + 10, 3, 2);
+      ctx.fillStyle = '#c8383f'; ctx.fillRect(bx + 3, by + 2, 2, 4); ctx.fillRect(bx + 3, by + 7, 2, 2);
     }
     ctx.restore();
     dibujarNieve(t);
