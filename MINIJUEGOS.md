@@ -54,6 +54,17 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
 2. Probar con `py -m http.server 8000` y `?debug=1&dia=NN&abrir=NN`: que se gana, que se pierde y se reintenta, que "Saltar" aparece, que al cerrar y volver a entrar no queda nada colgado, y que funciona con tamaño de móvil.
 3. Un commit por día: `Día NN: <nombre>`.
 
+## Juego extra: Los canelones
+
+No es ninguna de las 24 puertas: es una mesa en la calle, a la derecha del edificio (planta baja), que se puede jugar **cualquier día, también antes del 1 de diciembre**, para ir probando el calendario. Hasta jugarla la primera vez tiene un «!» encima.
+
+- **Archivo:** `juegos/extra-canelones.js`. Contenido en `dias.json` → `canelones` (`titulo`, `instruccion`, `derrota` con `{n}` = canelones comidos, `recompensa`). Se abre con `Dias.abrirCanelones()`; al ganar enseña la recompensa con la etiqueta «Extra» y no marca ningún día.
+- **Mecánica:** 30 canelones en 40 segundos; cada uno son 3 bocados (Espacio, ABRIR o tocar). Al terminar uno, llega el siguiente de la bandeja. 4 canelones por partida salen ardiendo (humo rojo y «!»): si se muerden antes de que se enfríen (1,1 s), Henar echa fuego por la boca y pierde 2 segundos (una vez por canelón).
+- **La tripa:** cada 5 canelones crece una fase (con «boing»): a los 15 salta un botón del abrigo, a los 20 asoma la tripa y a los 30 es una bola que salta por encima de la mesa y rueda de lado a lado.
+- **Récord:** se guarda en `localStorage` (`adviento.canelones`) y se muestra en el marcador.
+- **Música:** `canelones` (melodía original, tipo tarantela). Efectos: `nam`, `boing`, `quema`.
+- **Pruebas:** en modo debug, `canelonesIr(29)` desde la consola salta a 29 canelones comidos y `canelonesDebug()` enseña el estado.
+
 ## Días
 
 Cada día tiene la descripción del usuario. Las **propuestas** son recomendaciones pendientes de confirmar al hacer ese día.

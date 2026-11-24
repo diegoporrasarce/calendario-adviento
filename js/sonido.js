@@ -136,6 +136,15 @@ const Sonido = (() => {
                                      [60, 1], [55, 1], [52, 1], [48, 1]]),
       bajo: [48, 53, 55, 48, 48, 53, 55, 48]
     },
+    // Melodía original, rápida y de banquete (tipo tarantela), para el juego extra de los canelones
+    canelones: {
+      tempo: 0.17, compas: 3, tipo: 'square',
+      melodia: [[64, 1], [65, 1], [64, 1], [62, 1], [64, 1], [60, 1], [57, 1], [60, 1], [64, 1], [69, 3],
+        [67, 1], [65, 1], [64, 1], [65, 1], [62, 1], [59, 1], [55, 1], [59, 1], [62, 1], [64, 3],
+        [64, 1], [65, 1], [64, 1], [62, 1], [64, 1], [60, 1], [57, 1], [60, 1], [64, 1], [69, 3],
+        [71, 1], [69, 1], [67, 1], [65, 1], [64, 1], [62, 1], [64, 1], [59, 1], [62, 1], [57, 3]],
+      bajo: [45, 45, 45, 45, 52, 52, 45, 45, 45, 45, 45, 45, 52, 52, 45, 45]
+    },
     // Melodía original, alegre y tranquila, para la mudanza del día 1
     mudanza: {
       tempo: 0.3, compas: 4, tipo: 'triangle',
@@ -376,6 +385,16 @@ const Sonido = (() => {
     }
     else if (nombre === 'derrumbe') { ruido(t, 1.2, 0.25, 300); ruido(t + 0.3, 0.9, 0.2, 180); nota(33, t, 1, 'square', 0.06); }
     else if (nombre === 'saltar') { nota(67, t, 0.06, 'square', 0.05); nota(74, t + 0.04, 0.06, 'square', 0.05); }
+    else if (nombre === 'nam') { ruido(t, 0.07, 0.12, 700); nota(50 + Math.floor(Math.random() * 4), t + 0.02, 0.07, 'square', 0.06); }
+    else if (nombre === 'boing') {                       // muelle: el tono sube y baja deprisa
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(180, t); osc.frequency.exponentialRampToValueAtTime(620, t + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(260, t + 0.3);
+      g.gain.setValueAtTime(0.16, t); g.gain.linearRampToValueAtTime(0.0001, t + 0.32);
+      osc.connect(g).connect(salida); osc.start(t); osc.stop(t + 0.34);
+    }
+    else if (nombre === 'quema') { ruido(t, 0.5, 0.14, 3500); nota(76, t, 0.08, 'square', 0.06); nota(70, t + 0.08, 0.16, 'square', 0.06); }
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 

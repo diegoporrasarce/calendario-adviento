@@ -516,6 +516,39 @@ const Sprites = (() => {
     }
   };
 
+  /* ---------- Mesa de los canelones (juego extra, en la calle). (x, y) = centro de las patas en el suelo ---------- */
+  function mesaCanelones(ctx, x, y, t) {
+    const r = (c, a, b, w, h) => rect(ctx, c, x + a, y + b, w, h);
+    ctx.globalAlpha = 0.25; r('#000', -10, 0, 20, 1); ctx.globalAlpha = 1;          // sombra en la nieve
+    r('#5c3414', -7, -10, 2, 10); r('#5c3414', 5, -10, 2, 10);                      // patas
+    r('#3d220c', -7, -1, 3, 1); r('#3d220c', 5, -1, 3, 1);
+    // mantel de cuadros rojos y blancos, con el borde en picos
+    for (let i = 0; i < 20; i++)
+      for (let j = 0; j < 6; j++) {
+        const cuadro = (Math.floor(i / 2) + Math.floor(j / 2)) % 2;
+        if (j === 5 && i % 2) continue;
+        r(cuadro ? '#c8383f' : '#f3ecd8', -10 + i, -14 + j, 1, 1);
+      }
+    r('#9c2630', -10, -14, 20, 1);
+    // bandeja con canelones gratinados
+    r('#8c857b', -8, -17, 16, 3); r('#b9b2a6', -8, -17, 16, 1);
+    for (let k = 0; k < 3; k++) {
+      const cx = -7 + k * 5;
+      r('#f3e2b0', cx, -19, 4, 2); r('#fff7e0', cx, -19, 4, 1);
+      r('#c08a3a', cx + 1 + (k % 2), -19, 1, 1);                                     // gratinado
+      r('#c8383f', cx, -18, 1, 1); r('#c8383f', cx + 3, -18, 1, 1);                 // tomate en los extremos
+    }
+    // vaho que sube
+    ctx.fillStyle = '#ffffff';
+    for (let k = 0; k < 3; k++) {
+      const fase = (t * 0.9 + k / 3) % 1;
+      ctx.globalAlpha = 0.7 * (1 - fase);
+      const hx = x - 5 + k * 5 + Math.round(Math.sin(t * 3 + k * 2) * 1.5);
+      ctx.fillRect(hx, Math.round(y - 21 - fase * 10), 1, 2);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // Pinta el retrato `nombre` en un <canvas> (ajusta su tamaño). Devuelve false si no existe.
   function pintarRetrato(lienzo, nombre) {
     const r = RETRATOS[nombre];
@@ -527,5 +560,5 @@ const Sprites = (() => {
   }
 
   return { pintarRetrato, umbral, tramar, lienzoAux, P, rect, disco, numero, anchoNumero, personaje, papaNoel, humo,
-           luna, nube, candado, abeto, trineo, muneco, corona, regalo };
+           luna, nube, candado, abeto, trineo, muneco, corona, regalo, mesaCanelones };
 })();
