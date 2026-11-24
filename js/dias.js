@@ -8,6 +8,7 @@ const Dias = (() => {
 
   let datos = [];                 // entradas de dias.json
   let bienvenida = null;          // lo que cuenta el muñeco de nieve (dias.json → bienvenida)
+  let canelones = null;           // juego extra de la calle (dias.json → canelones), se puede jugar cualquier día
   let abiertas = new Set(leerProgreso());
   let modalAbierto = false;
   let ficha = 0;                  // invalida cargas asíncronas de un modal ya cerrado
@@ -72,6 +73,7 @@ const Dias = (() => {
     const json = await resp.json();
     datos = Array.isArray(json.dias) ? json.dias : [];
     bienvenida = json.bienvenida || null;
+    canelones = json.canelones || null;
   }
 
   /* ---------- Modal ---------- */
@@ -210,7 +212,7 @@ const Dias = (() => {
 
   // Mensaje del modal al terminar (o saltar) el minijuego.
   function mostrarRecompensa(n, entrada) {
-    $('modal-dia').textContent = `Día ${n}`;
+    $('modal-dia').textContent = n ? `Día ${n}` : (entrada.etiqueta || 'Extra');
     $('modal-titulo').textContent = entrada.titulo || `Día ${n}`;
     const foto = $('modal-foto');
     foto.classList.add('oculto');
@@ -236,7 +238,7 @@ const Dias = (() => {
       // el tercer argumento son los datos del día en dias.json (palabras, preguntas, fotos…)
       limpiarJuego = juego.iniciarJuego(contenedor, () => {
         if (miFicha !== ficha) return;
-        marcarAbierta(n);
+        if (n > 0) marcarAbierta(n);     // n = 0: juego extra (no es ninguna de las 24 puertas)
         quitarMinijuego();
         mostrarRecompensa(n, entrada);
       }, entrada);
@@ -259,6 +261,15 @@ const Dias = (() => {
     quitarMinijuego();
     $('modal-juego').replaceChildren();
     $('modal').classList.add('oculto');
+  }
+
+  // Juego extra de los canelones (mesa en la calle, a la derecha del edificio): disponible siempre,
+  // también antes del 1 de diciembre. No cuenta como ninguna puerta.
+  function abrirCanelones() {
+    if (modalAbierto || !canelones) return false;
+    abrirMinijuego(0, canelones, ++ficha);
+    modalAbierto = true;
+    return true;
   }
 
   // Abre la puerta n si está permitido. Devuelve false si todavía no toca.
@@ -327,6 +338,6 @@ const Dias = (() => {
 
   return {
     TOTAL, debug, diaActual, cargar, estado, info, abrirPuerta, cerrarModal,
-    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo, hablarMuneco, munecoVisto
+    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo, hablarMuneco, munecoVisto, abrirCanelones
   };
 })();

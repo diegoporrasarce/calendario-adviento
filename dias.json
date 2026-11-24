@@ -20,6 +20,14 @@
       { "habla": "muneco", "texto": "Si se te olvida algo, vuelve a hablar conmigo. ¡Aquí estaré, sin derretirme!" }
     ]
   },
+  "canelones": {
+    "titulo": "Los canelones",
+    "etiqueta": "Extra",
+    "juego": "extra-canelones",
+    "instruccion": "COMETE 30 CANELONES ANTES DE QUE SE ACABE EL TIEMPO: PULSA ESPACIO O TOCA LA PANTALLA PARA DAR CADA BOCADO. ¡CUIDADO! SI UN CANELON ECHA HUMO ROJO, ESPERA A QUE SE ENFRIE O TE QUEMARAS.",
+    "derrota": "SOLO {n} CANELONES... ¡Y CON LO RICOS QUE ESTABAN!",
+    "recompensa": "¡30 canelones! Estás como una bola, pero has demostrado estar más que preparada para las comidas de Navidad. Ve haciendo hueco: el 1 de diciembre se abre la primera puerta."
+  },
   "dias": [
     { "dia": 1, "tipo": "minijuego", "titulo": "Descarga el camión", "juego": "dia01-camion", "recompensa": "¡Feliz primer día de diciembre! Cada caja en su sitio: tu piso nuevo ya empieza a parecer un hogar. ¡Bienvenida a casa! Mañana empiezan las sorpresas." },
     { "dia": 2, "tipo": "minijuego", "titulo": "Atrapa copos", "juego": "dia02-copos", "recompensa": "¡Feliz segundo día de diciembre! Has atrapado todos los copos, pero esto no ha hecho más que empezar: todavía quedan muchas pruebas por superar." },
