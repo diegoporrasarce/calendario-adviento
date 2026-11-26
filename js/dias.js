@@ -8,7 +8,7 @@ const Dias = (() => {
 
   let datos = [];                 // entradas de dias.json
   let bienvenida = null;          // lo que cuenta el muñeco de nieve (dias.json → bienvenida)
-  let canelones = null;           // juego extra de la calle (dias.json → canelones), se puede jugar cualquier día
+  let extras = {};                // juegos extra (dias.json → canelones, bocadillo): se pueden jugar cualquier día
   let abiertas = new Set(leerProgreso());
   let modalAbierto = false;
   let ficha = 0;                  // invalida cargas asíncronas de un modal ya cerrado
@@ -73,7 +73,7 @@ const Dias = (() => {
     const json = await resp.json();
     datos = Array.isArray(json.dias) ? json.dias : [];
     bienvenida = json.bienvenida || null;
-    canelones = json.canelones || null;
+    extras = { canelones: json.canelones || null, bocadillo: json.bocadillo || null };
   }
 
   /* ---------- Modal ---------- */
@@ -263,11 +263,11 @@ const Dias = (() => {
     $('modal').classList.add('oculto');
   }
 
-  // Juego extra de los canelones (mesa en la calle, a la derecha del edificio): disponible siempre,
-  // también antes del 1 de diciembre. No cuenta como ninguna puerta.
-  function abrirCanelones() {
-    if (modalAbierto || !canelones) return false;
-    abrirMinijuego(0, canelones, ++ficha);
+  // Juegos extra (los canelones en la calle; el bocadillo en la ventanilla de la planta baja):
+  // disponibles siempre, también antes del 1 de diciembre. No cuentan como ninguna puerta.
+  function abrirExtra(nombre) {
+    if (modalAbierto || !extras[nombre]) return false;
+    abrirMinijuego(0, extras[nombre], ++ficha);
     modalAbierto = true;
     return true;
   }
@@ -338,6 +338,6 @@ const Dias = (() => {
 
   return {
     TOTAL, debug, diaActual, cargar, estado, info, abrirPuerta, cerrarModal,
-    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo, hablarMuneco, munecoVisto, abrirCanelones
+    hayModal: () => modalAbierto, hayDialogo: () => !!dialogo, avanzarDialogo, hablarMuneco, munecoVisto, abrirExtra
   };
 })();
