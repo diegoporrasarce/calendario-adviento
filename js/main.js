@@ -195,6 +195,10 @@
   const MESA_X = 305;
   const CLAVE_CANELONES = Dias.debug ? 'adviento.canelones.debug' : 'adviento.canelones';
   const canelonesProbados = () => { try { return localStorage.getItem(CLAVE_CANELONES) !== null; } catch (e) { return true; } };
+  let bocataCerca = false;                 // junto a la ventanilla de los bocadillos (planta baja, entre las puertas 2 y 3)
+  const BOCATA_X = 148;
+  const CLAVE_BOCADILLO = Dias.debug ? 'adviento.bocadillo.debug' : 'adviento.bocadillo';
+  const bocadilloProbado = () => { try { return localStorage.getItem(CLAVE_BOCADILLO) !== null; } catch (e) { return true; } };
   let aviso = '', avisoHasta = 0;
   const VEL = 58, VEL_ESCALERA = 64;       // px/s andando y por la escalera
 
@@ -214,7 +218,8 @@
   function accion() {
     if (Dias.hayModal() || jug.enEscalera) return;
     if (!puertaCercana && munecoCerca) { if (Dias.hablarMuneco()) Sonido.efecto('abrir'); return; }
-    if (!puertaCercana && mesaCerca) { if (Dias.abrirCanelones()) Sonido.efecto('abrir'); return; }
+    if (!puertaCercana && mesaCerca) { if (Dias.abrirExtra('canelones')) Sonido.efecto('abrir'); return; }
+    if (!puertaCercana && bocataCerca) { if (Dias.abrirExtra('bocadillo')) Sonido.efecto('abrir'); return; }
     if (!puertaCercana) return;
     const n = puertaCercana;
     if (Dias.abrirPuerta(n)) Sonido.efecto('abrir');
@@ -284,6 +289,7 @@
     // puerta que hay delante (o el muñeco de nieve, a la izquierda de la planta baja)
     munecoCerca = !jug.enEscalera && jug.planta === 0 && jug.x <= X_MIN + 14;
     mesaCerca = !jug.enEscalera && jug.planta === 0 && jug.x >= MESA_X - 14;
+    bocataCerca = !jug.enEscalera && jug.planta === 0 && Math.abs(jug.x - BOCATA_X) <= 10;
     puertaCercana = 0;
     if (!jug.enEscalera) {
       for (let n = 1; n <= Dias.TOTAL; n++) {
@@ -301,8 +307,10 @@
     if (puertaCercana && Dias.estado(puertaCercana) === 'bloqueada') return `Día ${puertaCercana}: se abre el ${puertaCercana} de diciembre`;
     if (munecoCerca && !puertaCercana) return 'Pulsa Espacio (o ABRIR) para hablar con el muñeco de nieve';
     if (mesaCerca && !puertaCercana) return 'Pulsa Espacio (o ABRIR) para comer canelones';
+    if (bocataCerca && !puertaCercana) return 'Pulsa Espacio (o ABRIR) para cortar el bocadillo';
     if (!Dias.munecoVisto() && !Dias.hayModal()) return 'El muñeco de nieve del portal quiere contarte algo';
     if (!canelonesProbados() && !Dias.hayModal()) return '¿Tienes hambre? Hay canelones en la calle, a la derecha';
+    if (!bocadilloProbado() && !Dias.hayModal()) return 'Han abierto una ventanilla de bocadillos en la planta baja';
     return '';
   }
 
@@ -330,6 +338,7 @@
     for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarHalo(ctx, n, Dias.estado(n), cam, t);
     for (let n = 1; n <= Dias.TOTAL; n++) Edificio.dibujarPuerta(ctx, n, Dias.estado(n), cam, t, sacudidas[n]);
     Sprites.mesaCanelones(ctx, MESA_X, sueloY(0) - cam, t);
+    Sprites.ventanillaBocadillos(ctx, BOCATA_X, sueloY(0) - cam, t);
     Sprites.personaje(ctx, Math.round(jug.x), Math.round(jug.y) - cam, jug.dir, jug.modo,
       jug.enEscalera ? jug.tEscalera : t);    // en la escalera la animación solo avanza al moverse
     if (puertaCercana) {
@@ -337,9 +346,11 @@
       Edificio.dibujarFlecha(ctx, d.cx, d.y - cam - 51, t);
     } else if (munecoCerca) Edificio.dibujarFlecha(ctx, MUNECO_X, sueloY(0) - cam - 40, t);
     else if (mesaCerca) Edificio.dibujarFlecha(ctx, MESA_X, sueloY(0) - cam - 42, t);
+    else if (bocataCerca) Edificio.dibujarFlecha(ctx, BOCATA_X, sueloY(0) - cam - 52, t);
 
     if (!puertaCercana && !munecoCerca && !Dias.munecoVisto()) exclamacion(MUNECO_X - 4, sueloY(0) - cam - 46, t);   // hasta hablar con él
     if (!mesaCerca && !canelonesProbados()) exclamacion(MESA_X - 4, sueloY(0) - cam - 44, t);              // hasta probar los canelones
+    if (!bocataCerca && !bocadilloProbado()) exclamacion(BOCATA_X - 4, sueloY(0) - cam - 54, t);          // hasta probar el bocadillo
     ctx.restore();
     dibujarNieve(t);
 

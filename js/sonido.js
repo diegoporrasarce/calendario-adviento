@@ -136,6 +136,15 @@ const Sonido = (() => {
                                      [60, 1], [55, 1], [52, 1], [48, 1]]),
       bajo: [48, 53, 55, 48, 48, 53, 55, 48]
     },
+    // Melodía original, saltarina (tipo polca), para el juego extra del bocadillo
+    bocadillo: {
+      tempo: 0.16, compas: 4, tipo: 'square',
+      melodia: [[55, 1], [60, 1], [64, 1], [60, 1], [62, 1], [59, 1], [55, 2],
+        [57, 1], [60, 1], [65, 1], [60, 1], [64, 1], [60, 1], [55, 2],
+        [55, 1], [60, 1], [64, 1], [67, 1], [65, 1], [62, 1], [59, 2],
+        [60, 1], [62, 1], [59, 1], [55, 1], [60, 2], [null, 2]],
+      bajo: [48, 43, 41, 43, 48, 43, 41, 48]
+    },
     // Melodía original, rápida y de banquete (tipo tarantela), para el juego extra de los canelones
     canelones: {
       tempo: 0.17, compas: 3, tipo: 'square',
@@ -395,6 +404,7 @@ const Sonido = (() => {
       osc.connect(g).connect(salida); osc.start(t); osc.stop(t + 0.34);
     }
     else if (nombre === 'quema') { ruido(t, 0.5, 0.14, 3500); nota(76, t, 0.08, 'square', 0.06); nota(70, t + 0.08, 0.16, 'square', 0.06); }
+    else if (nombre === 'corte') { ruido(t, 0.09, 0.2, 2500); ruido(t + 0.05, 0.06, 0.12, 600); nota(43, t + 0.04, 0.06, 'square', 0.07); }
     else if (nombre === 'perder') [67, 63, 60, 55].forEach((m, i) => nota(m, t + i * 0.13, 0.18, 'triangle', 0.12));
   }
 

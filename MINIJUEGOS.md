@@ -58,12 +58,22 @@ El edificio del mapa principal no cambia de estado: el derrumbe solo ocurre dent
 
 No es ninguna de las 24 puertas: es una mesa en la calle, a la derecha del edificio (planta baja), que se puede jugar **cualquier día, también antes del 1 de diciembre**, para ir probando el calendario. Hasta jugarla la primera vez tiene un «!» encima.
 
-- **Archivo:** `juegos/extra-canelones.js`. Contenido en `dias.json` → `canelones` (`titulo`, `instruccion`, `derrota` con `{n}` = canelones comidos, `recompensa`). Se abre con `Dias.abrirCanelones()`; al ganar enseña la recompensa con la etiqueta «Extra» y no marca ningún día.
+- **Archivo:** `juegos/extra-canelones.js`. Contenido en `dias.json` → `canelones` (`titulo`, `instruccion`, `derrota` con `{n}` = canelones comidos, `recompensa`). Se abre con `Dias.abrirExtra('canelones')`; al ganar enseña la recompensa con la etiqueta «Extra» y no marca ningún día.
 - **Mecánica:** 30 canelones en 40 segundos; cada uno son 3 bocados (Espacio, ABRIR o tocar). Al terminar uno, llega el siguiente de la bandeja. 4 canelones por partida salen ardiendo (humo rojo y «!»): si se muerden antes de que se enfríen (1,1 s), Henar echa fuego por la boca y pierde 2 segundos (una vez por canelón).
 - **La tripa:** cada 5 canelones crece una fase (con «boing»): a los 15 salta un botón del abrigo, a los 20 asoma la tripa y a los 30 es una bola que salta por encima de la mesa y rueda de lado a lado.
 - **Récord:** se guarda en `localStorage` (`adviento.canelones`) y se muestra en el marcador.
 - **Música:** `canelones` (melodía original, tipo tarantela). Efectos: `nam`, `boing`, `quema`.
 - **Pruebas:** en modo debug, `canelonesIr(29)` desde la consola salta a 29 canelones comidos y `canelonesDebug()` enseña el estado.
+
+## Juego extra: El bocadillo kilométrico
+
+Ventanilla de bocadillos en la planta baja, entre las puertas 2 y 3 (toldo de rayas, mostrador con un bocadillo que no cabe y cartel colgado). Igual que los canelones: se juega cualquier día, no cuenta como puerta y lleva «!» hasta probarla.
+
+- **Archivo:** `juegos/extra-bocadillo.js`. Contenido en `dias.json` → `bocadillo` (`titulo`, `instruccion`, `derrota`, `recompensa`). Se abre con `Dias.abrirExtra('bocadillo')`.
+- **Mecánica:** un bocadillo larguísimo pasa por la tabla de derecha a izquierda, cada vez un poco más rápido. Hay que partirlo en 15 raciones pulsando (Espacio, ABRIR o tocar) cuando una marca verde ▼ pasa bajo el cuchillo (margen de ±6 px; ±2 px = «¡PERFECTO!»). Pulsar donde no hay marca solo hace «¡TOC!».
+- **Se pierde** si se gastan los 3 bocadillos de vida: cada marca que se escapa sin cortar y cada palillo de bandera roja que se corta (hay 4, en mitad de algunas raciones) cuesta uno. Aporrear la tecla no sirve: acaba cortando palillos.
+- **Música:** `bocadillo` (melodía original, tipo polca). Efecto nuevo: `corte`.
+- **Pruebas:** en modo debug, `bocadilloDebug()` enseña el estado (distancia de la siguiente marca y del siguiente palillo al cuchillo).
 
 ## Días
 

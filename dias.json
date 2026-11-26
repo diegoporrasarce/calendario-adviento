@@ -24,9 +24,17 @@
     "titulo": "Los canelones",
     "etiqueta": "Extra",
     "juego": "extra-canelones",
-    "instruccion": "COMETE 30 CANELONES ANTES DE QUE SE ACABE EL TIEMPO: PULSA ESPACIO O TOCA LA PANTALLA PARA DAR CADA BOCADO. ¡CUIDADO! SI UN CANELON ECHA HUMO ROJO, ESPERA A QUE SE ENFRIE O TE QUEMARAS.",
+    "instruccion": "COMETE 30 CANELONES ANTES DE QUE ACABE EL TIEMPO. SI UNO ECHA HUMO ROJO, ESPERA... ¡O TE QUEMARAS!",
     "derrota": "SOLO {n} CANELONES... ¡Y CON LO RICOS QUE ESTABAN!",
     "recompensa": "¡30 canelones! Estás como una bola, pero has demostrado estar más que preparada para las comidas de Navidad. Ve haciendo hueco: el 1 de diciembre se abre la primera puerta."
+  },
+  "bocadillo": {
+    "titulo": "El bocadillo kilométrico",
+    "etiqueta": "Extra",
+    "juego": "extra-bocadillo",
+    "instruccion": "CORTA EL BOCADILLO EN 15 RACIONES: PULSA CUANDO UNA MARCA VERDE PASE BAJO EL CUCHILLO. ¡NO CORTES LOS PALILLOS ROJOS!",
+    "derrota": "¡TE HAS QUEDADO SIN BOCADILLOS! CON LO BIEN QUE OLIA...",
+    "recompensa": "¡15 raciones! Hay bocadillo para todo el edificio. Si en Navidad hace falta alguien que corte el pan, ya sabemos a quién llamar."
   },
   "dias": [
     { "dia": 1, "tipo": "minijuego", "titulo": "Descarga el camión", "juego": "dia01-camion", "recompensa": "¡Feliz primer día de diciembre! Cada caja en su sitio: tu piso nuevo ya empieza a parecer un hogar. ¡Bienvenida a casa! Mañana empiezan las sorpresas." },

@@ -549,6 +549,31 @@ const Sprites = (() => {
     ctx.globalAlpha = 1;
   }
 
+  /* ---------- Ventanilla de los bocadillos (juego extra, en la planta baja). x = centro de la ventana, y = suelo ---------- */
+  function ventanillaBocadillos(ctx, x, y, t) {
+    const r = (c, a, b, w, h) => rect(ctx, c, x + a, y + b, w, h);
+    // toldo de rayas con el borde en picos
+    r('#5e2620', -13, -40, 26, 1);
+    for (let i = 0; i < 26; i++) {
+      const c = Math.floor(i / 3) % 2 ? '#f3ecd8' : '#c8383f';
+      r(c, -13 + i, -39, 1, 5 + (i % 3 === 1 ? 1 : 0));
+    }
+    r('rgba(0,0,0,0.25)', -12, -33, 24, 1);
+    // mostrador con un bocadillo larguísimo que no cabe
+    r('#5c3414', -10, -15, 20, 3); r('#8f5524', -10, -15, 20, 1);
+    r('#3d220c', -8, -12, 2, 3); r('#3d220c', 6, -12, 2, 3);
+    const bx = -17;
+    r('#a8642a', bx, -17, 34, 2); r('#d9963f', bx + 1, -18, 32, 2); r('#f0c070', bx + 2, -18, 29, 1);
+    for (let k = 3; k < 32; k += 5) r('#a8642a', bx + k, -18, 2, 1);                 // cortes de la corteza
+    r('#4caf50', bx + 2, -16, 30, 1);                                                 // lechuga
+    for (let k = 4; k < 32; k += 6) r('#c8383f', bx + k, -16, 2, 1);                 // tomate
+    // cartel colgado con un bocadillo dibujado (se balancea un poco)
+    const bal = Math.round(Math.sin(t * 1.5));
+    r('#3d220c', 13, -38, 1, 3);
+    r('#3d220c', 10 + bal, -35, 9, 7); r('#f3ecd8', 11 + bal, -34, 7, 5);
+    r('#d9963f', 12 + bal, -33, 5, 2); r('#4caf50', 12 + bal, -31, 5, 1);
+  }
+
   // Pinta el retrato `nombre` en un <canvas> (ajusta su tamaño). Devuelve false si no existe.
   function pintarRetrato(lienzo, nombre) {
     const r = RETRATOS[nombre];
@@ -560,5 +585,5 @@ const Sprites = (() => {
   }
 
   return { pintarRetrato, umbral, tramar, lienzoAux, P, rect, disco, numero, anchoNumero, personaje, papaNoel, humo,
-           luna, nube, candado, abeto, trineo, muneco, corona, regalo, mesaCanelones };
+           luna, nube, candado, abeto, trineo, muneco, corona, regalo, mesaCanelones, ventanillaBocadillos };
 })();
